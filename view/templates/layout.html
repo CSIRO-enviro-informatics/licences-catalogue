@@ -1,20 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="utf-8">
-    <title>Media Types</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='simple.css') }}" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Muli">
+    <meta charset="UTF-8">
+    <title>Policies Catalogue</title>
+    <link rel="stylesheet" href="/style/csiro_theme.css" />
+    <link rel="shortcut icon" href="/style/csiro.ico">
 </head>
 <body>
     <header>
-
+        <img id="csiro-logo" src="/style/logo.gif" alt="CSIRO's logo" />
+	    <nav>
+            <ul>
+                <li><a href="https://csiro.au">CSIRO</a></li>
+                <li><a href="{{ url_for('controller.home') }}">Catalogue Home</a></li>
+            </ul>
+        </nav>
     </header>
-    <div id="content">
-        {% block content %}{% endblock %}
-    </div><!-- content -->
-    <footer>
-        <a href="https://creativecommons.org/licenses/by/4.0/">Licensed using Creative Commons 4.0</a>.
-    </footer>
+    <div id="container-content">
+        <div id="container-content-2">
+            {% block content %}{% endblock %}
+        </div><!-- container-content -->
+    </div><!-- container-content-2 -->
+
+    <div id="footer-external">
+		<ul id="footer-external-links">
+			<li>CSIRO links: </li>
+			<li><a href="http://www.csiro.au/Copyright.aspx">Copyright</a></li>
+			<li>|</li>
+			<li><a href="http://www.csiro.au/Legal-Notice-and-Disclaimer.aspx">Legal Notice and Disclaimer</a></li>
+			<li>|</li>
+			<li><a href="http://www.csiro.au/Privacy.aspx">Privacy</a></li>
+			<li>|</li>
+			<li><a href="http://www.csiro.au/Accessibility.aspx">Accessibility</a></li>
+			<li>|</li>
+			<li class="last"><a href="http://www.csiro.au/Sitemap.aspx">Site Map</a></li>
+		</ul>
+	</div><!-- footer external -->
 </body>
 </html>

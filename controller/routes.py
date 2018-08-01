@@ -10,3 +10,7 @@ routes = Blueprint('controller', __name__)
 @routes.route('/')
 def home():
     return render_template('page_home.html')
+
+
+# DB
+# https://docs.python.org/3.6/library/sqlite3.html
