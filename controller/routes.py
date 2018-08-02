@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 import _conf as conf
+import sqlite3
 
 routes = Blueprint('controller', __name__)
 
@@ -13,4 +14,9 @@ def home():
 
 
 # DB
-# https://docs.python.org/3.6/library/sqlite3.html
+conn = sqlite3.connect(conf.DATABASE_PATH)
+conn.execute('PRAGMA foreign_keys = 1')
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM RULE_TYPE')
+print('Rule Types', cursor.fetchall())
+
