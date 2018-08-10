@@ -53,6 +53,19 @@ def test_create_policy():
         db_access.create_policy(new_policy_uri)
 
 
+def test_delete_policy():
+    # Should remove an existing policy
+    asset_uri = 'https://example.com#asset'
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    db_access.add_asset(asset_uri, policy_uri)
+    db_access.delete_policy(policy_uri)
+    assert not db_access.policy_exists(policy_uri)
+
+    # Should have also removed any assets using that policy
+    assert not db_access.asset_exists(asset_uri)
+
+
 def test_policy_exists():
     # Should return true if the policy exists
     uri = 'https://example.com#test'
@@ -85,15 +98,52 @@ def test_set_policy_attribute():
 
 def test_get_policy():
     # Should raise an exception when the policy doesn't exist
-    uri = 'https://example.com#test'
+    policy_uri = 'https://example.com#policy'
     with pytest.raises(ValueError):
-        db_access.get_policy(uri)
+        db_access.get_policy(policy_uri)
 
     # Should get all the attributes of the policy
-    db_access.create_policy(uri)
-    result = db_access.get_policy(uri)
-    assert 'ID' in result
-    assert result['URI'] == 'https://example.com#test'
+    db_access.create_policy(policy_uri)
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_id = db_access.create_rule(rule_type)
+    db_access.add_rule_to_policy(rule_id, policy_uri)
+    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
+    db_access.add_action_to_rule(rule_id, action_uri)
+    assignor_uri = 'https://example.com#assignor'
+    assignee_uri = 'https://example.com#assignee'
+    db_access.create_party(assignor_uri)
+    db_access.create_party(assignee_uri)
+    db_access.add_assignor_to_rule(assignor_uri, rule_id)
+    db_access.add_assignee_to_rule(assignee_uri, rule_id)
+    policy = db_access.get_policy(policy_uri)
+    expected_policy_attributes = ['ID', 'URI', 'TYPE', 'LABEL', 'JURISDICTION', 'LEGAL_CODE', 'HAS_VERSION', 'LANGUAGE',
+                                  'SEE_ALSO', 'SAME_AS', 'COMMENT', 'LOGO', 'CREATED', 'STATUS']
+    assert all(attr in policy for attr in expected_policy_attributes)
+    assert policy['URI'] == policy_uri
+
+    # Should get all of the rules
+    assert policy['RULES'][0]['ID'] == rule_id
+    assert policy['RULES'][0]['TYPE'] == rule_type
+
+    # Should get actions associated with the rule
+    expected_action_attributes = ['ID', 'LABEL', 'URI', 'DEFINITION']
+    action = policy['RULES'][0]['ACTIONS'][0]
+    assert action['URI'] == action_uri
+    assert all(attr in action for attr in expected_action_attributes)
+
+    # Should get assignors and assignees associated with the rule
+    assignors = policy['RULES'][0]['ASSIGNORS']
+    assignees = policy['RULES'][0]['ASSIGNEES']
+    assert assignors == [assignor_uri]
+    assert assignees == [assignee_uri]
+
+
+def test_get_all_policies():
+    policy1 = 'https://example.com#policy1'
+    policy2 = 'https://example.com#policy2'
+    db_access.create_policy(policy1)
+    db_access.create_policy(policy2)
+    assert db_access.get_all_policies() == [policy1, policy2]
 
 
 def test_add_asset():
@@ -128,19 +178,6 @@ def test_asset_exists():
     assert not db_access.asset_exists(nonexistent_uri)
 
 
-def test_delete_policy():
-    # Should remove an existing policy
-    asset_uri = 'https://example.com#asset'
-    policy_uri = 'https://example.com#policy'
-    db_access.create_policy(policy_uri)
-    db_access.add_asset(asset_uri, policy_uri)
-    db_access.delete_policy(policy_uri)
-    assert not db_access.policy_exists(policy_uri)
-
-    # Should have also removed any assets using that policy
-    assert not db_access.asset_exists(asset_uri)
-
-
 def test_remove_asset():
     # Should remove an existing asset
     asset_uri = 'https://example.com#asset'
@@ -151,6 +188,28 @@ def test_remove_asset():
     assert not db_access.asset_exists(asset_uri)
 
 
+def test_get_asset():
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    asset_uri = 'https://example.com#asset'
+    db_access.add_asset(asset_uri, policy_uri)
+    asset = db_access.get_asset(asset_uri)
+    expected_attributes = ['ID', 'URI', 'POLICY_ID']
+    assert all(attr in asset for attr in expected_attributes)
+    assert asset['URI'] == asset_uri
+
+
+def test_get_all_assets():
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    asset1 = 'https://example.com#asset1'
+    asset2 = 'https://example.com#asset2'
+    db_access.add_asset(asset1, policy_uri)
+    db_access.add_asset(asset2, policy_uri)
+    assets = db_access.get_all_assets()
+    assert assets == [asset1, asset2]
+
+
 def test_create_rule():
     # Should raise an exception when the rule type is not valid
     with pytest.raises(ValueError):
@@ -159,12 +218,86 @@ def test_create_rule():
     # Should add a rule and return an id
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     new_rule_id = db_access.create_rule(rule_type)
-    assert new_rule_id == 1
-    db_access.cursor.execute(
-        'SELECT COUNT(1) FROM RULE WHERE ID = {id} AND TYPE = "{type}"'.format(id=new_rule_id, type=rule_type)
-    )
-    rule_exists = db_access.cursor.fetchone()[0]
-    assert rule_exists
+    int(new_rule_id)
+    assert db_access.rule_exists(new_rule_id)
+
+
+def test_delete_rule():
+    # Should not be able to delete if the rule is still used in any policies
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_id = db_access.create_rule(rule_type)
+    db_access.add_rule_to_policy(rule_id, policy_uri)
+    with pytest.raises(ValueError):
+        db_access.delete_rule(rule_id)
+
+    # Should delete the rule
+    rule_id = db_access.create_rule(rule_type)
+    db_access.delete_rule(rule_id)
+    assert not db_access.rule_exists(rule_id)
+
+    # Should also remove any actions from the rule
+    db_access.cursor.execute('SELECT COUNT(1) FROM RULE_HAS_ACTION WHERE RULE_ID = {rule_id}'.format(rule_id=rule_id))
+    rule_has_actions = db_access.cursor.fetchone()[0]
+    assert not rule_has_actions
+
+    # Should also remove any assignors from the rule
+    db_access.cursor.execute('SELECT COUNT(1) FROM RULE_HAS_ASSIGNOR WHERE RULE_ID = {rule_id}'.format(rule_id=rule_id))
+    rule_has_assignors = db_access.cursor.fetchone()[0]
+    assert not rule_has_assignors
+
+    # Should also remove any assignees from the rule
+    db_access.cursor.execute('SELECT COUNT(1) FROM RULE_HAS_ASSIGNEE WHERE RULE_ID = {rule_id}'.format(rule_id=rule_id))
+    rule_has_assignees = db_access.cursor.fetchone()[0]
+    assert not rule_has_assignees
+
+
+def test_add_rule_to_policy():
+    # Should raise an exception if the rule does not exist
+    rule_id = 1
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    with pytest.raises(ValueError):
+        db_access.add_rule_to_policy(rule_id, policy_uri)
+
+    # Should raise an exception if the policy does not exist
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_id = db_access.create_rule(rule_type)
+    db_access.delete_policy(policy_uri)
+    with pytest.raises(ValueError):
+        db_access.add_rule_to_policy(rule_id, policy_uri)
+
+    # Should add a rule to a policy
+    db_access.create_policy(policy_uri)
+    db_access.add_rule_to_policy(rule_id, policy_uri)
+    db_access.cursor.execute('''
+        SELECT COUNT(1) FROM POLICY_HAS_RULE P_R, POLICY P 
+        WHERE P_R.RULE_ID = {rule_id}
+        AND P_R.POLICY_ID = P.ID
+        AND P.URI = "{policy_uri}"
+    '''.format(rule_id=rule_id, policy_uri=policy_uri))
+    rule_assigned = db_access.cursor.fetchone()[0]
+    assert rule_assigned
+
+
+def test_remove_rule_from_policy():
+    # Should remove a rule from a policy
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_id = db_access.create_rule(rule_type)
+    db_access.add_rule_to_policy(rule_id, policy_uri)
+    db_access.remove_rule_from_policy(rule_id, policy_uri)
+    query = '''
+        SELECT COUNT(1) FROM POLICY_HAS_RULE P_R, POLICY P 
+        WHERE P_R.RULE_ID = {rule_id} 
+        AND P_R.POLICY_ID = P.ID
+        AND P.URI = "{policy_uri}"
+    '''
+    db_access.cursor.execute(query.format(rule_id=rule_id, policy_uri=policy_uri))
+    rule_assigned = db_access.cursor.fetchone()[0]
+    assert not rule_assigned
 
 
 def test_create_party():
@@ -175,7 +308,7 @@ def test_create_party():
     # Should store a new party entry in the database and assign an ID
     new_party_uri = 'https://example.com#test'
     new_party_id = db_access.create_party(new_party_uri)
-    assert new_party_id == 1
+    int(new_party_id)
     db_access.cursor.execute('SELECT URI FROM PARTY WHERE ID = {id}'.format(id=new_party_id))
     stored_uri = db_access.cursor.fetchone()[0]
     assert stored_uri == new_party_uri

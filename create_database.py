@@ -95,7 +95,7 @@ def rebuild():
         );
     ''')
     conn.execute('''
-        CREATE TABLE RULE_HAS_ASSIGNOR (
+        CREATE TABLE IF NOT EXISTS RULE_HAS_ASSIGNOR (
             PARTY_ID    INT NOT NULL,
             RULE_ID     INT NOT NULL,
             FOREIGN KEY (PARTY_ID) REFERENCES PARTY (ID),
@@ -104,7 +104,7 @@ def rebuild():
         );
     ''')
     conn.execute('''
-        CREATE TABLE RULE_HAS_ASSIGNEE (
+        CREATE TABLE IF NOT EXISTS RULE_HAS_ASSIGNEE (
             PARTY_ID    INT NOT NULL,
             RULE_ID     INT NOT NULL,
             FOREIGN KEY (PARTY_ID) REFERENCES PARTY (ID),
