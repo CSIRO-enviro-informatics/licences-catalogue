@@ -5,7 +5,7 @@ This catalogue is a website tool to allow people to find policies according to c
 
 The technology used is Python Flask - a bare-bones HTTP framework - configured as a simple Model-View-Controller application with the application data being stored in SQLite. Data from the database will also be available as RDF data in a future release.
 
-Further project documentation is in the [_docs/][_docs/] folder of this repository.
+Further project documentation is in the [_docs/](_docs/) folder of this repository.
 
 ## License
 This repository is licensed under Creative Commons 4.0 International. See the [LICENSE deed](LICENSE) for details.
