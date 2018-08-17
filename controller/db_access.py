@@ -1,6 +1,5 @@
 import sqlite3
 import _conf as conf
-import re
 
 # DB
 conn = sqlite3.connect(conf.DATABASE_PATH)
@@ -10,23 +9,10 @@ cursor = conn.cursor()
 
 
 def create_policy(uri):
-    uri = str(uri)
-    if not is_valid_uri(uri):
-        raise ValueError('Not a valid URI: ' + uri)
     if policy_exists(uri):
         raise ValueError('A Policy with that URI already exists.')
     cursor.execute('INSERT INTO POLICY (URI) VALUES ("{uri:s}");'.format(uri=uri))
     conn.commit()
-    return cursor.lastrowid
-
-
-def is_valid_uri(uri):
-    return True if re.match('\w+:(/?/?)[^\s]+', uri) else False
-
-
-def policy_exists(uri):
-    cursor.execute('SELECT COUNT(1) FROM POLICY WHERE URI = "{uri:s}"'.format(uri=uri))
-    return cursor.fetchone()[0]
 
 
 def delete_policy(uri):
@@ -34,9 +20,15 @@ def delete_policy(uri):
     conn.commit()
 
 
+def policy_exists(uri):
+    cursor.execute('SELECT COUNT(1) FROM POLICY WHERE URI = "{uri:s}"'.format(uri=uri))
+    return cursor.fetchone()[0]
+
+
 def set_policy_attribute(uri, attr, value):
     permitted_attributes = ['TYPE', 'LABEL', 'JURISDICTION', 'LEGAL_CODE', 'HAS_VERSION', 'LANGUAGE', 'SEE_ALSO',
                             'SAME_AS', 'COMMENT', 'LOGO', 'STATUS']
+    attr = attr.upper()
     if attr not in permitted_attributes:
         raise ValueError('Attribute \'' + attr + '\' is not permitted.')
     if not policy_exists(uri):
@@ -67,20 +59,14 @@ def get_all_policies():
 
 
 def add_asset(uri, policy_uri):
-    uri = str(uri)
-    if not is_valid_uri(uri):
-        raise ValueError('Not a valid URI: ' + uri)
     if not policy_exists(policy_uri):
         raise ValueError('Policy with URI ' + uri + ' does not exist.')
     if asset_exists(uri):
         raise ValueError('An Asset with that URI already exists.')
-    cursor.execute('SELECT ID FROM POLICY WHERE URI="{policy_uri:s}"'.format(policy_uri=policy_uri))
-    policy_id = cursor.fetchone()['ID']
     cursor.execute(
-        'INSERT INTO ASSET (URI, POLICY_ID) VALUES ("{uri:s}", {policy_id})'.format(uri=uri, policy_id=policy_id)
+        'INSERT INTO ASSET (URI, POLICY_URI) VALUES ("{uri}", "{policy_uri}")'.format(uri=uri, policy_uri=policy_uri)
     )
     conn.commit()
-    return cursor.lastrowid
 
 
 def asset_exists(uri):
@@ -109,47 +95,46 @@ def get_all_assets():
     return assets
 
 
-def create_rule(rule_type):
+def create_rule(uri, rule_type):
+    if rule_exists(uri):
+        raise ValueError('A Rule with that URI already exists.')
     try:
-        cursor.execute('INSERT INTO RULE (TYPE) VALUES ("{rule_type:s}")'.format(rule_type=rule_type))
+        query_str = 'INSERT INTO RULE (URI, TYPE) VALUES ("{uri}", "{rule_type}")'
+        cursor.execute(query_str.format(uri=uri, rule_type=rule_type))
     except sqlite3.IntegrityError:
         raise ValueError('Rule type ' + rule_type + ' is not permitted.')
     conn.commit()
-    return cursor.lastrowid
 
 
-def delete_rule(rule_id):
+def delete_rule(rule_uri):
     try:
-        conn.execute('DELETE FROM RULE WHERE ID = {id}'.format(id=rule_id))
+        conn.execute('DELETE FROM RULE WHERE URI = "{uri}"'.format(uri=rule_uri))
     except sqlite3.IntegrityError:
         raise ValueError('Cannot delete a Rule while it is assigned to a Policy.')
     conn.commit()
 
 
-def add_rule_to_policy(rule_id, policy_uri):
-    if not rule_exists(rule_id):
-        raise ValueError('Rule with ID ' + str(rule_id) + ' does not exist.')
-    cursor.execute('SELECT ID FROM POLICY WHERE URI = "{uri}"'.format(uri=policy_uri))
-    result = cursor.fetchone()
-    if result is None:
+def add_rule_to_policy(rule_uri, policy_uri):
+    if not rule_exists(rule_uri):
+        raise ValueError('Rule with URI ' + str(rule_uri) + ' does not exist.')
+    if not policy_exists(policy_uri):
         raise ValueError('Policy with URI ' + policy_uri + ' does not exist.')
-    policy_id = result['ID']
-    query_str = 'INSERT INTO POLICY_HAS_RULE (POLICY_ID, RULE_ID) VALUES ({policy_id}, {rule_id})'
-    conn.execute(query_str.format(policy_id=policy_id, rule_id=rule_id))
+    query_str = 'INSERT INTO POLICY_HAS_RULE (POLICY_URI, RULE_URI) VALUES ("{policy_uri}", "{rule_uri}")'
+    conn.execute(query_str.format(policy_uri=policy_uri, rule_uri=rule_uri))
 
 
-def remove_rule_from_policy(rule_id, policy_uri):
+def remove_rule_from_policy(rule_uri, policy_uri):
     conn.execute('''
         DELETE FROM POLICY_HAS_RULE
-        WHERE RULE_ID = {rule_id} AND POLICY_ID IN (
-            SELECT ID FROM POLICY WHERE URI = "{policy_uri}"
-        )'''.format(rule_id=rule_id, policy_uri=policy_uri))
+        WHERE RULE_URI = "{rule_uri}" AND POLICY_URI IN (
+            SELECT URI FROM POLICY WHERE URI = "{policy_uri}"
+        )'''.format(rule_uri=rule_uri, policy_uri=policy_uri))
 
 
 def get_rules_for_policy(policy_uri):
     query_str = '''
-        SELECT R.ID, R.TYPE FROM RULE R, POLICY_HAS_RULE P_R, POLICY P
-        WHERE R.ID = P_R.RULE_ID AND P_R.POLICY_ID = P.ID AND P.URI = "{policy_uri}"
+        SELECT R.URI, R.TYPE FROM RULE R, POLICY_HAS_RULE P_R, POLICY P
+        WHERE R.URI = P_R.RULE_URI AND P_R.POLICY_URI = P.URI AND P.URI = "{policy_uri}"
     '''
     cursor.execute(query_str.format(policy_uri=policy_uri))
     rules_results = cursor.fetchall()
@@ -159,22 +144,18 @@ def get_rules_for_policy(policy_uri):
         rules = list()
         for rule_result in rules_results:
             rule = dict(rule_result)
-            rule['ACTIONS'] = get_actions_for_rule(rule['ID'])
-            rule['ASSIGNORS'] = get_assignors_for_rule(rule['ID'])
-            rule['ASSIGNEES'] = get_assignees_for_rule(rule['ID'])
+            rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
+            rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
+            rule['ASSIGNEES'] = get_assignees_for_rule(rule['URI'])
             rules.append(rule)
         return rules
 
 
 def create_party(uri):
-    uri = str(uri)
-    if not is_valid_uri(uri):
-        raise ValueError('Not a valid URI: ' + uri)
     if party_exists(uri):
         raise ValueError('A Party with that URI already exists.')
     cursor.execute('INSERT INTO PARTY (URI) VALUES ("{uri:s}")'.format(uri=uri))
     conn.commit()
-    return cursor.lastrowid
 
 
 def party_exists(uri):
@@ -187,41 +168,38 @@ def delete_party(uri):
     conn.commit()
 
 
-def rule_exists(rule_id):
-    cursor.execute('SELECT COUNT(1) FROM RULE WHERE ID = {id}'.format(id=rule_id))
+def rule_exists(rule_uri):
+    cursor.execute('SELECT COUNT(1) FROM RULE WHERE URI = "{uri}"'.format(uri=rule_uri))
     return cursor.fetchone()[0]
 
 
-def add_action_to_rule(rule_id, action_uri):
-    if not rule_exists(rule_id):
-        raise ValueError('Rule with ID ' + str(rule_id) + ' does not exist.')
-    cursor.execute('SELECT ID FROM ACTION WHERE URI = "{uri:s}"'.format(uri=action_uri))
-    result = cursor.fetchone()
-    if result is None:
-        raise ValueError('Action with URI ' + action_uri + ' does not exist.')
-    action_id = result['ID']
-    query_str = 'INSERT INTO RULE_HAS_ACTION (RULE_ID, ACTION_ID) VALUES ({rule_id}, {action_id})'
-    conn.execute(query_str.format(rule_id=rule_id, action_id=action_id))
+def action_exists(action_uri):
+    cursor.execute('SELECT COUNT(1) FROM ACTION WHERE URI = "{uri}"'.format(uri=action_uri))
+    return cursor.fetchone()[0]
+
+
+def add_action_to_rule(action_uri, rule_uri):
+    if not rule_exists(rule_uri):
+        raise ValueError('Rule with URI ' + str(rule_uri) + ' does not exist.')
+    if not action_exists(action_uri):
+        raise ValueError('Action with URI ' + action_uri + ' is not permitted.')
+    query_str = 'INSERT INTO RULE_HAS_ACTION (RULE_URI, ACTION_URI) VALUES ("{rule_uri}", "{action_uri}")'
+    conn.execute(query_str.format(rule_uri=rule_uri, action_uri=action_uri))
     conn.commit()
 
 
-def remove_action_from_rule(rule_id, action_uri):
-    cursor.execute('SELECT ID FROM ACTION WHERE URI = "{uri:s}"'.format(uri=action_uri))
-    result = cursor.fetchone()
-    if result is None:
-        raise ValueError('Action with URI ' + action_uri + ' does not exist.')
-    action_id = result['ID']
-    query_str = 'DELETE FROM RULE_HAS_ACTION WHERE RULE_ID = {rule_id} AND ACTION_ID={action_id}'
-    conn.execute(query_str.format(rule_id=rule_id, action_id=action_id))
+def remove_action_from_rule(action_uri, rule_uri):
+    query_str = 'DELETE FROM RULE_HAS_ACTION WHERE RULE_URI = "{rule_uri}" AND ACTION_URI = "{action_uri}"'
+    conn.execute(query_str.format(rule_uri=rule_uri, action_uri=action_uri))
     conn.commit()
 
 
-def get_actions_for_rule(rule_id):
+def get_actions_for_rule(rule_uri):
     cursor.execute('''
-        SELECT A.ID, A.LABEL, A.URI, A.DEFINITION FROM ACTION A, RULE_HAS_ACTION R_A 
-        WHERE R_A.RULE_ID = {rule_id}
-        AND R_A.ACTION_ID = A.ID
-    '''.format(rule_id=rule_id))
+        SELECT A.URI, A.LABEL, A.DEFINITION FROM ACTION A, RULE_HAS_ACTION R_A 
+        WHERE R_A.RULE_URI = "{rule_uri}"
+        AND R_A.ACTION_URI = A.URI
+    '''.format(rule_uri=rule_uri))
     results = cursor.fetchall()
     actions = list()
     for result in results:
@@ -229,76 +207,66 @@ def get_actions_for_rule(rule_id):
     return actions
 
 
-def get_party_id(uri):
-    cursor.execute('SELECT ID FROM PARTY WHERE URI = "{uri}"'.format(uri=uri))
-    result = cursor.fetchone()
-    if result is None:
-        raise ValueError('Party with URI ' + uri + ' does not exist.')
-    return result['ID']
-
-
-def add_assignor_to_rule(party_uri, rule_id):
-    if not rule_exists(rule_id):
-        raise ValueError('Rule with ID ' + str(rule_id) + ' does not exist.')
-    party_id = get_party_id(party_uri)
-    query_str = 'INSERT INTO RULE_HAS_ASSIGNOR (PARTY_ID, RULE_ID) VALUES ({party_id}, {rule_id})'
-    conn.execute(query_str.format(party_id=party_id, rule_id=rule_id))
+def add_assignor_to_rule(party_uri, rule_uri):
+    if not rule_exists(rule_uri):
+        raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
+    query_str = 'INSERT INTO RULE_HAS_ASSIGNOR (PARTY_URI, RULE_URI) VALUES ("{party_uri}", "{rule_uri}")'
+    try:
+        conn.execute(query_str.format(party_uri=party_uri, rule_uri=rule_uri))
+    except sqlite3.IntegrityError:
+        raise ValueError('Party with URI ' + party_uri + ' does not exist.')
     conn.commit()
 
 
-def remove_assignor_from_rule(party_uri, rule_id):
-    query_str = '''
-        DELETE FROM RULE_HAS_ASSIGNOR 
-        WHERE RULE_ID= {rule_id} AND PARTY_ID IN (
-            SELECT ID FROM PARTY WHERE URI = "{party_uri}"
-        )
-    '''
-    conn.execute(query_str.format(party_uri=party_uri, rule_id=rule_id))
+def remove_assignor_from_rule(party_uri, rule_uri):
+    query_str = 'DELETE FROM RULE_HAS_ASSIGNOR WHERE RULE_URI = "{rule_uri}" AND PARTY_URI = "{party_uri}"'
+    conn.execute(query_str.format(party_uri=party_uri, rule_uri=rule_uri))
     conn.commit()
 
 
-def get_assignors_for_rule(rule_id):
-    cursor.execute('''
-        SELECT P.URI FROM RULE_HAS_ASSIGNOR R_A, PARTY P 
-        WHERE R_A.RULE_ID = {rule_id}
-        AND R_A.PARTY_ID = P.ID
-    '''.format(rule_id=rule_id))
+def get_assignors_for_rule(rule_uri):
+    cursor.execute('SELECT PARTY_URI FROM RULE_HAS_ASSIGNOR WHERE RULE_URI = "{rule_uri}"'.format(rule_uri=rule_uri))
     assignors = list()
     for result in cursor.fetchall():
-        assignors.append(result['URI'])
+        assignors.append(result['PARTY_URI'])
     return assignors
 
 
-def add_assignee_to_rule(party_uri, rule_id):
-    if not rule_exists(rule_id):
-        raise ValueError('Rule with ID ' + str(rule_id) + ' does not exist.')
-    party_id = get_party_id(party_uri)
-    query_str = 'INSERT INTO RULE_HAS_ASSIGNEE (PARTY_ID, RULE_ID) VALUES ({party_id}, {rule_id})'
-    conn.execute(query_str.format(party_id=party_id, rule_id=rule_id))
+def add_assignee_to_rule(party_uri, rule_uri):
+    if not party_exists(party_uri):
+        raise ValueError('Party with URI ' + party_uri + ' does not exist.')
+    if not rule_exists(rule_uri):
+        raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
+    query_str = 'INSERT INTO RULE_HAS_ASSIGNEE (PARTY_URI, RULE_URI) VALUES ("{party_uri}", "{rule_uri}")'
+    conn.execute(query_str.format(party_uri=party_uri, rule_uri=rule_uri))
     conn.commit()
 
 
-def remove_assignee_from_rule(party_uri, rule_id):
-    query_str = '''
-        DELETE FROM RULE_HAS_ASSIGNEE
-        WHERE RULE_ID= {rule_id} AND PARTY_ID IN (
-            SELECT ID FROM PARTY WHERE URI = "{party_uri}"
-        )
-    '''
-    conn.execute(query_str.format(party_uri=party_uri, rule_id=rule_id))
+def remove_assignee_from_rule(party_uri, rule_uri):
+    query_str = 'DELETE FROM RULE_HAS_ASSIGNEE WHERE RULE_URI = "{rule_uri}" AND PARTY_URI = "{party_uri}"'
+    conn.execute(query_str.format(party_uri=party_uri, rule_uri=rule_uri))
     conn.commit()
 
 
-def get_assignees_for_rule(rule_id):
-    cursor.execute('''
-        SELECT P.URI FROM RULE_HAS_ASSIGNEE R_A, PARTY P 
-        WHERE R_A.RULE_ID = {rule_id}
-        AND R_A.PARTY_ID = P.ID
-    '''.format(rule_id=rule_id))
+def get_assignees_for_rule(rule_uri):
+    cursor.execute('SELECT PARTY_URI FROM RULE_HAS_ASSIGNEE WHERE RULE_URI = "{rule_uri}"'.format(rule_uri=rule_uri))
     assignees = list()
     for result in cursor.fetchall():
-        assignees.append(result['URI'])
+        assignees.append(result['PARTY_URI'])
     return assignees
+
+
+def get_permitted_rule_types():
+    cursor.execute('SELECT TYPE FROM RULE_TYPE')
+    return list(cursor.fetchall())
+
+
+def get_permitted_rule_types():
+    cursor.execute('SELECT TYPE FROM RULE_TYPE')
+    permitted_rule_types = list()
+    for rule_type in cursor.fetchall():
+        permitted_rule_types.append(rule_type['TYPE'])
+    return permitted_rule_types
 
 
 def query(query_str):

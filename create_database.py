@@ -25,8 +25,7 @@ def rebuild():
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS POLICY (
-            ID              INTEGER NOT NULL    PRIMARY KEY AUTOINCREMENT,
-            URI             TEXT    NOT NULL    UNIQUE,
+            URI             TEXT    NOT NULL    PRIMARY KEY,
             TYPE            TEXT,
             LABEL           TEXT,
             JURISDICTION    TEXT,
@@ -44,10 +43,9 @@ def rebuild():
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS ASSET (
-            ID          INTEGER NOT NULL    PRIMARY KEY AUTOINCREMENT,
-            URI         TEXT    NOT NULL    UNIQUE,
-            POLICY_ID   INT     NOT NULL,
-            FOREIGN KEY (POLICY_ID) REFERENCES POLICY (ID) ON DELETE CASCADE
+            URI         TEXT    NOT NULL    PRIMARY KEY,
+            POLICY_URI  TEXT    NOT NULL,
+            FOREIGN KEY (POLICY_URI) REFERENCES POLICY (URI) ON DELETE CASCADE
         );
     ''')
     conn.execute('''
@@ -57,59 +55,57 @@ def rebuild():
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS RULE (
-            ID      INTEGER NOT NULL    PRIMARY KEY AUTOINCREMENT,
+            URI     TEXT    NOT NULL    PRIMARY KEY,
             TYPE    TEXT    NOT NULL,
             FOREIGN KEY (TYPE) REFERENCES RULE_TYPE(TYPE)
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS POLICY_HAS_RULE (
-            POLICY_ID   INT NOT NULL,
-            RULE_ID     INT NOT NULL,
-            FOREIGN KEY (POLICY_ID) REFERENCES POLICY (ID) ON DELETE CASCADE,
-            FOREIGN KEY (RULE_ID) REFERENCES RULE (ID),
-            PRIMARY KEY (POLICY_ID, RULE_ID)
+            POLICY_URI  TEXT    NOT NULL,
+            RULE_URI    TEXT    NOT NULL,
+            FOREIGN KEY (POLICY_URI) REFERENCES POLICY (URI) ON DELETE CASCADE,
+            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI),
+            PRIMARY KEY (POLICY_URI, RULE_URI)
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS ACTION (
-            ID          INTEGER NOT NULL    PRIMARY KEY AUTOINCREMENT,
+            URI         TEXT    NOT NULL    PRIMARY KEY,
             LABEL       TEXT    NOT NULL,
-            URI         TEXT    NOT NULL,
             DEFINITION  TEXT    NOT NULL
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS RULE_HAS_ACTION (
-            RULE_ID     INT NOT NULL,
-            ACTION_ID   INT NOT NULL,
-            FOREIGN KEY (RULE_ID) REFERENCES RULE (ID),
-            FOREIGN KEY (ACTION_ID) REFERENCES ACTION (ID),
-            PRIMARY KEY (RULE_ID, ACTION_ID)
+            RULE_URI    TEXT    NOT NULL,
+            ACTION_URI  TEXT    NOT NULL,
+            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI),
+            FOREIGN KEY (ACTION_URI) REFERENCES ACTION (URI),
+            PRIMARY KEY (RULE_URI, ACTION_URI)
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS PARTY (
-            ID  INTEGER NOT NULL PRIMARY KEY    AUTOINCREMENT,
-            URI INT     NOT NULL
+            URI TEXT    NOT NULL    PRIMARY KEY
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS RULE_HAS_ASSIGNOR (
-            PARTY_ID    INT NOT NULL,
-            RULE_ID     INT NOT NULL,
-            FOREIGN KEY (PARTY_ID) REFERENCES PARTY (ID),
-            FOREIGN KEY (RULE_ID) REFERENCES RULE (ID) ON DELETE CASCADE,
-            PRIMARY KEY (PARTY_ID, RULE_ID)
+            PARTY_URI   TEXT    NOT NULL,
+            RULE_URI    TEXT    NOT NULL,
+            FOREIGN KEY (PARTY_URI) REFERENCES PARTY (URI),
+            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
+            PRIMARY KEY (PARTY_URI, RULE_URI)
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS RULE_HAS_ASSIGNEE (
-            PARTY_ID    INT NOT NULL,
-            RULE_ID     INT NOT NULL,
-            FOREIGN KEY (PARTY_ID) REFERENCES PARTY (ID),
-            FOREIGN KEY (RULE_ID) REFERENCES RULE (ID) ON DELETE CASCADE,
-            PRIMARY KEY (PARTY_ID, RULE_ID)
+            PARTY_URI   TEXT    NOT NULL,
+            RULE_URI    TEXT    NOT NULL,
+            FOREIGN KEY (PARTY_URI) REFERENCES PARTY (URI),
+            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
+            PRIMARY KEY (PARTY_URI, RULE_URI)
         );
     ''')
     conn.execute('''
