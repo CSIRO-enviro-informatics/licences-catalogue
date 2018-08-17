@@ -151,6 +151,16 @@ def get_rules_for_policy(policy_uri):
         return rules
 
 
+def get_all_rules():
+    # Returns a list of all rule uris
+    cursor.execute('SELECT URI FROM RULE')
+    results = cursor.fetchall()
+    rules = list()
+    for asset in results:
+        rules.append(asset['URI'])
+    return rules
+
+
 def create_party(uri):
     if party_exists(uri):
         raise ValueError('A Party with that URI already exists.')

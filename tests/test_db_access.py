@@ -263,6 +263,16 @@ def test_remove_rule_from_policy():
     assert not rule_assigned
 
 
+def test_get_all_rules():
+    rule1 = 'https://example.com#rule1'
+    rule2 = 'https://example.com#rule2'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule1, rule_type)
+    db_access.create_rule(rule2, rule_type)
+    rules = db_access.get_all_rules()
+    assert rules == [rule1, rule2]
+
+
 def test_create_party():
     # Should store a new party entry in the database
     party_uri = 'https://example.com#test'
