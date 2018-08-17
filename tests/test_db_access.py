@@ -127,6 +127,16 @@ def test_add_asset():
         db_access.add_asset(asset_uri, policy_uri)
 
 
+def test_remove_asset():
+    # Should remove an existing asset
+    asset_uri = 'https://example.com#asset'
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    db_access.add_asset(asset_uri, policy_uri)
+    db_access.remove_asset(asset_uri)
+    assert not db_access.asset_exists(asset_uri)
+
+
 def test_asset_exists():
     # Should return true if the asset exists
     asset_uri = 'https://example.com#asset'
@@ -138,27 +148,6 @@ def test_asset_exists():
     # Should return false if the asset doesn't exist
     nonexistent_uri = 'https://example.com#nonexistent'
     assert not db_access.asset_exists(nonexistent_uri)
-
-
-def test_remove_asset():
-    # Should remove an existing asset
-    asset_uri = 'https://example.com#asset'
-    policy_uri = 'https://example.com#policy'
-    db_access.create_policy(policy_uri)
-    db_access.add_asset(asset_uri, policy_uri)
-    db_access.remove_asset(asset_uri)
-    assert not db_access.asset_exists(asset_uri)
-
-
-def test_get_asset():
-    policy_uri = 'https://example.com#policy'
-    db_access.create_policy(policy_uri)
-    asset_uri = 'https://example.com#asset'
-    db_access.add_asset(asset_uri, policy_uri)
-    asset = db_access.get_asset(asset_uri)
-    expected_attributes = ['URI', 'POLICY_URI']
-    assert all(attr in asset for attr in expected_attributes)
-    assert asset['URI'] == asset_uri
 
 
 def test_get_all_assets():
@@ -286,6 +275,16 @@ def test_create_party():
         db_access.create_party(party_uri)
 
 
+def test_delete_party():
+    # Should delete the entry for a party
+    party_uri = 'http://example.com#party'
+    db_access.create_party(party_uri)
+    db_access.delete_party(party_uri)
+    db_access.cursor.execute('SELECT COUNT(1) FROM PARTY WHERE URI = "{party_uri}"'.format(party_uri=party_uri))
+    party_exists = db_access.cursor.fetchone()[0]
+    assert not party_exists
+
+
 def test_party_exists():
     # Should return true if the party exists
     uri = 'https://example.com#test'
@@ -297,14 +296,13 @@ def test_party_exists():
     assert not db_access.party_exists(nonexistent_uri)
 
 
-def test_delete_party():
-    # Should delete the entry for a party
-    party_uri = 'http://example.com#party'
-    db_access.create_party(party_uri)
-    db_access.delete_party(party_uri)
-    db_access.cursor.execute('SELECT COUNT(1) FROM PARTY WHERE URI = "{party_uri}"'.format(party_uri=party_uri))
-    party_exists = db_access.cursor.fetchone()[0]
-    assert not party_exists
+def test_get_all_parties():
+    party1 = 'https://example.com#party1'
+    party2 = 'https://example.com#party'
+    db_access.create_party(party1)
+    db_access.create_party(party2)
+    parties = db_access.get_all_parties()
+    assert parties == [party1, party2]
 
 
 def test_rule_exists():
@@ -316,6 +314,15 @@ def test_rule_exists():
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     db_access.create_rule(rule_uri, rule_type)
     assert db_access.rule_exists(rule_uri)
+
+
+def test_get_permitted_rule_types():
+    permitted_rule_types = db_access.get_permitted_rule_types()
+    assert permitted_rule_types == [
+        'http://www.w3.org/ns/odrl/2/permission',
+        'http://www.w3.org/ns/odrl/2/prohibition',
+        'http://www.w3.org/ns/odrl/2/duty'
+    ]
 
 
 def test_action_exists():
@@ -442,12 +449,3 @@ def test_remove_assignee_from_rule():
     db_access.cursor.execute(query.format(rule_uri=rule_uri, party_uri=party_uri))
     assignee_exists = db_access.cursor.fetchone()[0]
     assert not assignee_exists
-
-
-def test_get_permitted_rule_types():
-    permitted_rule_types = db_access.get_permitted_rule_types()
-    assert permitted_rule_types == [
-        'http://www.w3.org/ns/odrl/2/permission',
-        'http://www.w3.org/ns/odrl/2/prohibition',
-        'http://www.w3.org/ns/odrl/2/duty'
-    ]

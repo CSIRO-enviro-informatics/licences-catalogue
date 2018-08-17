@@ -11,7 +11,7 @@ cursor = conn.cursor()
 def create_policy(uri):
     if policy_exists(uri):
         raise ValueError('A Policy with that URI already exists.')
-    cursor.execute('INSERT INTO POLICY (URI) VALUES ("{uri:s}");'.format(uri=uri))
+    cursor.execute('INSERT INTO POLICY (URI, CREATED) VALUES ("{uri}", CURRENT_TIMESTAMP);'.format(uri=uri))
     conn.commit()
 
 
@@ -69,20 +69,14 @@ def add_asset(uri, policy_uri):
     conn.commit()
 
 
-def asset_exists(uri):
-    cursor.execute('SELECT COUNT(1) FROM ASSET WHERE URI = "{uri:s}"'.format(uri=uri))
-    return cursor.fetchone()[0]
-
-
 def remove_asset(uri):
     conn.execute('DELETE FROM ASSET WHERE URI = "{uri:s}"'.format(uri=uri))
     conn.commit()
 
 
-def get_asset(asset_uri):
-    # Returns a dictionary with all the attributes of that asset
-    cursor.execute('SELECT * FROM ASSET WHERE URI = "{asset_uri}"'.format(asset_uri=asset_uri))
-    return dict(cursor.fetchone())
+def asset_exists(uri):
+    cursor.execute('SELECT COUNT(1) FROM ASSET WHERE URI = "{uri:s}"'.format(uri=uri))
+    return cursor.fetchone()[0]
 
 
 def get_all_assets():
@@ -161,10 +155,28 @@ def get_all_rules():
     return rules
 
 
+def rule_exists(rule_uri):
+    cursor.execute('SELECT COUNT(1) FROM RULE WHERE URI = "{uri}"'.format(uri=rule_uri))
+    return cursor.fetchone()[0]
+
+
+def get_permitted_rule_types():
+    cursor.execute('SELECT TYPE FROM RULE_TYPE')
+    permitted_rule_types = list()
+    for rule_type in cursor.fetchall():
+        permitted_rule_types.append(rule_type['TYPE'])
+    return permitted_rule_types
+
+
 def create_party(uri):
     if party_exists(uri):
         raise ValueError('A Party with that URI already exists.')
     cursor.execute('INSERT INTO PARTY (URI) VALUES ("{uri:s}")'.format(uri=uri))
+    conn.commit()
+
+
+def delete_party(uri):
+    conn.execute('DELETE FROM PARTY WHERE URI = "{uri:s}"'.format(uri=uri))
     conn.commit()
 
 
@@ -173,14 +185,13 @@ def party_exists(uri):
     return cursor.fetchone()[0]
 
 
-def delete_party(uri):
-    conn.execute('DELETE FROM PARTY WHERE URI = "{uri:s}"'.format(uri=uri))
-    conn.commit()
-
-
-def rule_exists(rule_uri):
-    cursor.execute('SELECT COUNT(1) FROM RULE WHERE URI = "{uri}"'.format(uri=rule_uri))
-    return cursor.fetchone()[0]
+def get_all_parties():
+    cursor.execute('SELECT URI FROM PARTY')
+    results = cursor.fetchall()
+    parties = list()
+    for party in results:
+        parties.append(party['URI'])
+    return parties
 
 
 def action_exists(action_uri):
@@ -264,19 +275,6 @@ def get_assignees_for_rule(rule_uri):
     for result in cursor.fetchall():
         assignees.append(result['PARTY_URI'])
     return assignees
-
-
-def get_permitted_rule_types():
-    cursor.execute('SELECT TYPE FROM RULE_TYPE')
-    return list(cursor.fetchall())
-
-
-def get_permitted_rule_types():
-    cursor.execute('SELECT TYPE FROM RULE_TYPE')
-    permitted_rule_types = list()
-    for rule_type in cursor.fetchall():
-        permitted_rule_types.append(rule_type['TYPE'])
-    return permitted_rule_types
 
 
 def query(query_str):
