@@ -335,6 +335,13 @@ def test_action_exists():
     assert db_access.action_exists(action_uri)
 
 
+def test_get_all_actions():
+    actions = db_access.get_all_actions()
+    assert actions
+    for action in actions:
+        assert all(x in ['URI', 'LABEL', 'DEFINITION'] for x in action)
+
+
 def test_add_action_to_rule():
     # Should raise an exception if the rule doesn't exist
     rule_uri = 'https://example.com#rule'

@@ -381,6 +381,21 @@ def get_actions_for_rule(rule_uri):
     return actions
 
 
+def get_all_actions():
+    """
+    Returns a list of all the Actions which are permitted along with their label and definition
+
+    :return A list of Actions
+                Each Action is a dictionary with elements: URI, LABEL, DEFINITION
+    """
+    cursor.execute('SELECT URI, LABEL, DEFINITION FROM ACTION')
+    results = cursor.fetchall()
+    actions = list()
+    for result in results:
+        actions.append({'URI': result['URI'], 'LABEL': result['LABEL'], 'DEFINITION': result['DEFINITION']})
+    return actions
+
+
 def add_assignor_to_rule(party_uri, rule_uri):
     """
     Add a Party to a Rule as an Assignor.
