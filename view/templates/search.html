@@ -1,0 +1,230 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Search for a Licence</h1>
+    <div class="row mt-5">
+        <div class="col-md-5 mb-3">
+            <ul class="list-group">
+                <li class="list-group-item font-weight-bold active">Filter:</li>
+                <li class="list-group-item font-weight-bold">Permissions</li>
+                <li class="list-group-item">
+                    <span class="ml-3">Read</span>
+                    <a href="#!"><i class="fas fa-times text-danger"></i></a>
+                </li>
+                <li class="list-group-item font-weight-bold">Obligations</li>
+                <li class="list-group-item">
+                    <span class="ml-3">Attach Policy</span>
+                    <a href="#!"><i class="fas fa-times text-danger"></i></a>
+                </li>
+                <li class="list-group-item font-weight-bold">Prohibitions</li>
+                <li class="list-group-item">
+                    <span class="ml-3">Distribute</span>
+                    <a href="#!"><i class="fas fa-times text-danger"></i></a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-7">
+            <div class="ml-3">
+                <div class="dropdown mb-3" id="permission-dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="permission-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Add Permission
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="permission-dropdown-button">
+                        <a class="dropdown-item">Read</a>
+                        <a class="dropdown-item">Derive</a>
+                        <a class="dropdown-item">Distribute</a>
+                    </div>
+                </div>
+                <div class="dropdown mb-3" id="obligation-dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="obligation-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Add Obligation
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="obligation-dropdown-button">
+                        <a class="dropdown-item">Read</a>
+                        <a class="dropdown-item">Derive</a>
+                        <a class="dropdown-item">Distribute</a>
+                    </div>
+                </div>
+                <div class="dropdown mb-3" id="prohibition-dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="prohibition-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Add Prohibition
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="prohibition-dropdown-button">
+                        <a class="dropdown-item">Read</a>
+                        <a class="dropdown-item">Derive</a>
+                        <a class="dropdown-item">Distribute</a>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <button type="button" class="btn btn-primary">Filter Licences</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h2>Results</h2>
+            <div class="row mt-3 mb-3">
+                <div class="col-md-1">
+                    <i class="fas fa-check-circle fa-3x text-success"></i>
+                </div>
+                <div class="col-md-11 mt-2 text-success">
+                    <h3>The following licences are a perfect fit with your requirements</h3>
+                </div>
+            </div>
+            <div class="accordion" id="perfect-fit-accordion">
+                <div class="card">
+                    <div class="card-header mouseover bg-success text-white" id="perfect-fit-heading-1" data-toggle="collapse" data-target="#perfect-fit-collapse-1">
+                        <h5 class="mb-0 font-weight-bold">Licence #1</h5>
+                    </div>
+                    <div id="perfect-fit-collapse-1" class="collapse" aria-labelledby="perfect-fit-heading-1" data-parent="#perfect-fit-accordion">
+                        <div class="card-body text-center">
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header mouseover bg-success text-white" id="perfect-fit-heading-2" data-toggle="collapse" data-target="#perfect-fit-collapse-2">
+                        <h5 class="mb-0 font-weight-bold">Licence #2</h5>
+                    </div>
+                    <div id="perfect-fit-collapse-2" class="collapse" aria-labelledby="perfect-fit-heading-2" data-parent="#perfect-fit-accordion">
+                        <div class="card-body text-center">
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header mouseover bg-success text-white" id="perfect-fit-heading-3" data-toggle="collapse" data-target="#perfect-fit-collapse-3">
+                        <h5 class="mb-0 font-weight-bold">Licence #3</h5>
+                    </div>
+                    <div id="perfect-fit-collapse-3" class="collapse" aria-labelledby="perfect-fit-heading-3" data-parent="#perfect-fit-accordion">
+                        <div class="card-body text-center">
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3 mb-3">
+                <div class="col-md-1 mt-2">
+                    <i class="fas fa-exclamation-circle fa-3x text-warning"></i>
+                </div>
+                <div class="col-md-11 text-warning">
+                    <h3>The following licences are compatible with your requirements, but have extra conditions</h3>
+                </div>
+            </div>
+            <div class="accordion" id="extra-conditions-accordion">
+                <div class="card">
+                    <div class="card-header mouseover bg-warning text-white" id="extra-conditions-heading-1" data-toggle="collapse" data-target="#extra-conditions-collapse-1">
+                        <h5 class="mb-0 font-weight-bold">Licence #4</h5>
+                    </div>
+                    <div id="extra-conditions-collapse-1" class="collapse" aria-labelledby="extra-conditions-heading-1" data-parent="#extra-conditions-accordion">
+                        <div class="card-body text-center">
+                            <h5>This licence has these additional conditions:</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <th scope="row">Permissions</th>
+                                    <td class="text-left">Derive</td>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header mouseover bg-warning text-white" id="extra-conditions-heading-2" data-toggle="collapse" data-target="#extra-conditions-collapse-2">
+                        <h5 class="mb-0 font-weight-bold">Licence #5</h5>
+                    </div>
+                    <div id="extra-conditions-collapse-2" class="collapse" aria-labelledby="extra-conditions-heading-2" data-parent="#extra-conditions-accordion">
+                        <div class="card-body text-center">
+                            <h5>This licence has these additional conditions:</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <th scope="row">Permissions</th>
+                                    <td class="text-left">Derive</td>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header mouseover bg-warning text-white" id="extra-conditions-heading-3" data-toggle="collapse" data-target="#extra-conditions-collapse-3">
+                        <h5 class="mb-0 font-weight-bold">Licence #6</h5>
+                    </div>
+                    <div id="extra-conditions-collapse-3" class="collapse" aria-labelledby="extra-conditions-heading-3" data-parent="#extra-conditions-accordion">
+                        <div class="card-body text-center">
+                            <h5>This licence has these additional conditions:</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <th scope="row">Permissions</th>
+                                    <td class="text-left">Derive</td>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3 mb-3">
+                <div class="col-md-1">
+                    <i class="fas fa-times-circle fa-3x text-danger"></i>
+                </div>
+                <div class="col-md-11 mt-2 text-danger">
+                    <h3>The following licences are missing some requirements</h3>
+                </div>
+            </div>
+            <div class="accordion" id="missing-conditions-accordion">
+                <div class="card">
+                    <div class="card-header mouseover bg-danger text-white" id="missing-conditions-heading-1" data-toggle="collapse" data-target="#missing-conditions-collapse-1">
+                        <h5 class="mb-0 font-weight-bold">Licence #7</h5>
+                    </div>
+                    <div id="missing-conditions-collapse-1" class="collapse" aria-labelledby="missing-conditions-heading-1" data-parent="#missing-conditions-accordion">
+                        <div class="card-body text-center">
+                            <h5>This licence is missing these requirements:</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <th scope="row">Permissions</th>
+                                    <td class="text-left">Read</td>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header mouseover bg-danger text-white" id="missing-conditions-heading-2" data-toggle="collapse" data-target="#missing-conditions-collapse-2">
+                        <h5 class="mb-0 font-weight-bold">Licence #8</h5>
+                    </div>
+                    <div id="missing-conditions-collapse-2" class="collapse" aria-labelledby="missing-conditions-heading-2" data-parent="#missing-conditions-accordion">
+                        <div class="card-body text-center">
+                            <h5>This licence is missing these requirements:</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <th scope="row">Permissions</th>
+                                    <td class="text-left">Read</td>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header mouseover bg-danger text-white" id="missing-conditions-heading-3" data-toggle="collapse" data-target="#missing-conditions-collapse-3">
+                        <h5 class="mb-0 font-weight-bold">Licence #9</h5>
+                    </div>
+                    <div id="missing-conditions-collapse-3" class="collapse" aria-labelledby="missing-conditions-heading-3" data-parent="#missing-conditions-accordion">
+                        <div class="card-body text-center">
+                            <h5>This licence is missing these requirements:</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <th scope="row">Permissions</th>
+                                    <td class="text-left">Read</td>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-primary">See Licence</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
