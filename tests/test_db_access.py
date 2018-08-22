@@ -73,8 +73,6 @@ def test_get_policy():
     db_access.add_action_to_rule(action_uri, rule_uri)
     assignor_uri = 'https://example.com#assignor'
     assignee_uri = 'https://example.com#assignee'
-    db_access.create_party(assignor_uri)
-    db_access.create_party(assignee_uri)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     policy = db_access.get_policy(policy_uri)
@@ -106,6 +104,20 @@ def test_get_all_policies():
     db_access.create_policy(policy1)
     db_access.create_policy(policy2)
     assert db_access.get_all_policies() == [policy1, policy2]
+
+
+def test_policy_has_rule():
+    # Should return false if the policy does not have the rule
+    policy_uri = 'https://example.com#policy'
+    rule_uri = 'http://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    assert not db_access.policy_has_rule(policy_uri, rule_uri)
+
+    # Should return true if the policy has the rule
+    db_access.create_policy(policy_uri)
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.add_rule_to_policy(rule_uri, policy_uri)
+    assert db_access.policy_has_rule(policy_uri, rule_uri)
 
 
 def test_add_asset():
@@ -184,6 +196,12 @@ def test_delete_rule():
     rule_uri = 'http://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     db_access.create_rule(rule_uri, rule_type)
+    assignor_uri = 'http://example.com#assignor'
+    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+    assignee_uri = 'http://example.com#assignee'
+    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
+    db_access.add_action_to_rule(action_uri, rule_uri)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     with pytest.raises(ValueError):
         db_access.delete_rule(rule_uri)
@@ -200,16 +218,10 @@ def test_delete_rule():
     assert not rule_has_actions
 
     # Should also remove any assignors from the rule
-    query_str = 'SELECT COUNT(1) FROM RULE_HAS_ASSIGNOR WHERE RULE_URI = "{rule_uri}"'
-    db_access.cursor.execute(query_str.format(rule_uri=rule_uri))
-    rule_has_assignors = db_access.cursor.fetchone()[0]
-    assert not rule_has_assignors
+    assert not db_access.rule_has_assignor(assignor_uri, rule_uri)
 
     # Should also remove any assignees from the rule
-    query_str = 'SELECT COUNT(1) FROM RULE_HAS_ASSIGNEE WHERE RULE_URI = "{rule_uri}"'
-    db_access.cursor.execute(query_str.format(rule_uri=rule_uri))
-    rule_has_assignees = db_access.cursor.fetchone()[0]
-    assert not rule_has_assignees
+    assert not db_access.rule_has_assignee(assignee_uri, rule_uri)
 
 
 def test_add_rule_to_policy():
@@ -235,6 +247,10 @@ def test_add_rule_to_policy():
     db_access.cursor.execute(query_str.format(rule_uri=rule_uri, policy_uri=policy_uri))
     rule_assigned = db_access.cursor.fetchone()[0]
     assert rule_assigned
+
+    # Should raise an exception if the rule is already included in the policy
+    with pytest.raises(ValueError):
+        db_access.add_rule_to_policy(rule_uri, policy_uri)
 
 
 def test_remove_rule_from_policy():
@@ -262,49 +278,6 @@ def test_get_all_rules():
     assert rules == [rule1, rule2]
 
 
-def test_create_party():
-    # Should store a new party entry in the database
-    party_uri = 'https://example.com#test'
-    db_access.create_party(party_uri)
-    db_access.cursor.execute('SELECT COUNT(1) FROM PARTY WHERE URI = "{uri}"'.format(uri=party_uri))
-    party_exists = db_access.cursor.fetchone()[0]
-    assert party_exists
-
-    # Should reject duplicate parties
-    with pytest.raises(ValueError):
-        db_access.create_party(party_uri)
-
-
-def test_delete_party():
-    # Should delete the entry for a party
-    party_uri = 'http://example.com#party'
-    db_access.create_party(party_uri)
-    db_access.delete_party(party_uri)
-    db_access.cursor.execute('SELECT COUNT(1) FROM PARTY WHERE URI = "{party_uri}"'.format(party_uri=party_uri))
-    party_exists = db_access.cursor.fetchone()[0]
-    assert not party_exists
-
-
-def test_party_exists():
-    # Should return true if the party exists
-    uri = 'https://example.com#test'
-    db_access.create_party(uri)
-    assert db_access.party_exists(uri)
-
-    # Should return false if the policy doesn't exist
-    nonexistent_uri = 'https://example.com#nonexistent'
-    assert not db_access.party_exists(nonexistent_uri)
-
-
-def test_get_all_parties():
-    party1 = 'https://example.com#party1'
-    party2 = 'https://example.com#party'
-    db_access.create_party(party1)
-    db_access.create_party(party2)
-    parties = db_access.get_all_parties()
-    assert parties == [party1, party2]
-
-
 def test_rule_exists():
     # Should return false if the policy doesn't exist
     rule_uri = 'https://example.com#rule'
@@ -323,6 +296,20 @@ def test_get_permitted_rule_types():
         'http://www.w3.org/ns/odrl/2/prohibition',
         'http://www.w3.org/ns/odrl/2/duty'
     ]
+
+
+def test_get_policies_for_rule():
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    policy1 = 'https://example.com#policy1'
+    db_access.create_policy(policy1)
+    db_access.add_rule_to_policy(rule_uri, policy1)
+    policy2 = 'https://example.com#policy2'
+    db_access.create_policy(policy2)
+    db_access.add_rule_to_policy(rule_uri, policy2)
+    policies = db_access.get_policies_for_rule(rule_uri)
+    assert policies == [policy1, policy2]
 
 
 def test_action_exists():
@@ -364,6 +351,10 @@ def test_add_action_to_rule():
     action_entry_exists = db_access.cursor.fetchone()[0]
     assert action_entry_exists
 
+    # Should raise an exception if the rule already has that action
+    with pytest.raises(ValueError):
+        db_access.add_action_to_rule(action_uri, rule_uri)
+
 
 def test_remove_action_from_rule():
     # Should remove an action from a rule
@@ -379,80 +370,134 @@ def test_remove_action_from_rule():
     assert not action_entry_exists
 
 
-def test_add_assignor_to_rule():
-    # Should raise an exception if the rule doesn't exist
-    party_uri = 'http://example.com#party'
+def test_get_actions_for_rule():
     rule_uri = 'https://example.com#rule'
-    db_access.create_party(party_uri)
-    with pytest.raises(ValueError):
-        db_access.add_assignor_to_rule(party_uri, rule_uri)
-
-    # Should raise an exception if the party doesn't exist
-    party_uri = 'nonexistent'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     db_access.create_rule(rule_uri, rule_type)
+    action1 = 'http://www.w3.org/ns/odrl/2/acceptTracking'
+    action2 = 'http://www.w3.org/ns/odrl/2/aggregate'
+    db_access.add_action_to_rule(action1, rule_uri)
+    db_access.add_action_to_rule(action2, rule_uri)
+    actions = db_access.get_actions_for_rule(rule_uri)
+    assert all(action['URI'] in [action1, action2] for action in actions)
+
+
+def test_rule_has_action():
+    # Should return false if the rule does not have the action
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
+    assert not db_access.rule_has_action(rule_uri, rule_type)
+
+    # Should return true if the rule has the action
+    db_access.add_action_to_rule(action_uri, rule_uri)
+    assert db_access.rule_has_action(rule_uri, action_uri)
+
+
+def test_add_assignor_to_rule():
+    # Should raise an exception if the rule doesn't exist
+    assignor_uri = 'http://example.com#assignor'
+    rule_uri = 'https://example.com#rule'
     with pytest.raises(ValueError):
-        db_access.add_assignor_to_rule(party_uri, rule_uri)
+        db_access.add_assignor_to_rule(assignor_uri, rule_uri)
 
     # Should add an assignor to a rule
-    party_uri = 'http://example.com#party'
-    db_access.add_assignor_to_rule(party_uri, rule_uri)
-    query_str = 'SELECT COUNT(1) FROM RULE_HAS_ASSIGNOR WHERE RULE_URI = "{rule_uri}" AND PARTY_URI = "{party_uri}"'
-    db_access.cursor.execute(query_str.format(rule_uri=rule_uri, party_uri=party_uri))
-    assignor_exists = db_access.cursor.fetchone()[0]
-    assert assignor_exists
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+    assert db_access.rule_has_assignor(rule_uri, assignor_uri)
+
+    # Should raise an exception if the rule already has that assignor
+    with pytest.raises(ValueError):
+        db_access.add_assignor_to_rule(assignor_uri, rule_uri)
 
 
 def test_remove_assignor_from_rule():
-    # Should remove an action from a rule
-    party_uri = 'http://example.com#party'
-    db_access.create_party(party_uri)
+    # Should remove an assignor from a rule
+    assignor_uri = 'http://example.com#assignor'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     db_access.create_rule(rule_uri, rule_type)
-    db_access.add_assignor_to_rule(party_uri, rule_uri)
-    db_access.remove_assignor_from_rule(party_uri, rule_uri)
-    query = 'SELECT COUNT(1) FROM RULE_HAS_ASSIGNOR WHERE RULE_URI = "{rule_uri}" AND PARTY_URI = "{party_uri}"'
-    db_access.cursor.execute(query.format(rule_uri=rule_uri, party_uri=party_uri))
-    assignor_exists = db_access.cursor.fetchone()[0]
-    assert not assignor_exists
+    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+    db_access.remove_assignor_from_rule(assignor_uri, rule_uri)
+    assert not db_access.rule_has_assignor(rule_uri, assignor_uri)
+
+
+def test_rule_has_assignor():
+    # Should return false if the rule doesn't have that assignor
+    assignor_uri = 'http://example.com#assignor'
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    assert not db_access.rule_has_assignor(rule_uri, assignor_uri)
+
+    # Should return true if the rule does have that assignor
+    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+    assert db_access.rule_has_assignor(rule_uri, assignor_uri)
+
+
+def test_get_assignors_for_rule():
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    assignor1 = 'https://example.com#assignor1'
+    assignor2 = 'https://example.com#assignor2'
+    db_access.add_assignor_to_rule(assignor1, rule_uri)
+    db_access.add_assignor_to_rule(assignor2, rule_uri)
+    assignors = db_access.get_assignors_for_rule(rule_uri)
+    assert assignors == [assignor1, assignor2]
 
 
 def test_add_assignee_to_rule():
     # Should raise an exception if the rule doesn't exist
-    party_uri = 'http://example.com#party'
-    rule_uri = 'nonexistant'
-    db_access.create_party(party_uri)
-    with pytest.raises(ValueError):
-        db_access.add_assignee_to_rule(party_uri, rule_uri)
-
-    # Should raise an exception if the party doesn't exist
-    party_uri = 'nonexistent'
+    assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
     with pytest.raises(ValueError):
-        db_access.add_assignee_to_rule(party_uri, rule_uri)
+        db_access.add_assignee_to_rule(assignee_uri, rule_uri)
 
     # Should add an assignee to a rule
-    party_uri = 'http://example.com#party'
-    db_access.add_assignee_to_rule(party_uri, rule_uri)
-    query = 'SELECT COUNT(1) FROM RULE_HAS_ASSIGNEE WHERE RULE_URI = "{rule_uri}" AND PARTY_URI = "{party_uri}"'
-    db_access.cursor.execute(query.format(rule_uri=rule_uri, party_uri=party_uri))
-    assignee_exists = db_access.cursor.fetchone()[0]
-    assert assignee_exists
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+    assert db_access.rule_has_assignee(rule_uri, assignee_uri)
+
+    # Should raise an exception if the rule already has that assignee
+    with pytest.raises(ValueError):
+        db_access.add_assignee_to_rule(assignee_uri, rule_uri)
 
 
 def test_remove_assignee_from_rule():
-    # Should remove an action from a rule
-    party_uri = 'http://example.com#party'
-    db_access.create_party(party_uri)
+    # Should remove an assignee from a rule
+    assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     db_access.create_rule(rule_uri, rule_type)
-    db_access.add_assignee_to_rule(party_uri, rule_uri)
-    db_access.remove_assignee_from_rule(party_uri, rule_uri)
-    query = 'SELECT COUNT(1) FROM RULE_HAS_ASSIGNEE WHERE RULE_URI = "{rule_uri}" AND PARTY_URI = "{party_uri}"'
-    db_access.cursor.execute(query.format(rule_uri=rule_uri, party_uri=party_uri))
-    assignee_exists = db_access.cursor.fetchone()[0]
-    assert not assignee_exists
+    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+    db_access.remove_assignee_from_rule(assignee_uri, rule_uri)
+    assert not db_access.rule_has_assignee(rule_uri, assignee_uri)
+
+
+def test_rule_has_assignee():
+    # Should return false if the rule doesn't have that assignee
+    assignee_uri = 'http://example.com#assignee'
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    assert not db_access.rule_has_assignee(rule_uri, assignee_uri)
+
+    # Should return true if the rule does have that assignee
+    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+    assert db_access.rule_has_assignee(rule_uri, assignee_uri)
+
+
+def test_get_assignees_for_rule():
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    assignee1 = 'https://example.com#assignee1'
+    assignee2 = 'https://example.com#assignee2'
+    db_access.add_assignee_to_rule(assignee1, rule_uri)
+    db_access.add_assignee_to_rule(assignee2, rule_uri)
+    assignees = db_access.get_assignees_for_rule(rule_uri)
+    assert assignees == [assignee1, assignee2]

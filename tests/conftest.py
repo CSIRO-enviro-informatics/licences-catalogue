@@ -21,9 +21,8 @@ def setup_database():
 
 @pytest.fixture(autouse=True)
 def wipe_database():
-    db_access.conn.execute('DELETE FROM RULE_HAS_ASSIGNEE')
-    db_access.conn.execute('DELETE FROM RULE_HAS_ASSIGNOR')
-    db_access.conn.execute('DELETE FROM PARTY')
+    db_access.conn.execute('DELETE FROM ASSIGNEE')
+    db_access.conn.execute('DELETE FROM ASSIGNOR')
     db_access.conn.execute('DELETE FROM RULE_HAS_ACTION')
     db_access.conn.execute('DELETE FROM POLICY_HAS_RULE')
     db_access.conn.execute('DELETE FROM RULE')

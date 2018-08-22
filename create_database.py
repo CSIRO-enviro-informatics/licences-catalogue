@@ -80,32 +80,25 @@ def rebuild():
         CREATE TABLE IF NOT EXISTS RULE_HAS_ACTION (
             RULE_URI    TEXT    NOT NULL,
             ACTION_URI  TEXT    NOT NULL,
-            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI),
+            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
             FOREIGN KEY (ACTION_URI) REFERENCES ACTION (URI),
             PRIMARY KEY (RULE_URI, ACTION_URI)
         );
     ''')
     conn.execute('''
-        CREATE TABLE IF NOT EXISTS PARTY (
-            URI TEXT    NOT NULL    PRIMARY KEY
+        CREATE TABLE IF NOT EXISTS ASSIGNOR (
+            ASSIGNOR_URI    TEXT    NOT NULL,
+            RULE_URI        TEXT    NOT NULL,
+            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
+            PRIMARY KEY (ASSIGNOR_URI, RULE_URI)
         );
     ''')
     conn.execute('''
-        CREATE TABLE IF NOT EXISTS RULE_HAS_ASSIGNOR (
-            PARTY_URI   TEXT    NOT NULL,
-            RULE_URI    TEXT    NOT NULL,
-            FOREIGN KEY (PARTY_URI) REFERENCES PARTY (URI),
+        CREATE TABLE IF NOT EXISTS ASSIGNEE (
+            ASSIGNEE_URI    TEXT    NOT NULL,
+            RULE_URI        TEXT    NOT NULL,
             FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
-            PRIMARY KEY (PARTY_URI, RULE_URI)
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS RULE_HAS_ASSIGNEE (
-            PARTY_URI   TEXT    NOT NULL,
-            RULE_URI    TEXT    NOT NULL,
-            FOREIGN KEY (PARTY_URI) REFERENCES PARTY (URI),
-            FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
-            PRIMARY KEY (PARTY_URI, RULE_URI)
+            PRIMARY KEY (ASSIGNEE_URI, RULE_URI)
         );
     ''')
     conn.execute('''
