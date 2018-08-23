@@ -1,0 +1,8 @@
+{% extends 'browse.html' %}
+{% block left_column %}
+<ul>
+    {% for item in items %}
+    <li><a href="{{ item['link'] }}">{{ item['label'] }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

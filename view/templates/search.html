@@ -71,35 +71,33 @@
                     <h3>The following licences are a perfect fit with your requirements</h3>
                 </div>
             </div>
-            <div class="accordion" id="perfect-fit-accordion">
-                <div class="card">
-                    <div class="card-header mouseover" id="perfect-fit-heading-1" data-toggle="collapse" data-target="#perfect-fit-collapse-1">
-                        <h5 class="mb-0">Licence #1</h5>
-                    </div>
-                    <div id="perfect-fit-collapse-1" class="collapse" aria-labelledby="perfect-fit-heading-1" data-parent="#perfect-fit-accordion">
-                        <div class="card-body text-center">
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#perfect-fit-1">
+                    <h5 class="mb-0">Licence #1</h5>
+                </div>
+                <div id="perfect-fit-1" class="collapse">
+                    <div class="card-body text-center">
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header mouseover" id="perfect-fit-heading-2" data-toggle="collapse" data-target="#perfect-fit-collapse-2">
-                        <h5 class="mb-0">Licence #2</h5>
-                    </div>
-                    <div id="perfect-fit-collapse-2" class="collapse" aria-labelledby="perfect-fit-heading-2" data-parent="#perfect-fit-accordion">
-                        <div class="card-body text-center">
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#perfect-fit-2">
+                    <h5 class="mb-0">Licence #2</h5>
+                </div>
+                <div id="perfect-fit-2" class="collapse">
+                    <div class="card-body text-center">
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header mouseover" id="perfect-fit-heading-3" data-toggle="collapse" data-target="#perfect-fit-collapse-3">
-                        <h5 class="mb-0">Licence #3</h5>
-                    </div>
-                    <div id="perfect-fit-collapse-3" class="collapse" aria-labelledby="perfect-fit-heading-3" data-parent="#perfect-fit-accordion">
-                        <div class="card-body text-center">
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#perfect-fit-3">
+                    <h5 class="mb-0">Licence #3</h5>
+                </div>
+                <div id="perfect-fit-3" class="collapse">
+                    <div class="card-body text-center">
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
             </div>
@@ -111,56 +109,56 @@
                     <h3>The following licences are compatible with your requirements, but have extra conditions</h3>
                 </div>
             </div>
-            <div class="accordion" id="extra-conditions-accordion">
-                <div class="card">
-                    <div class="card-header mouseover" id="extra-conditions-heading-1" data-toggle="collapse" data-target="#extra-conditions-collapse-1">
-                        <h5 class="mb-0">Licence #4</h5>
-                    </div>
-                    <div id="extra-conditions-collapse-1" class="collapse" aria-labelledby="extra-conditions-heading-1" data-parent="#extra-conditions-accordion">
-                        <div class="card-body text-center">
-                            <h5>This licence has these additional conditions:</h5>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <th scope="row">Permissions</th>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#extra-conditions-1">
+                    <h5 class="mb-0">Licence #4</h5>
+                </div>
+                <div id="extra-conditions-1" class="collapse">
+                    <div class="card-body text-center">
+                        <h5>This licence has these additional conditions:</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>Permissions</th>
                                     <td class="text-left">Derive</td>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header mouseover" id="extra-conditions-heading-2" data-toggle="collapse" data-target="#extra-conditions-collapse-2">
-                        <h5 class="mb-0">Licence #5</h5>
-                    </div>
-                    <div id="extra-conditions-collapse-2" class="collapse" aria-labelledby="extra-conditions-heading-2" data-parent="#extra-conditions-accordion">
-                        <div class="card-body text-center">
-                            <h5>This licence has these additional conditions:</h5>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <th scope="row">Permissions</th>
-                                    <td class="text-left">Derive</td>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#extra-conditions-2">
+                    <h5 class="mb-0">Licence #5</h5>
+                </div>
+                <div id="extra-conditions-2" class="collapse">
+                    <div class="card-body text-center">
+                        <h5>This licence has these additional conditions:</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <th scope="row">Permissions</th>
+                                <td class="text-left">Derive</td>
+                            </tbody>
+                        </table>
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header mouseover" id="extra-conditions-heading-3" data-toggle="collapse" data-target="#extra-conditions-collapse-3">
-                        <h5 class="mb-0">Licence #6</h5>
-                    </div>
-                    <div id="extra-conditions-collapse-3" class="collapse" aria-labelledby="extra-conditions-heading-3" data-parent="#extra-conditions-accordion">
-                        <div class="card-body text-center">
-                            <h5>This licence has these additional conditions:</h5>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <th scope="row">Permissions</th>
-                                    <td class="text-left">Derive</td>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#extra-conditions-3">
+                    <h5 class="mb-0">Licence #6</h5>
+                </div>
+                <div id="extra-conditions-3" class="collapse">
+                    <div class="card-body text-center">
+                        <h5>This licence has these additional conditions:</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <th scope="row">Permissions</th>
+                                <td class="text-left">Derive</td>
+                            </tbody>
+                        </table>
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
             </div>
@@ -172,56 +170,54 @@
                     <h3>The following licences are missing some requirements</h3>
                 </div>
             </div>
-            <div class="accordion" id="missing-conditions-accordion">
-                <div class="card">
-                    <div class="card-header mouseover" id="missing-conditions-heading-1" data-toggle="collapse" data-target="#missing-conditions-collapse-1">
-                        <h5 class="mb-0">Licence #7</h5>
-                    </div>
-                    <div id="missing-conditions-collapse-1" class="collapse" aria-labelledby="missing-conditions-heading-1" data-parent="#missing-conditions-accordion">
-                        <div class="card-body text-center">
-                            <h5>This licence is missing these requirements:</h5>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <th scope="row">Permissions</th>
-                                    <td class="text-left">Read</td>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#missing-conditions-1">
+                    <h5 class="mb-0">Licence #7</h5>
+                </div>
+                <div id="missing-conditions-1" class="collapse">
+                    <div class="card-body text-center">
+                        <h5>This licence is missing these requirements:</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <th scope="row">Permissions</th>
+                                <td class="text-left">Read</td>
+                            </tbody>
+                        </table>
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header mouseover" id="missing-conditions-heading-2" data-toggle="collapse" data-target="#missing-conditions-collapse-2">
-                        <h5 class="mb-0">Licence #8</h5>
-                    </div>
-                    <div id="missing-conditions-collapse-2" class="collapse" aria-labelledby="missing-conditions-heading-2" data-parent="#missing-conditions-accordion">
-                        <div class="card-body text-center">
-                            <h5>This licence is missing these requirements:</h5>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <th scope="row">Permissions</th>
-                                    <td class="text-left">Read</td>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#missing-conditions-2">
+                    <h5 class="mb-0">Licence #8</h5>
+                </div>
+                <div id="missing-conditions-2" class="collapse">
+                    <div class="card-body text-center">
+                        <h5>This licence is missing these requirements:</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <th scope="row">Permissions</th>
+                                <td class="text-left">Read</td>
+                            </tbody>
+                        </table>
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header mouseover" id="missing-conditions-heading-3" data-toggle="collapse" data-target="#missing-conditions-collapse-3">
-                        <h5 class="mb-0">Licence #9</h5>
-                    </div>
-                    <div id="missing-conditions-collapse-3" class="collapse" aria-labelledby="missing-conditions-heading-3" data-parent="#missing-conditions-accordion">
-                        <div class="card-body text-center">
-                            <h5>This licence is missing these requirements:</h5>
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <th scope="row">Permissions</th>
-                                    <td class="text-left">Read</td>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-primary">See Licence</button>
-                        </div>
+            </div>
+            <div class="card">
+                <div class="card-header mouseover" data-toggle="collapse" data-target="#missing-conditions-3">
+                    <h5 class="mb-0">Licence #9</h5>
+                </div>
+                <div id="missing-conditions-3" class="collapse">
+                    <div class="card-body text-center">
+                        <h5>This licence is missing these requirements:</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <th scope="row">Permissions</th>
+                                <td class="text-left">Read</td>
+                            </tbody>
+                        </table>
+                        <a href="{{ url_for('controller.view_licence') }}" type="button" class="btn btn-primary">See Licence</a>
                     </div>
                 </div>
             </div>

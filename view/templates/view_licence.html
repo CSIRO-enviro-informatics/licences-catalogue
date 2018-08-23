@@ -1,0 +1,87 @@
+{% extends 'browse.html' %}
+{% block left_column %}
+<table class="table">
+    <col width="150">
+    <tbody>
+        <tr>
+            <th>Type:</th>
+            <td>Licence</td>
+        </tr>
+        <tr>
+            <th>Comment:</th>
+        </tr>
+        <tr>
+            <th>Status:</th>
+        </tr>
+        <tr>
+            <th>Version:</th>
+        </tr>
+        <tr>
+            <th>Created:</th>
+        </tr>
+        <tr>
+            <th>Jurisdiction:</th>
+        </tr>
+        <tr>
+            <th>Legal Code:</th>
+        </tr>
+        <tr>
+            <th>Language:</th>
+        </tr>
+        <tr>
+            <th>Same As:</th>
+        </tr>
+        <tr>
+            <th>See Also:</th>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
+{% block right_column %}
+<img src="/style/logo.gif" alt="Licence Logo">
+{% endblock %}
+{% block bottom %}
+<h2>Rules</h2>
+<div class="card">
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-1">
+        <h5 class="mb-0">Rule #1</h5>
+    </div>
+    <div id="rule-1" class="collapse">
+        <div class="card-body text-center">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Type</th>
+                        <td class="text-left">Permission</td>
+                    </tr>
+                    <tr>
+                        <th>Actions</th>
+                        <td class="text-left">Read</td>
+                    </tr>
+                </tbody>
+            </table>
+            <a href="#!" type="button" class="btn btn-primary">See Rule</a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-2">
+        <h5 class="mb-0">Rule #1</h5>
+    </div>
+    <div id="rule-2" class="collapse">
+        <div class="card-body text-center">
+            <a href="#!" type="button" class="btn btn-primary">See Rule</a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-3">
+        <h5 class="mb-0">Rule #1</h5>
+    </div>
+    <div id="rule-3" class="collapse">
+        <div class="card-body text-center">
+            <a href="#!" type="button" class="btn btn-primary">See Rule</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -3,35 +3,36 @@
     <div class="row">
         <div class="col-md-8">
             <h1>{% if title is defined %}{{ title }}{% else %}Register{% endif %}</h1>
-            <ul>
-                {% for item in items %}
-                <li><a href="{{ item['link'] }}">{{ item['label'] }}</a></li>
-                {% endfor %}
-            </ul>
+            {% block left_column %}{% endblock %}
         </div>
         <div class="col-md-4">
             <h5>Permalink</h5>
             <div>
-                <input class="permalink" onClick="this.select();" value="{{ permalink }}" />
+                <input class="permalink" value="{{ permalink }}" />
                 <div class="clipboard-icon">
                     <a href="#!" class="far fa-2x fa-clipboard"></a>
                     <span class="clipboard-tooltip">Copy to clipboard</span>
                 </div>
             </div>
-            <a href="{{ rdf_link }}" type="button" class="btn btn-primary mt-2">Download as RDF</a>
-            <a href="{{ json_link }}" type="button" class="btn btn-primary mt-2">Download as JSON</a>
+            <a href="{{ rdf_link }}" type="button" class="btn btn-primary mt-2 mb-2">Download as RDF</a>
+            <a href="{{ json_link }}" type="button" class="btn btn-primary mt-2 mb-2">Download as JSON</a>
+            {% block right_column %}{% endblock %}
         </div>
     </div>
+    {% block bottom %}{% endblock %}
 {% endblock %}
 {% block bottom_script %}
 <script>
-    $('body').on('click', '.clipboard-icon', function() {
-        copyToClipboard($(this), $('.permalink'));
+    $('body').on('click', '.permalink', function() {
+        $(this).select();
     });
-    var copyToClipboard = function(clicked, target) {
+    $('body').on('click', '.clipboard-icon', function() {
+        copyToClipboard($('.permalink'));
+        $(this).children('.clipboard-tooltip').text('Copied!');
+    });
+    var copyToClipboard = function(target) {
         $(target).focus().select();
         document.execCommand('copy');
-        $(clicked).children('.clipboard-tooltip').text('Copied!');
     };
 </script>
 {% endblock %}

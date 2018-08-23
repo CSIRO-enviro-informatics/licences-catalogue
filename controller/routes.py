@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
+from werkzeug.routing import BaseConverter
 
 routes = Blueprint('controller', __name__)
 
@@ -20,14 +21,14 @@ def search():
 def browse_licences():
     title = 'Licence Register'
     items = [
-        {'label': 'Licence #1', 'link': '#!'},
-        {'label': 'Licence #2', 'link': '#!'},
-        {'label': 'Licence #3', 'link': '#!'}
+        {'label': 'Licence #1', 'link': url_for('controller.view_licence')},
+        {'label': 'Licence #2', 'link': url_for('controller.view_licence')},
+        {'label': 'Licence #3', 'link': url_for('controller.view_licence')}
     ]
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
-    return render_template('browse_template.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+    return render_template('browse_list.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
                            json_link=json_link)
 
 
@@ -42,7 +43,7 @@ def browse_rules():
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
-    return render_template('browse_template.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+    return render_template('browse_list.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
                            json_link=json_link)
 
 
@@ -57,5 +58,15 @@ def browse_actions():
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
-    return render_template('browse_template.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+    return render_template('browse_list.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+                           json_link=json_link)
+
+
+@routes.route('/licence/example_licence', methods=['GET'])
+def view_licence():
+    title = "Example Licence"
+    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('view_licence.html', title=title, permalink=permalink, rdf_link=rdf_link,
                            json_link=json_link)
