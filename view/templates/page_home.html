@@ -11,11 +11,11 @@
 
     <h2>Actions</h2>
     <ul>
-        <li><a href="/search">Find a Licence</a></li>
+        <li><a href="{{ url_for('controller.search') }}">Find a Licence</a></li>
         <li>Create a Licence</li>
-        <li><a href="/licence">Browse Licences</a></li>
-        <li>Browse Rules</li>
-        <li>Browse Actions</li>
+        <li><a href="{{ url_for('controller.browse_licences') }}">Browse Licences</a></li>
+        <li><a href="{{ url_for('controller.browse_rules') }}">Browse Rules</a></li>
+        <li><a href="{{ url_for('controller.browse_actions') }}">Browse Actions</a></li>
     </ul>
 
     <h2>License</h2>

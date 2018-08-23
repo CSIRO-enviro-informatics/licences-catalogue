@@ -18,4 +18,44 @@ def search():
 
 @routes.route('/licence', methods=['GET'])
 def browse_licences():
-    return render_template('browse_licences.html')
+    title = 'Licence Register'
+    items = [
+        {'label': 'Licence #1', 'link': '#!'},
+        {'label': 'Licence #2', 'link': '#!'},
+        {'label': 'Licence #3', 'link': '#!'}
+    ]
+    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('browse_template.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+                           json_link=json_link)
+
+
+@routes.route('/rule', methods=['GET'])
+def browse_rules():
+    title = 'Rule Register'
+    items = [
+        {'label': 'Rule #1', 'link': '#!'},
+        {'label': 'Rule #2', 'link': '#!'},
+        {'label': 'Rule #3', 'link': '#!'}
+    ]
+    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('browse_template.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+                           json_link=json_link)
+
+
+@routes.route('/action', methods=['GET'])
+def browse_actions():
+    title = 'Action Register'
+    items = [
+        {'label': 'Action #1', 'link': '#!'},
+        {'label': 'Action #2', 'link': '#!'},
+        {'label': 'Action #3', 'link': '#!'}
+    ]
+    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('browse_template.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
+                           json_link=json_link)
