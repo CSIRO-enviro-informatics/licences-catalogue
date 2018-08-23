@@ -14,3 +14,8 @@ def home():
 @routes.route('/search', methods=['GET'])
 def search():
     return render_template('search.html')
+
+
+@routes.route('/licence', methods=['GET'])
+def browse_licences():
+    return render_template('browse_licences.html')

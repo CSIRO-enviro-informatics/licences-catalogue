@@ -1,5 +1,5 @@
 .btn {
-    width: 150px;
+    width: 200px;
 }
 
 .btn-col {
@@ -8,4 +8,50 @@
 
 .mouseover {
     cursor: pointer;
+}
+
+.permalink {
+    width: 85%;
+    float: left;
+    padding: 5px;
+    background-color: #e6e6e6;
+}
+
+.clipboard-icon {
+    margin-left: 85%;
+    text-align: center;
+    height: 45px;
+    position: relative;
+}
+
+.clipboard-icon .clipboard-tooltip {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    position: absolute;
+    z-index : 1;
+    bottom: 125%;
+    margin-left: -70px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.clipboard-icon .clipboard-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.clipboard-icon:hover .clipboard-tooltip {
+    visibility: visible;
+    opacity: 1;
 }
