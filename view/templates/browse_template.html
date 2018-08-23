@@ -23,3 +23,15 @@
         </div>
     </div>
 {% endblock %}
+{% block bottom_script %}
+<script>
+    $('body').on('click', '.clipboard-icon', function() {
+        copyToClipboard($(this), $('.permalink'));
+    });
+    var copyToClipboard = function(clicked, target) {
+        $(target).focus().select();
+        document.execCommand('copy');
+        $(clicked).children('.clipboard-tooltip').text('Copied!');
+    };
+</script>
+{% endblock %}
