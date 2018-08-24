@@ -1,0 +1,80 @@
+{% extends 'browse.html' %}
+{% block left_column %}
+<table class="table">
+    <col width="150">
+    <tbody>
+        <tr>
+            <th>Type:</th>
+            <td>Permission</td>
+        </tr>
+        <tr>
+            <th>Assignors:</th>
+            <td></td>
+        </tr>
+        <tr>
+            <th>Assignees:</th>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
+{% block right_column %}
+<img src="/style/logo.gif" alt="Licence Logo">
+{% endblock %}
+{% block bottom %}
+<h2>Actions</h2>
+<div class="card">
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#action-1">
+        <h5 class="mb-0">Action #1</h5>
+    </div>
+    <div id="action-1" class="collapse">
+        <div class="card-body text-center">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Definition</th>
+                        <td class="text-left"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <a href="#!" type="button" class="btn btn-primary">See Action</a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#action-2">
+        <h5 class="mb-0">Action #2</h5>
+    </div>
+    <div id="action-2" class="collapse">
+        <div class="card-body text-center">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Definition</th>
+                        <td class="text-left"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <a href="#!" type="button" class="btn btn-primary">See Action</a>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#action-3">
+        <h5 class="mb-0">Action #3</h5>
+    </div>
+    <div id="action-3" class="collapse">
+        <div class="card-body text-center">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Definition</th>
+                        <td class="text-left"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <a href="#!" type="button" class="btn btn-primary">See Action</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
