@@ -57,6 +57,7 @@ def rebuild():
         CREATE TABLE IF NOT EXISTS RULE (
             URI     TEXT    NOT NULL    PRIMARY KEY,
             TYPE    TEXT    NOT NULL,
+            LABEL   TEXT    NOT NULL,
             FOREIGN KEY (TYPE) REFERENCES RULE_TYPE(TYPE)
         );
     ''')

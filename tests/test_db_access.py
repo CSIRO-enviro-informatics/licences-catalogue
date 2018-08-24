@@ -67,7 +67,8 @@ def test_get_policy():
     db_access.create_policy(policy_uri)
     rule_uri = 'http://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
     db_access.add_action_to_rule(action_uri, rule_uri)
@@ -84,6 +85,7 @@ def test_get_policy():
     # Should get all of the rules
     assert policy['RULES'][0]['URI'] == rule_uri
     assert policy['RULES'][0]['TYPE'] == rule_type
+    assert policy['RULES'][0]['LABEL'] == rule_label
 
     # Should get actions associated with the rule
     expected_action_attributes = ['LABEL', 'URI', 'DEFINITION']
@@ -110,12 +112,13 @@ def test_policy_has_rule():
     # Should return false if the policy does not have the rule
     policy_uri = 'https://example.com#policy'
     rule_uri = 'http://example.com#rule'
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     assert not db_access.policy_has_rule(policy_uri, rule_uri)
 
     # Should return true if the policy has the rule
     db_access.create_policy(policy_uri)
-    db_access.create_rule(rule_uri, rule_type)
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     assert db_access.policy_has_rule(policy_uri, rule_uri)
 
@@ -175,18 +178,23 @@ def test_get_all_assets():
 
 def test_create_rule():
     # Should raise an exception when the rule type is not valid
+    rule_label = 'Rule'
     with pytest.raises(ValueError):
-        db_access.create_rule('rule', 'invalid_type')
+        db_access.create_rule('rule', 'invalid_type', rule_label)
 
-    # Should add a rule
+    # Should raise an exception when no label is provided
     rule_uri = 'http://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    with pytest.raises(ValueError):
+        db_access.create_rule(rule_uri, rule_type, None)
+
+    # Should add a rule
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assert db_access.rule_exists(rule_uri)
 
     # Should raise an exception when that rule already exists
     with pytest.raises(ValueError):
-        db_access.create_rule(rule_uri, rule_type)
+        db_access.create_rule(rule_uri, rule_type, rule_label)
 
 
 def test_delete_rule():
@@ -195,7 +203,8 @@ def test_delete_rule():
     db_access.create_policy(policy_uri)
     rule_uri = 'http://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assignor_uri = 'http://example.com#assignor'
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     assignee_uri = 'http://example.com#assignee'
@@ -235,7 +244,8 @@ def test_add_rule_to_policy():
     # Should raise an exception if the policy does not exist
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.delete_policy(policy_uri)
     with pytest.raises(ValueError):
         db_access.add_rule_to_policy(rule_uri, policy_uri)
@@ -259,7 +269,8 @@ def test_remove_rule_from_policy():
     db_access.create_policy(policy_uri)
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     db_access.remove_rule_from_policy(rule_uri, policy_uri)
     query_str = 'SELECT COUNT(1) FROM POLICY_HAS_RULE WHERE RULE_URI = "{rule_uri}" AND POLICY_URI = "{policy_uri}"'
@@ -272,8 +283,9 @@ def test_get_all_rules():
     rule1 = 'https://example.com#rule1'
     rule2 = 'https://example.com#rule2'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule1, rule_type)
-    db_access.create_rule(rule2, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule1, rule_type, rule_label)
+    db_access.create_rule(rule2, rule_type, rule_label)
     rules = db_access.get_all_rules()
     assert rules == [rule1, rule2]
 
@@ -285,7 +297,8 @@ def test_rule_exists():
 
     # Should return true if the party exists
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assert db_access.rule_exists(rule_uri)
 
 
@@ -301,7 +314,8 @@ def test_get_permitted_rule_types():
 def test_get_policies_for_rule():
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     policy1 = 'https://example.com#policy1'
     db_access.create_policy(policy1)
     db_access.add_rule_to_policy(rule_uri, policy1)
@@ -338,7 +352,8 @@ def test_add_action_to_rule():
 
     # Should raise an exception if the action doesn't exist
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     action_uri = 'nonexistent'
     with pytest.raises(ValueError):
         db_access.add_action_to_rule(action_uri, rule_uri)
@@ -360,7 +375,8 @@ def test_remove_action_from_rule():
     # Should remove an action from a rule
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
     db_access.add_action_to_rule(action_uri, rule_uri)
     db_access.remove_action_from_rule(action_uri, rule_uri)
@@ -373,7 +389,8 @@ def test_remove_action_from_rule():
 def test_get_actions_for_rule():
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     action1 = 'http://www.w3.org/ns/odrl/2/acceptTracking'
     action2 = 'http://www.w3.org/ns/odrl/2/aggregate'
     db_access.add_action_to_rule(action1, rule_uri)
@@ -386,7 +403,8 @@ def test_rule_has_action():
     # Should return false if the rule does not have the action
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
     assert not db_access.rule_has_action(rule_uri, rule_type)
 
@@ -404,7 +422,8 @@ def test_add_assignor_to_rule():
 
     # Should add an assignor to a rule
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     assert db_access.rule_has_assignor(rule_uri, assignor_uri)
 
@@ -418,7 +437,8 @@ def test_remove_assignor_from_rule():
     assignor_uri = 'http://example.com#assignor'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     db_access.remove_assignor_from_rule(assignor_uri, rule_uri)
     assert not db_access.rule_has_assignor(rule_uri, assignor_uri)
@@ -429,7 +449,8 @@ def test_rule_has_assignor():
     assignor_uri = 'http://example.com#assignor'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assert not db_access.rule_has_assignor(rule_uri, assignor_uri)
 
     # Should return true if the rule does have that assignor
@@ -440,7 +461,8 @@ def test_rule_has_assignor():
 def test_get_assignors_for_rule():
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assignor1 = 'https://example.com#assignor1'
     assignor2 = 'https://example.com#assignor2'
     db_access.add_assignor_to_rule(assignor1, rule_uri)
@@ -458,7 +480,8 @@ def test_add_assignee_to_rule():
 
     # Should add an assignee to a rule
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     assert db_access.rule_has_assignee(rule_uri, assignee_uri)
 
@@ -472,7 +495,8 @@ def test_remove_assignee_from_rule():
     assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     db_access.remove_assignee_from_rule(assignee_uri, rule_uri)
     assert not db_access.rule_has_assignee(rule_uri, assignee_uri)
@@ -483,7 +507,8 @@ def test_rule_has_assignee():
     assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assert not db_access.rule_has_assignee(rule_uri, assignee_uri)
 
     # Should return true if the rule does have that assignee
@@ -494,7 +519,8 @@ def test_rule_has_assignee():
 def test_get_assignees_for_rule():
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    db_access.create_rule(rule_uri, rule_type)
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assignee1 = 'https://example.com#assignee1'
     assignee2 = 'https://example.com#assignee2'
     db_access.add_assignee_to_rule(assignee1, rule_uri)

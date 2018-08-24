@@ -88,6 +88,7 @@ def get_policy(policy_uri):
                     Each Rule is a Dictionary containing the following elements:
                         URI - string
                         TYPE - string
+                        LABEL - string
                         ASSIGNORS - List of strings
                         ASSIGNEES - List of strings
                         ACTIONS - List of Actions
@@ -169,7 +170,7 @@ def get_all_assets():
     return assets
 
 
-def create_rule(rule_uri, rule_type):
+def create_rule(rule_uri, rule_type, rule_label):
     """
     Creates a new Rule with the given URI and rule type.
 
@@ -177,13 +178,16 @@ def create_rule(rule_uri, rule_type):
     :param rule_type: Permitted rule types: http://www.w3.org/ns/odrl/2/permission
                                             http://www.w3.org/ns/odrl/2/prohibition
                                             http://www.w3.org/ns/odrl/2/duty
+    :param rule_label:
     """
     if rule_exists(rule_uri):
         raise ValueError('A Rule with that URI already exists.')
     if rule_type not in get_permitted_rule_types():
         raise ValueError('Rule type ' + rule_type + ' is not permitted.')
-    query_str = 'INSERT INTO RULE (URI, TYPE) VALUES ("{uri}", "{rule_type}")'
-    cursor.execute(query_str.format(uri=rule_uri, rule_type=rule_type))
+    if not rule_label:
+        raise ValueError('Rule must have a label.')
+    query_str = 'INSERT INTO RULE (URI, TYPE, LABEL) VALUES ("{uri}", "{rule_type}", "{label}")'
+    cursor.execute(query_str.format(uri=rule_uri, rule_type=rule_type, label=rule_label))
     conn.commit()
 
 
@@ -230,6 +234,7 @@ def get_rules_for_policy(policy_uri):
                 Each Rule is a Dictionary containing the following elements:
                     URI - string
                     TYPE - string
+                    LABEL - string
                     ASSIGNORS - List of strings
                     ASSIGNEES - List of strings
                     ACTIONS - List of Actions
@@ -239,7 +244,7 @@ def get_rules_for_policy(policy_uri):
                         DEFINITION - string
     """
     query_str = '''
-        SELECT R.URI, R.TYPE FROM RULE R, POLICY_HAS_RULE P_R, POLICY P
+        SELECT R.URI, R.TYPE, R.LABEL FROM RULE R, POLICY_HAS_RULE P_R, POLICY P
         WHERE R.URI = P_R.RULE_URI AND P_R.POLICY_URI = P.URI AND P.URI = "{policy_uri}"
     '''
     cursor.execute(query_str.format(policy_uri=policy_uri))
