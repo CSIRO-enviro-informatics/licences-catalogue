@@ -68,15 +68,26 @@ def view_licence():
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
+    logo = '/style/logo.gif'
     return render_template('view_licence.html', title=title, permalink=permalink, rdf_link=rdf_link,
-                           json_link=json_link)
+                           json_link=json_link, logo=logo)
 
 
-@routes.route('/licence/example_rule', methods=['GET'])
+@routes.route('/rule/example_rule', methods=['GET'])
 def view_rule():
     title = 'Example Rule'
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
     return render_template('view_rule.html', title=title, permalink=permalink, rdf_link=rdf_link,
+                           json_link=json_link)
+
+
+@routes.route('/action/example_action', methods=['GET'])
+def view_action():
+    title = 'Example Action'
+    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('view_action.html', title=title, permalink=permalink, rdf_link=rdf_link,
                            json_link=json_link)

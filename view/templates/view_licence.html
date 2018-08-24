@@ -9,36 +9,49 @@
         </tr>
         <tr>
             <th>Comment:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Status:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Version:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Created:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Jurisdiction:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Legal Code:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Language:</th>
+            <td></td>
         </tr>
         <tr>
             <th>Same As:</th>
+            <td></td>
         </tr>
         <tr>
             <th>See Also:</th>
+            <td></td>
+        </tr>
+        <tr>
+            <th>URL:</th>
+            <td></td>
         </tr>
     </tbody>
 </table>
 {% endblock %}
 {% block right_column %}
-<img src="/style/logo.gif" alt="Licence Logo">
+{% if logo is defined %}<img src="{{ logo }}" alt="Licence Logo">{% endif %}
 {% endblock %}
 {% block bottom %}
 <h2>Rules</h2>
