@@ -1,4 +1,8 @@
 {% extends 'browse.html' %}
+{% block title %}
+<h1>Viewing Licence:</h1>
+<h2>{% if title is defined %}{{ title }}{% endif %}</h2>
+{% endblock %}
 {% block left_column %}
 <table class="table">
     <col width="150">

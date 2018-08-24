@@ -2,7 +2,9 @@
 {% block content %}
     <div class="row">
         <div class="col-md-8">
-            <h1>{% if title is defined %}{{ title }}{% else %}Register{% endif %}</h1>
+            {% block title %}
+            <h1>{% if title is defined %}{{ title }}{% endif %}</h1>
+            {% endblock %}
             {% block left_column %}{% endblock %}
         </div>
         <div class="col-md-4">

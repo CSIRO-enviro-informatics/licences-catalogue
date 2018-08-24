@@ -1,4 +1,8 @@
 {% extends 'browse.html' %}
+{% block title %}
+<h1>Viewing Rule:</h1>
+<h2>{% if title is defined %}{{ title }}{% endif %}</h2>
+{% endblock %}
 {% block left_column %}
 <table class="table">
     <col width="150">
@@ -6,6 +10,16 @@
         <tr>
             <th>Type:</th>
             <td>Permission</td>
+        </tr>
+        <tr>
+            <th>Actions:</th>
+            <td>
+                <ul>
+                    <li><a href="{{ url_for('controller.view_action') }}">Action #1</a></li>
+                    <li><a href="{{ url_for('controller.view_action') }}">Action #2</a></li>
+                    <li><a href="{{ url_for('controller.view_action') }}">Action #3</a></li>
+                </ul>
+            </td>
         </tr>
         <tr>
             <th>Assignors:</th>
@@ -23,59 +37,10 @@
 </table>
 {% endblock %}
 {% block bottom %}
-<h2>Actions</h2>
-<div class="card">
-    <div class="card-header mouseover" data-toggle="collapse" data-target="#action-1">
-        <h5 class="mb-0">Action #1</h5>
-    </div>
-    <div id="action-1" class="collapse">
-        <div class="card-body text-center">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Definition</th>
-                        <td class="text-left"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <a href="{{ url_for('controller.view_action') }}" type="button" class="btn btn-primary">See Action</a>
-        </div>
-    </div>
-</div>
-<div class="card">
-    <div class="card-header mouseover" data-toggle="collapse" data-target="#action-2">
-        <h5 class="mb-0">Action #2</h5>
-    </div>
-    <div id="action-2" class="collapse">
-        <div class="card-body text-center">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Definition</th>
-                        <td class="text-left"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <a href="{{ url_for('controller.view_action') }}" type="button" class="btn btn-primary">See Action</a>
-        </div>
-    </div>
-</div>
-<div class="card">
-    <div class="card-header mouseover" data-toggle="collapse" data-target="#action-3">
-        <h5 class="mb-0">Action #3</h5>
-    </div>
-    <div id="action-3" class="collapse">
-        <div class="card-body text-center">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Definition</th>
-                        <td class="text-left"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <a href="{{ url_for('controller.view_action') }}" type="button" class="btn btn-primary">See Action</a>
-        </div>
-    </div>
-</div>
+<h2>Licenses that implement this rule:</h2>
+<ul>
+    <li><a href="{{ url_for('controller.view_licence') }}">Licence #1</a></li>
+    <li><a href="{{ url_for('controller.view_licence') }}">Licence #2</a></li>
+    <li><a href="{{ url_for('controller.view_licence') }}">Licence #3</a></li>
+</ul>
 {% endblock %}

@@ -1,4 +1,8 @@
 {% extends 'browse.html' %}
+{% block title %}
+<h1>Viewing Action:</h1>
+<h2>{% if title is defined %}{{ title }}{% endif %}</h2>
+{% endblock %}
 {% block left_column %}
 <table class="table">
     <col width="150">
@@ -13,4 +17,12 @@
         </tr>
     </tbody>
 </table>
+{% endblock %}
+{% block bottom %}
+<h2>Rules that implement this action:</h2>
+<ul>
+    <li><a href="{{ url_for('controller.view_rule') }}">Rule #1</a></li>
+    <li><a href="{{ url_for('controller.view_rule') }}">Rule #2</a></li>
+    <li><a href="{{ url_for('controller.view_rule') }}">Rule #3</a></li>
+</ul>
 {% endblock %}
