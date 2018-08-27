@@ -118,6 +118,5 @@ catalog-*
 licenses.ttl
 
 # local config inc pwds
-_conf/
-
+_conf/__init__.py
 
