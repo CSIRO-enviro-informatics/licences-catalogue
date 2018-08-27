@@ -120,3 +120,6 @@ licenses.ttl
 # local config inc pwds
 _conf/__init__.py
 
+
+# SQLite DB files
+*.db
