@@ -18,14 +18,29 @@ def get_db():
     return db
 
 
-def query(query_str, args=(), one=False):
+def update_db(query_str, args=()):
+    """
+    Submits a query to update or insert something in the database.
+
+    :param query_str: The query as a string. Use args for adding variables to prevent SQL Injection
+    :param args:
+    :return: The most recent rowid
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(query_str, args)
+    conn.commit()
+    return cursor.lastrowid
+
+
+def query_db(query_str, args=(), one=False):
     """
     Queries the database
 
     :param query_str: The query as a string. Use args for adding variables to prevent SQL Injection
     :param args:
     :param one:
-    :return:
+    :return: The results of the query
     """
     conn = get_db()
     cursor = conn.cursor()
@@ -45,14 +60,14 @@ def create_policy(policy_uri):
     """
     if policy_exists(policy_uri):
         raise ValueError('A Policy with that URI already exists.')
-    query('INSERT INTO POLICY (URI, CREATED) VALUES (?, CURRENT_TIMESTAMP)', (policy_uri, ))
+    query_db('INSERT INTO POLICY (URI, CREATED) VALUES (?, CURRENT_TIMESTAMP)', (policy_uri,))
 
 
 def delete_policy(policy_uri):
     """
     Deletes the Policy with the given URI
     """
-    query('DELETE FROM POLICY WHERE URI = ?', (policy_uri,))
+    query_db('DELETE FROM POLICY WHERE URI = ?', (policy_uri,))
 
 
 def policy_exists(policy_uri):
@@ -62,7 +77,7 @@ def policy_exists(policy_uri):
     :return:    True if the policy exists
                 False if the policy does not exist
     """
-    return query('SELECT COUNT(1) FROM POLICY WHERE URI = ?', (policy_uri, ), one=True)[0]
+    return query_db('SELECT COUNT(1) FROM POLICY WHERE URI = ?', (policy_uri,), one=True)[0]
 
 
 def set_policy_attribute(policy_uri, attr, value):
@@ -82,7 +97,7 @@ def set_policy_attribute(policy_uri, attr, value):
     if not policy_exists(policy_uri):
         raise ValueError('Policy with URI ' + policy_uri + ' does not exist.')
     query_str = 'UPDATE POLICY SET {attr} = ? WHERE URI = ?'.format(attr=attr)
-    query(query_str, (value, policy_uri))
+    query_db(query_str, (value, policy_uri))
 
 
 def get_policy(policy_uri):
@@ -117,7 +132,7 @@ def get_policy(policy_uri):
                             LABEL - string
                             DEFINITION - string
     """
-    policy_result = query('SELECT * FROM POLICY WHERE URI = ?', (policy_uri,), one=True)
+    policy_result = query_db('SELECT * FROM POLICY WHERE URI = ?', (policy_uri,), one=True)
     if policy_result is None:
         raise ValueError('Policy with URI ' + policy_uri + ' does not exist.')
     policy = dict(policy_result)
@@ -130,7 +145,7 @@ def get_all_policies():
     Returns a lists of all Policy URIs
     """
     policies = list()
-    for result in query('SELECT URI FROM POLICY'):
+    for result in query_db('SELECT URI FROM POLICY'):
         policies.append(result['URI'])
     return policies
 
@@ -140,7 +155,7 @@ def policy_has_rule(policy_uri, rule_uri):
     Checks if the given Policy includes the given Rule
     """
     query_str = 'SELECT COUNT(1) FROM POLICY_HAS_RULE WHERE POLICY_URI = ? AND RULE_URI = ?'
-    return query(query_str, (policy_uri, rule_uri), one=True)[0]
+    return query_db(query_str, (policy_uri, rule_uri), one=True)[0]
 
 
 def add_asset(asset_uri, policy_uri):
@@ -151,14 +166,14 @@ def add_asset(asset_uri, policy_uri):
         raise ValueError('Policy with URI ' + asset_uri + ' does not exist.')
     if asset_exists(asset_uri):
         raise ValueError('An Asset with that URI already exists.')
-    query('INSERT INTO ASSET (URI, POLICY_URI) VALUES (?, ?)', (asset_uri, policy_uri))
+    query_db('INSERT INTO ASSET (URI, POLICY_URI) VALUES (?, ?)', (asset_uri, policy_uri))
 
 
 def remove_asset(asset_uri):
     """
     Removes an Asset from its Policy
     """
-    query('DELETE FROM ASSET WHERE URI = ?', (asset_uri,))
+    query_db('DELETE FROM ASSET WHERE URI = ?', (asset_uri,))
 
 
 def asset_exists(uri):
@@ -168,7 +183,7 @@ def asset_exists(uri):
     :return:    True if the asset exists
                 False if the asset does not exist
     """
-    return query('SELECT COUNT(1) FROM ASSET WHERE URI = ?', (uri,), one=True)[0]
+    return query_db('SELECT COUNT(1) FROM ASSET WHERE URI = ?', (uri,), one=True)[0]
 
 
 def get_all_assets():
@@ -176,7 +191,7 @@ def get_all_assets():
     Returns a list of all Asset URIs
     """
     assets = list()
-    for asset in query('SELECT URI FROM ASSET'):
+    for asset in query_db('SELECT URI FROM ASSET'):
         assets.append(asset['URI'])
     return assets
 
@@ -190,6 +205,7 @@ def create_rule(rule_uri, rule_type, rule_label):
                                             http://www.w3.org/ns/odrl/2/prohibition
                                             http://www.w3.org/ns/odrl/2/duty
     :param rule_label:
+    :return: rowid of the rule
     """
     if rule_exists(rule_uri):
         raise ValueError('A Rule with that URI already exists.')
@@ -197,7 +213,8 @@ def create_rule(rule_uri, rule_type, rule_label):
         raise ValueError('Rule type ' + rule_type + ' is not permitted.')
     if not rule_label:
         raise ValueError('Rule must have a label.')
-    query('INSERT INTO RULE (URI, TYPE, LABEL) VALUES (?, ?, ?)', (rule_uri, rule_type, rule_label))
+    rule_id = update_db('INSERT INTO RULE (URI, TYPE, LABEL) VALUES (?, ?, ?)', (rule_uri, rule_type, rule_label))
+    return rule_id
 
 
 def delete_rule(rule_uri):
@@ -206,7 +223,34 @@ def delete_rule(rule_uri):
     """
     if len(get_policies_for_rule(rule_uri)) > 0:
         raise ValueError('Cannot delete a Rule while it is assigned to a Policy.')
-    query('DELETE FROM RULE WHERE URI = ?', (rule_uri,))
+    query_db('DELETE FROM RULE WHERE URI = ?', (rule_uri,))
+
+
+def get_rule(rule_uri):
+    """
+    Retrieve all the relevant information about a Rule, including its Actions, Assignors and Assignees.
+
+    :return: A Dictionary containing the following elements:
+                URI - string
+                TYPE_URI - string
+                TYPE - string
+                LABEL - string
+                ASSIGNORS - List of strings
+                ASSIGNEES - List of strings
+                ACTIONS - List of Actions
+                    Each Action is a Dictionary containing the following elements:
+                    URI - string
+                    LABEL - string
+                    DEFINITION - string
+                    rowid - int
+    """
+    if not rule_exists(rule_uri):
+        raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
+    rule = dict(query_db('SELECT URI, TYPE, LABEL FROM RULE WHERE URI = ?', (rule_uri,), one=True))
+    rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
+    rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
+    rule['ASSIGNEES'] = get_assignees_for_rule(rule['URI'])
+    return rule
 
 
 def add_rule_to_policy(rule_uri, policy_uri):
@@ -219,7 +263,7 @@ def add_rule_to_policy(rule_uri, policy_uri):
         raise ValueError('Policy with URI ' + policy_uri + ' does not exist.')
     if policy_has_rule(policy_uri, rule_uri):
         raise ValueError('Rule ' + rule_uri + ' is already included in Policy ' + policy_uri + '.')
-    query('INSERT INTO POLICY_HAS_RULE (POLICY_URI, RULE_URI) VALUES (?, ?)', (policy_uri, rule_uri))
+    query_db('INSERT INTO POLICY_HAS_RULE (POLICY_URI, RULE_URI) VALUES (?, ?)', (policy_uri, rule_uri))
 
 
 def remove_rule_from_policy(rule_uri, policy_uri):
@@ -227,7 +271,7 @@ def remove_rule_from_policy(rule_uri, policy_uri):
     Removes a Rule from a Policy. The Rule will still exist unless deleted, but is not assigned to that Policy anymore.
     """
     query_str = 'DELETE FROM POLICY_HAS_RULE WHERE RULE_URI=? AND POLICY_URI IN (SELECT URI FROM POLICY WHERE URI=?)'
-    query(query_str, (rule_uri, policy_uri))
+    query_db(query_str, (rule_uri, policy_uri))
 
 
 def get_rules_for_policy(policy_uri):
@@ -252,7 +296,7 @@ def get_rules_for_policy(policy_uri):
         WHERE R.URI = P_R.RULE_URI AND P_R.POLICY_URI = P.URI AND P.URI = ?
     '''
     rules = list()
-    for rule_result in query(query_str, (policy_uri,)):
+    for rule_result in query_db(query_str, (policy_uri,)):
         rule = dict(rule_result)
         rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
         rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
@@ -266,7 +310,7 @@ def get_all_rules():
     Returns a list with all Rule URIs
     """
     rules = list()
-    for asset in query('SELECT URI FROM RULE'):
+    for asset in query_db('SELECT URI FROM RULE'):
         rules.append(asset['URI'])
     return rules
 
@@ -278,7 +322,7 @@ def rule_exists(rule_uri):
     :return:    True if the Rule exists
                 False if the Rule does not exist
     """
-    return query('SELECT COUNT(1) FROM RULE WHERE URI = ?', (rule_uri,), one=True)[0]
+    return query_db('SELECT COUNT(1) FROM RULE WHERE URI = ?', (rule_uri,), one=True)[0]
 
 
 def get_permitted_rule_types():
@@ -291,7 +335,7 @@ def get_permitted_rule_types():
     However, they can be add/removed from the database at will so using this method to check is advised
     """
     permitted_rule_types = list()
-    for rule_type in query('SELECT TYPE FROM RULE_TYPE'):
+    for rule_type in query_db('SELECT TYPE FROM RULE_TYPE'):
         permitted_rule_types.append(rule_type['TYPE'])
     return permitted_rule_types
 
@@ -301,7 +345,7 @@ def get_policies_for_rule(rule_uri):
     Returns a list of all the Policies which use the Rule given
     """
     policies = list()
-    for result in query('SELECT POLICY_URI FROM POLICY_HAS_RULE WHERE RULE_URI = ?', (rule_uri,)):
+    for result in query_db('SELECT POLICY_URI FROM POLICY_HAS_RULE WHERE RULE_URI = ?', (rule_uri,)):
         policies.append(result['POLICY_URI'])
     return policies
 
@@ -313,7 +357,7 @@ def action_exists(action_uri):
     :return:    True if the Action exists
                 False if the Action does not exist
     """
-    return query('SELECT COUNT(1) FROM ACTION WHERE URI = ?', (action_uri,), one=True)[0]
+    return query_db('SELECT COUNT(1) FROM ACTION WHERE URI = ?', (action_uri,), one=True)[0]
 
 
 def add_action_to_rule(action_uri, rule_uri):
@@ -327,14 +371,14 @@ def add_action_to_rule(action_uri, rule_uri):
         raise ValueError('Action with URI ' + action_uri + ' is not permitted.')
     if rule_has_action(rule_uri, action_uri):
         raise ValueError('Rule ' + rule_uri + ' already includes Action ' + action_uri + '.')
-    query('INSERT INTO RULE_HAS_ACTION (RULE_URI, ACTION_URI) VALUES (?, ?)', (rule_uri, action_uri))
+    query_db('INSERT INTO RULE_HAS_ACTION (RULE_URI, ACTION_URI) VALUES (?, ?)', (rule_uri, action_uri))
 
 
 def remove_action_from_rule(action_uri, rule_uri):
     """
     Removes an Action from a Rule.
     """
-    query('DELETE FROM RULE_HAS_ACTION WHERE RULE_URI = ? AND ACTION_URI = ?', (rule_uri, action_uri))
+    query_db('DELETE FROM RULE_HAS_ACTION WHERE RULE_URI = ? AND ACTION_URI = ?', (rule_uri, action_uri))
 
 
 def get_actions_for_rule(rule_uri):
@@ -342,12 +386,12 @@ def get_actions_for_rule(rule_uri):
     Returns a list of all the Actions which are assigned to a given Rule
     """
     query_str = '''
-        SELECT A.URI, A.LABEL, A.DEFINITION FROM ACTION A, RULE_HAS_ACTION R_A 
+        SELECT A.URI, A.LABEL, A.DEFINITION, A.rowid FROM ACTION A, RULE_HAS_ACTION R_A 
         WHERE R_A.RULE_URI = ?
         AND R_A.ACTION_URI = A.URI
     '''
     actions = list()
-    for result in query(query_str, (rule_uri,)):
+    for result in query_db(query_str, (rule_uri,)):
         actions.append(dict(result))
     return actions
 
@@ -361,7 +405,7 @@ def get_rules_using_action(action_id):
         SELECT R.URI, R.TYPE, R.LABEL, R.rowid
         FROM RULE R, RULE_HAS_ACTION R_A, ACTION A
         WHERE R.URI = R_A.RULE_URI AND R_A.ACTION_URI = A.URI AND A.rowid = ?'''
-    for result in query(query_str, (action_id,)):
+    for result in query_db(query_str, (action_id,)):
         rules.append(dict(result))
     return rules
 
@@ -371,14 +415,14 @@ def rule_has_action(rule_uri, action_uri):
     Checks if a Rule has an Action
     """
     query_str = 'SELECT COUNT(1) FROM RULE_HAS_ACTION WHERE RULE_URI = ? AND ACTION_URI = ?'
-    return query(query_str, (rule_uri, action_uri), one=True)[0]
+    return query_db(query_str, (rule_uri, action_uri), one=True)[0]
 
 
 def get_action(action_id):
     """
     Returns the URI, Label and Definition of an Action given by ID
     """
-    result = query('SELECT URI, LABEL, DEFINITION FROM ACTION WHERE rowid = ?', (action_id,), one=True)
+    result = query_db('SELECT URI, LABEL, DEFINITION FROM ACTION WHERE rowid = ?', (action_id,), one=True)
     if result is None:
         raise ValueError('Action with ID ' + str(action_id) + ' not found.')
     return result
@@ -389,11 +433,11 @@ def get_all_actions():
     Returns a list of all the Actions which are permitted along with their label and definition
 
     :return A list of Actions
-                Each Action is a dictionary with elements: URI, LABEL, DEFINITION
+                Each Action is a dictionary with elements: URI, LABEL, DEFINITION, rowid
     """
     actions = list()
-    for result in query('SELECT URI, LABEL, DEFINITION FROM ACTION'):
-        actions.append({'URI': result['URI'], 'LABEL': result['LABEL'], 'DEFINITION': result['DEFINITION']})
+    for result in query_db('SELECT URI, LABEL, DEFINITION, rowid FROM ACTION'):
+        actions.append(dict(result))
     return actions
 
 
@@ -405,14 +449,14 @@ def add_assignor_to_rule(assignor_uri, rule_uri):
         raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
     if rule_has_assignor(rule_uri, assignor_uri):
         raise ValueError('Rule ' + rule_uri + ' already has an Assignor with URI ' + assignor_uri + '.')
-    query('INSERT INTO ASSIGNOR (ASSIGNOR_URI, RULE_URI) VALUES (?, ?)', (assignor_uri, rule_uri))
+    query_db('INSERT INTO ASSIGNOR (ASSIGNOR_URI, RULE_URI) VALUES (?, ?)', (assignor_uri, rule_uri))
 
 
 def remove_assignor_from_rule(assignor_uri, rule_uri):
     """
     Remove an Assignor from a Rule
     """
-    query('DELETE FROM ASSIGNOR WHERE RULE_URI = ? AND ASSIGNOR_URI = ?', (rule_uri, assignor_uri))
+    query_db('DELETE FROM ASSIGNOR WHERE RULE_URI = ? AND ASSIGNOR_URI = ?', (rule_uri, assignor_uri))
 
 
 def rule_has_assignor(rule_uri, assignor_uri):
@@ -423,7 +467,7 @@ def rule_has_assignor(rule_uri, assignor_uri):
                 False if the Rule does not have the Assignor
     """
     query_str = 'SELECT COUNT(1) FROM ASSIGNOR WHERE RULE_URI = ? AND ASSIGNOR_URI = ?'
-    return query(query_str, (rule_uri, assignor_uri), one=True)[0]
+    return query_db(query_str, (rule_uri, assignor_uri), one=True)[0]
 
 
 def get_assignors_for_rule(rule_uri):
@@ -431,7 +475,7 @@ def get_assignors_for_rule(rule_uri):
     Returns a list of URIs for all Assignors associated with a given Rule
     """
     assignors = list()
-    for result in query('SELECT ASSIGNOR_URI FROM ASSIGNOR WHERE RULE_URI = ?', (rule_uri,)):
+    for result in query_db('SELECT ASSIGNOR_URI FROM ASSIGNOR WHERE RULE_URI = ?', (rule_uri,)):
         assignors.append(result['ASSIGNOR_URI'])
     return assignors
 
@@ -444,14 +488,14 @@ def add_assignee_to_rule(assignee_uri, rule_uri):
         raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
     if rule_has_assignee(rule_uri, assignee_uri):
         raise ValueError('Rule ' + rule_uri + ' already has an Assignee with URI ' + assignee_uri + '.')
-    query('INSERT INTO ASSIGNEE (ASSIGNEE_URI, RULE_URI) VALUES (?, ?)', (assignee_uri, rule_uri))
+    query_db('INSERT INTO ASSIGNEE (ASSIGNEE_URI, RULE_URI) VALUES (?, ?)', (assignee_uri, rule_uri))
 
 
 def remove_assignee_from_rule(assignee_uri, rule_uri):
     """
     Remove an Assignee from a Rule
     """
-    query('DELETE FROM ASSIGNEE WHERE RULE_URI = ? AND ASSIGNEE_URI = ?', (rule_uri, assignee_uri))
+    query_db('DELETE FROM ASSIGNEE WHERE RULE_URI = ? AND ASSIGNEE_URI = ?', (rule_uri, assignee_uri))
 
 
 def rule_has_assignee(rule_uri, assignee_uri):
@@ -462,7 +506,7 @@ def rule_has_assignee(rule_uri, assignee_uri):
                 False if the Rule does not have the Assignee
     """
     query_str = 'SELECT COUNT(1) FROM ASSIGNEE WHERE RULE_URI = ? AND ASSIGNEE_URI = ?'
-    return query(query_str, (rule_uri, assignee_uri), one=True)[0]
+    return query_db(query_str, (rule_uri, assignee_uri), one=True)[0]
 
 
 def get_assignees_for_rule(rule_uri):
@@ -470,6 +514,6 @@ def get_assignees_for_rule(rule_uri):
     Returns a list of URIs for all Assignees associated with a given Rule
     """
     assignees = list()
-    for result in query('SELECT ASSIGNEE_URI FROM ASSIGNEE WHERE RULE_URI = ?', (rule_uri,)):
+    for result in query_db('SELECT ASSIGNEE_URI FROM ASSIGNEE WHERE RULE_URI = ?', (rule_uri,)):
         assignees.append(result['ASSIGNEE_URI'])
     return assignees

@@ -49,7 +49,7 @@ def test_set_policy_attribute(mock):
     new_policy_type = 'http://creativecommons.org/ns#License'
     db_access.create_policy(uri)
     db_access.set_policy_attribute(uri, 'TYPE', new_policy_type)
-    stored_policy_type = db_access.query('SELECT TYPE FROM POLICY WHERE URI = ?', (uri,), one=True)[0]
+    stored_policy_type = db_access.query_db('SELECT TYPE FROM POLICY WHERE URI = ?', (uri,), one=True)[0]
     assert stored_policy_type == new_policy_type
 
     # Should reject attribute change for a policy that does not exist
@@ -141,7 +141,7 @@ def test_add_asset(mock):
     # Should store a new asset entry in the database
     db_access.create_policy(policy_uri)
     db_access.add_asset(asset_uri, policy_uri)
-    asset_exists = db_access.query('SELECT COUNT(1) FROM ASSET WHERE URI = ?', (asset_uri,), one=True)[0]
+    asset_exists = db_access.query_db('SELECT COUNT(1) FROM ASSET WHERE URI = ?', (asset_uri,), one=True)[0]
     assert asset_exists
 
     # Should reject duplicate assets
@@ -200,8 +200,11 @@ def test_create_rule(mock):
         db_access.create_rule(rule_uri, rule_type, None)
 
     # Should add a rule
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    rowid = db_access.create_rule(rule_uri, rule_type, rule_label)
     assert db_access.rule_exists(rule_uri)
+
+    # Should return a rowid
+    int(rowid)
 
     # Should raise an exception when that rule already exists
     with pytest.raises(ValueError):
@@ -243,6 +246,40 @@ def test_delete_rule(mock):
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_rule(mock):
+    # Should raise an exception when the rule doesn't exist
+    rule_uri = 'http://example.com#rule'
+    with pytest.raises(ValueError):
+        db_access.get_rule(rule_uri)
+
+    # Should get uri, type and label of the rule
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
+    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
+    db_access.add_action_to_rule(action_uri, rule_uri)
+    assignor_uri = 'https://example.com#assignor'
+    assignee_uri = 'https://example.com#assignee'
+    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+    rule = db_access.get_rule(rule_uri)
+    assert rule['URI'] == rule_uri
+    assert rule['TYPE'] == rule_type
+    assert rule['LABEL'] == rule_label
+
+    # Should get actions associated with the rule
+    action = rule['ACTIONS'][0]
+    assert action['LABEL'] == 'Distribute'
+    assert action['URI'] == action_uri
+    assert action['DEFINITION'] == 'To supply the Asset to third-parties.'
+    assert 'rowid' in action
+
+    # Should get assignors and assignees associated with the rule
+    assert rule['ASSIGNORS'] == [assignor_uri]
+    assert rule['ASSIGNEES'] == [assignee_uri]
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_add_rule_to_policy(mock):
     # Should raise an exception if the rule does not exist
     rule_uri = 'https://example.com#nonexistant'
@@ -264,7 +301,7 @@ def test_add_rule_to_policy(mock):
     db_access.create_policy(policy_uri)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     query_str = 'SELECT COUNT(1) FROM POLICY_HAS_RULE WHERE RULE_URI = ? AND POLICY_URI = ?'
-    rule_assigned = db_access.query(query_str, (rule_uri, policy_uri), one=True)[0]
+    rule_assigned = db_access.query_db(query_str, (rule_uri, policy_uri), one=True)[0]
     assert rule_assigned
 
     # Should raise an exception if the rule is already included in the policy
@@ -368,7 +405,7 @@ def test_get_all_actions(mock):
     actions = db_access.get_all_actions()
     assert actions
     for action in actions:
-        assert all(x in ['URI', 'LABEL', 'DEFINITION'] for x in action)
+        assert all(x in ['URI', 'LABEL', 'DEFINITION', 'rowid'] for x in action)
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

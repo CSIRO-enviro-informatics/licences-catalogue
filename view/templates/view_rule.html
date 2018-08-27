@@ -9,29 +9,41 @@
     <tbody>
         <tr>
             <th>Type:</th>
-            <td>Permission</td>
+            <td>{{ rule['TYPE'] }}</td>
         </tr>
         <tr>
             <th>Actions:</th>
             <td>
                 <ul>
-                    <li><a href="{{ url_for('controller.view_action', action_id=1) }}">Action #1</a></li>
-                    <li><a href="{{ url_for('controller.view_action', action_id=2) }}">Action #2</a></li>
-                    <li><a href="{{ url_for('controller.view_action', action_id=3) }}">Action #3</a></li>
+                    {% for action in rule['ACTIONS'] %}
+                    <li><a href="{{ url_for('controller.view_action', action_id=action['rowid']) }}">{{ action['LABEL'] }}</a></li>
+                    {% endfor %}
                 </ul>
             </td>
         </tr>
         <tr>
             <th>Assignors:</th>
-            <td></td>
+            <td>
+                <ul>
+                    {% for assignor in rule['ASSIGNORS'] %}
+                    <li>{{ assignor }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
         </tr>
         <tr>
             <th>Assignees:</th>
-            <td></td>
+            <td>
+                <ul>
+                    {% for assignee in rule['ASSIGNEES'] %}
+                    <li>{{ assignee }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
         </tr>
         <tr>
             <th>URL:</th>
-            <td></td>
+            <td>{{ rule['URI'] }}</td>
         </tr>
     </tbody>
 </table>
@@ -39,8 +51,8 @@
 {% block bottom %}
 <h2>Licenses that implement this rule:</h2>
 <ul>
-    <li><a href="{{ url_for('controller.view_licence') }}">Licence #1</a></li>
-    <li><a href="{{ url_for('controller.view_licence') }}">Licence #2</a></li>
-    <li><a href="{{ url_for('controller.view_licence') }}">Licence #3</a></li>
+    {% for policy in policies %}
+    <li><a href="{{ url_for('controller.view_licence') }}">{{ policy['LABEL'] }}</a></li>
+    {% endfor %}
 </ul>
 {% endblock %}

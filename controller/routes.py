@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from controller import db_access
+import _conf as conf
 
 routes = Blueprint('controller', __name__)
 
@@ -50,11 +51,10 @@ def browse_rules():
 @routes.route('/action', methods=['GET'])
 def browse_actions():
     title = 'Action Register'
-    items = [
-        {'label': 'Action #1', 'link': '#!'},
-        {'label': 'Action #2', 'link': '#!'},
-        {'label': 'Action #3', 'link': '#!'}
-    ]
+    actions = db_access.get_all_actions()
+    items = list()
+    for action in actions:
+        items.append({'link': url_for('controller.view_action', action_id=action['rowid']), 'label': action['LABEL']})
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
@@ -73,14 +73,20 @@ def view_licence():
                            json_link=json_link, logo=logo)
 
 
-@routes.route('/rule/example_rule', methods=['GET'])
-def view_rule():
-    title = 'Example Rule'
+@routes.route('/rule/<rule_id>', methods=['GET'])
+def view_rule(rule_id):
+    rule_uri = conf.BASE_URI + 'rule/' + rule_id
+    try:
+        rule = db_access.get_rule(rule_uri)
+        policies = db_access.get_policies_for_rule(rule_uri)
+    except ValueError:
+        abort(404)
+        return
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
-    return render_template('view_rule.html', title=title, permalink=permalink, rdf_link=rdf_link,
-                           json_link=json_link)
+    return render_template('view_rule.html', permalink=permalink, rdf_link=rdf_link, json_link=json_link, rule=rule,
+                           policies=policies)
 
 
 @routes.route('/action/<action_id>', methods=['GET'])

@@ -22,7 +22,7 @@
 <h2>Rules that implement this action:</h2>
 <ul>
     {% for rule in rules %}
-    <li><a href="{{ url_for('controller.view_rule') }}">{{ rule['LABEL'] }}</a></li>
+    <li><a href="{{ url_for('controller.view_rule', rule_id=rule['rowid']) }}">{{ rule['LABEL'] }}</a></li>
     {% endfor %}
 </ul>
 {% endblock %}
