@@ -1,21 +1,7 @@
 import pytest
 from controller import db_access
-import sqlite3
-import _conf
 from unittest import mock
-
-db = None
-
-
-def mock_get_db():
-    global db
-    if db:
-        return db
-    else:
-        db = sqlite3.connect(_conf.DATABASE_PATH)
-        db.execute('PRAGMA foreign_keys = 1')
-        db.row_factory = sqlite3.Row
-        return db
+from seed_database import get_db as mock_get_db
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -436,6 +422,24 @@ def test_get_actions_for_rule(mock):
     db_access.add_action_to_rule(action2, rule_uri)
     actions = db_access.get_actions_for_rule(rule_uri)
     assert all(action['URI'] in [action1, action2] for action in actions)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_rules_using_action(mock):
+    action_id = 1
+    action_uri = 'http://www.w3.org/ns/odrl/2/acceptTracking'
+    rule1_uri = 'https://example.com#rule1'
+    rule1_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule1_label = 'Rule1'
+    db_access.create_rule(rule1_uri, rule1_type, rule1_label)
+    db_access.add_action_to_rule(action_uri, rule1_uri)
+    rule2_uri = 'https://example.com#rule2'
+    rule2_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule2_label = 'Rule2'
+    db_access.create_rule(rule2_uri, rule2_type, rule2_label)
+    db_access.add_action_to_rule(action_uri, rule2_uri)
+    rules = db_access.get_rules_using_action(action_id)
+    assert all(rule['URI'] in [rule1_uri, rule2_uri] for rule in rules)
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

@@ -352,6 +352,20 @@ def get_actions_for_rule(rule_uri):
     return actions
 
 
+def get_rules_using_action(action_id):
+    """
+    Returns a list of all the Rules which are currently using a given Action
+    """
+    rules = list()
+    query_str = '''
+        SELECT R.URI, R.TYPE, R.LABEL, R.rowid
+        FROM RULE R, RULE_HAS_ACTION R_A, ACTION A
+        WHERE R.URI = R_A.RULE_URI AND R_A.ACTION_URI = A.URI AND A.rowid = ?'''
+    for result in query(query_str, (action_id,)):
+        rules.append(dict(result))
+    return rules
+
+
 def rule_has_action(rule_uri, action_uri):
     """
     Checks if a Rule has an Action

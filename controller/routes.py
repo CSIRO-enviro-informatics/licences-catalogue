@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from werkzeug.routing import BaseConverter
+from flask import Blueprint, render_template, request, redirect, url_for, abort
+from controller import db_access
 
 routes = Blueprint('controller', __name__)
 
@@ -83,11 +83,15 @@ def view_rule():
                            json_link=json_link)
 
 
-@routes.route('/action/example_action', methods=['GET'])
-def view_action():
-    title = 'Example Action'
-    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+@routes.route('/action/<action_id>', methods=['GET'])
+def view_action(action_id):
+    try:
+        action = db_access.get_action(action_id)
+        rules = db_access.get_rules_using_action(action_id)
+    except ValueError:
+        abort(404)
+        return
     rdf_link = '#!'
     json_link = '#!'
-    return render_template('view_action.html', title=title, permalink=permalink, rdf_link=rdf_link,
-                           json_link=json_link)
+    return render_template('view_action.html', permalink=action['URI'], rdf_link=rdf_link, json_link=json_link,
+                           action=action, rules=rules)

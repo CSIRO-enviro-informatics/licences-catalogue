@@ -15,9 +15,9 @@
             <th>Actions:</th>
             <td>
                 <ul>
-                    <li><a href="{{ url_for('controller.view_action') }}">Action #1</a></li>
-                    <li><a href="{{ url_for('controller.view_action') }}">Action #2</a></li>
-                    <li><a href="{{ url_for('controller.view_action') }}">Action #3</a></li>
+                    <li><a href="{{ url_for('controller.view_action', action_id=1) }}">Action #1</a></li>
+                    <li><a href="{{ url_for('controller.view_action', action_id=2) }}">Action #2</a></li>
+                    <li><a href="{{ url_for('controller.view_action', action_id=3) }}">Action #3</a></li>
                 </ul>
             </td>
         </tr>
