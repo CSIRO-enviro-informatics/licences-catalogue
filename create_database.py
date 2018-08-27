@@ -73,7 +73,7 @@ def rebuild():
     conn.execute('''
         CREATE TABLE IF NOT EXISTS ACTION (
             URI         TEXT    NOT NULL    PRIMARY KEY,
-            LABEL       TEXT    NOT NULL,
+            LABEL       TEXT    NOT NULL    UNIQUE,
             DEFINITION  TEXT    NOT NULL
         );
     ''')
@@ -214,7 +214,7 @@ def rebuild():
                 ('Uninstall', 'http://www.w3.org/ns/odrl/2/uninstall', 
                     'To unload and delete the computer program Asset from a storage device and disable its readiness for 
                     operation.'),
-                ('Watermark', 'http://www.w3.org/ns/odrl/2/watermark', 'To apply a watermark to the Asset.');
+                ('Watermark', 'http://www.w3.org/ns/odrl/2/watermark', 'To apply a watermark to the Asset.')
     ''')
     conn.commit()
     conn.close()

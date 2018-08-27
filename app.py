@@ -1,10 +1,17 @@
 import logging
 import _conf as conf
-from flask import Flask
+from flask import Flask, g
 from controller import routes
 
 app = Flask(__name__, template_folder=conf.TEMPLATES_DIR, static_folder=conf.STATIC_DIR)
 app.register_blueprint(routes.routes)
+
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 
 # run the Flask app
