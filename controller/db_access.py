@@ -1,6 +1,7 @@
 import sqlite3
 import _conf as conf
 from flask import g
+import os
 
 """
 DB_ACCESS
@@ -12,6 +13,7 @@ A layer providing functions for interacting with the database.
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
+        os.makedirs(os.path.dirname(conf.DATABASE_PATH), exist_ok=True)
         db = g._database = sqlite3.connect(conf.DATABASE_PATH)
         db.execute('PRAGMA foreign_keys = 1')
         db.row_factory = sqlite3.Row  # Allows for accessing query results like a dictionary which is more readable
@@ -307,11 +309,11 @@ def get_rules_for_policy(policy_uri):
 
 def get_all_rules():
     """
-    Returns a list with all Rule URIs
+    Returns a list with all Rule labels and rowids
     """
     rules = list()
-    for asset in query_db('SELECT URI FROM RULE'):
-        rules.append(asset['URI'])
+    for rule in query_db('SELECT LABEL, rowid FROM RULE'):
+        rules.append(dict(rule))
     return rules
 
 
