@@ -328,11 +328,13 @@ def test_get_all_rules(mock):
     rule1 = 'https://example.com#rule1'
     rule2 = 'https://example.com#rule2'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule1, rule_type, rule_label)
-    db_access.create_rule(rule2, rule_type, rule_label)
+    rule1_label = 'Rule1'
+    rule2_label = 'Rule2'
+    db_access.create_rule(rule1, rule_type, rule1_label)
+    db_access.create_rule(rule2, rule_type, rule2_label)
     rules = db_access.get_all_rules()
-    assert rules == [rule1, rule2]
+    assert len(rules) == 2
+    assert rules == [{'URI': rule1, 'LABEL': rule1_label}, {'URI': rule2, 'LABEL': rule2_label}]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -377,7 +379,7 @@ def test_get_policies_for_rule(mock):
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_action_exists(mock):
     # Should return false if the action doesn't exist
-    action_uri = 'nonexistant'
+    action_uri = 'nonexistent'
     assert not db_access.action_exists(action_uri)
 
     # Should return true if the action exists
@@ -388,13 +390,13 @@ def test_action_exists(mock):
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_get_action(mock):
     # Should raise an exception if the action does not exist
-    action_id = -1
+    action_uri = 'nonexistent'
     with pytest.raises(ValueError):
-        db_access.get_action(action_id)
+        db_access.get_action(action_uri)
 
     # Should return uri, label, and definition
-    action_id = '1'
-    action = db_access.get_action(action_id)
+    action_uri = 'http://www.w3.org/ns/odrl/2/acceptTracking'
+    action = db_access.get_action(action_uri)
     assert action['LABEL'] == 'Accept Tracking'
     assert action['URI'] == 'http://www.w3.org/ns/odrl/2/acceptTracking'
     assert action['DEFINITION'] == 'To accept that the use of the Asset may be tracked.'
@@ -405,7 +407,7 @@ def test_get_all_actions(mock):
     actions = db_access.get_all_actions()
     assert actions
     for action in actions:
-        assert all(x in ['URI', 'LABEL', 'DEFINITION', 'rowid'] for x in action)
+        assert all(x in ['URI', 'LABEL', 'DEFINITION'] for x in action)
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -463,7 +465,6 @@ def test_get_actions_for_rule(mock):
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_get_rules_using_action(mock):
-    action_id = 1
     action_uri = 'http://www.w3.org/ns/odrl/2/acceptTracking'
     rule1_uri = 'https://example.com#rule1'
     rule1_type = 'http://www.w3.org/ns/odrl/2/permission'
@@ -475,7 +476,7 @@ def test_get_rules_using_action(mock):
     rule2_label = 'Rule2'
     db_access.create_rule(rule2_uri, rule2_type, rule2_label)
     db_access.add_action_to_rule(action_uri, rule2_uri)
-    rules = db_access.get_rules_using_action(action_id)
+    rules = db_access.get_rules_using_action(action_uri)
     assert all(rule['URI'] in [rule1_uri, rule2_uri] for rule in rules)
 
 

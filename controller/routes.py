@@ -49,14 +49,21 @@ def browse_licenses_json():
     return redirect('/licence/?_format=application/json')
 
 
-@routes.route('/rule', methods=['GET'])
-def browse_rules():
+@routes.route('/rule/')
+def rule_routes():
+    rule_uri = request.values.get('uri')
+    if rule_uri is None:
+        return view_rules_list()
+    else:
+        return view_rule(rule_uri)
+
+
+def view_rules_list():
     title = 'Rule Register'
-    items = [
-        {'label': 'Rule #1', 'link': '#!'},
-        {'label': 'Rule #2', 'link': '#!'},
-        {'label': 'Rule #3', 'link': '#!'}
-    ]
+    rules = db_access.get_all_rules()
+    items = list()
+    for rule in rules:
+        items.append({'uri': url_for('controller.rule_routes', uri=rule['URI']), 'label': rule['LABEL']})
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
@@ -64,18 +71,53 @@ def browse_rules():
                            json_link=json_link)
 
 
-@routes.route('/action', methods=['GET'])
-def browse_actions():
+def view_rule(rule_uri):
+    try:
+        rule = db_access.get_rule(rule_uri)
+        policies = db_access.get_policies_for_rule(rule_uri)
+    except ValueError:
+        abort(404)
+        return
+    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('view_rule.html', permalink=permalink, rdf_link=rdf_link, json_link=json_link, rule=rule,
+                           policies=policies, title=rule['LABEL'])
+
+
+@routes.route('/action/')
+def action_routes():
+    action_uri = request.values.get('uri')
+    if action_uri is None:
+        return view_actions_list()
+    else:
+        return view_action(action_uri)
+
+
+def view_actions_list():
     title = 'Action Register'
     actions = db_access.get_all_actions()
     items = list()
     for action in actions:
-        items.append({'link': url_for('controller.view_action', action_id=action['rowid']), 'label': action['LABEL']})
+        items.append({'uri': url_for('controller.action_routes', uri=action['URI']), 'label': action['LABEL']})
     permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
     rdf_link = '#!'
     json_link = '#!'
     return render_template('browse_list.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
                            json_link=json_link)
+
+
+def view_action(action_uri):
+    try:
+        action = db_access.get_action(action_uri)
+        rules = db_access.get_rules_using_action(action_uri)
+    except ValueError:
+        abort(404)
+        return
+    rdf_link = '#!'
+    json_link = '#!'
+    return render_template('view_action.html', permalink=action['URI'], rdf_link=rdf_link, json_link=json_link,
+                           action=action, rules=rules)
 
 
 @routes.route('/licence/example_licence', methods=['GET'])
@@ -87,33 +129,3 @@ def view_licence():
     logo = '/style/logo.gif'
     return render_template('view_licence.html', title=title, permalink=permalink, rdf_link=rdf_link,
                            json_link=json_link, logo=logo)
-
-
-@routes.route('/rule/<rule_id>', methods=['GET'])
-def view_rule(rule_id):
-    rule_uri = conf.BASE_URI + 'rule/' + rule_id
-    try:
-        rule = db_access.get_rule(rule_uri)
-        policies = db_access.get_policies_for_rule(rule_uri)
-    except ValueError:
-        abort(404)
-        return
-    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
-    rdf_link = '#!'
-    json_link = '#!'
-    return render_template('view_rule.html', permalink=permalink, rdf_link=rdf_link, json_link=json_link, rule=rule,
-                           policies=policies)
-
-
-@routes.route('/action/<action_id>', methods=['GET'])
-def view_action(action_id):
-    try:
-        action = db_access.get_action(action_id)
-        rules = db_access.get_rules_using_action(action_id)
-    except ValueError:
-        abort(404)
-        return
-    rdf_link = '#!'
-    json_link = '#!'
-    return render_template('view_action.html', permalink=action['URI'], rdf_link=rdf_link, json_link=json_link,
-                           action=action, rules=rules)

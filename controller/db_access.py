@@ -309,10 +309,10 @@ def get_rules_for_policy(policy_uri):
 
 def get_all_rules():
     """
-    Returns a list with all Rule labels and rowids
+    Returns a list with all Rule URIs and Labels
     """
     rules = list()
-    for rule in query_db('SELECT LABEL, rowid FROM RULE'):
+    for rule in query_db('SELECT URI, LABEL FROM RULE'):
         rules.append(dict(rule))
     return rules
 
@@ -398,16 +398,17 @@ def get_actions_for_rule(rule_uri):
     return actions
 
 
-def get_rules_using_action(action_id):
+def get_rules_using_action(action_uri):
     """
     Returns a list of all the Rules which are currently using a given Action
+    Each Rule is a Dictionary containing the following elements: URI, TYPE, LABEL
     """
     rules = list()
     query_str = '''
-        SELECT R.URI, R.TYPE, R.LABEL, R.rowid
-        FROM RULE R, RULE_HAS_ACTION R_A, ACTION A
-        WHERE R.URI = R_A.RULE_URI AND R_A.ACTION_URI = A.URI AND A.rowid = ?'''
-    for result in query_db(query_str, (action_id,)):
+        SELECT R.URI, R.TYPE, R.LABEL
+        FROM RULE R, RULE_HAS_ACTION R_A
+        WHERE R.URI = R_A.RULE_URI AND R_A.ACTION_URI = ?'''
+    for result in query_db(query_str, (action_uri,)):
         rules.append(dict(result))
     return rules
 
@@ -420,13 +421,13 @@ def rule_has_action(rule_uri, action_uri):
     return query_db(query_str, (rule_uri, action_uri), one=True)[0]
 
 
-def get_action(action_id):
+def get_action(action_uri):
     """
-    Returns the URI, Label and Definition of an Action given by ID
+    Returns the URI, Label and Definition of an Action
     """
-    result = query_db('SELECT URI, LABEL, DEFINITION FROM ACTION WHERE rowid = ?', (action_id,), one=True)
+    result = query_db('SELECT URI, LABEL, DEFINITION FROM ACTION WHERE URI = ?', (action_uri,), one=True)
     if result is None:
-        raise ValueError('Action with ID ' + str(action_id) + ' not found.')
+        raise ValueError('Action with ID ' + action_uri + ' not found.')
     return result
 
 
@@ -435,10 +436,10 @@ def get_all_actions():
     Returns a list of all the Actions which are permitted along with their label and definition
 
     :return A list of Actions
-                Each Action is a dictionary with elements: URI, LABEL, DEFINITION, rowid
+                Each Action is a dictionary with elements: URI, LABEL, DEFINITION
     """
     actions = list()
-    for result in query_db('SELECT URI, LABEL, DEFINITION, rowid FROM ACTION'):
+    for result in query_db('SELECT URI, LABEL, DEFINITION FROM ACTION'):
         actions.append(dict(result))
     return actions
 

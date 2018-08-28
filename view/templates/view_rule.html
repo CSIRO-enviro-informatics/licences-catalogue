@@ -16,7 +16,7 @@
             <td>
                 <ul>
                     {% for action in rule['ACTIONS'] %}
-                    <li><a href="{{ url_for('controller.view_action', action_id=action['rowid']) }}">{{ action['LABEL'] }}</a></li>
+                    <li><a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">{{ action['LABEL'] }}</a></li>
                     {% endfor %}
                 </ul>
             </td>
