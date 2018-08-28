@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask import Blueprint, render_template, request, redirect, url_for, abort, Response
 from controller import db_access
+import json
 import _conf as conf
 
 routes = Blueprint('controller', __name__)
@@ -18,19 +19,34 @@ def search():
     return render_template('search.html')
 
 
-@routes.route('/licence', methods=['GET'])
+@routes.route('/licence/')
 def browse_licences():
     title = 'Licence Register'
     items = [
-        {'label': 'Licence #1', 'link': url_for('controller.view_licence')},
-        {'label': 'Licence #2', 'link': url_for('controller.view_licence')},
-        {'label': 'Licence #3', 'link': url_for('controller.view_licence')}
+        {'label': 'Licence #1', 'uri': url_for('controller.view_licence')},
+        {'label': 'Licence #2', 'uri': url_for('controller.view_licence')},
+        {'label': 'Licence #3', 'uri': url_for('controller.view_licence')}
     ]
-    permalink = 'https://github.com/CSIRO-enviro-informatics/policies-catalogue'
+    permalink = conf.BASE_URI + 'licence/'
     rdf_link = '#!'
     json_link = '#!'
-    return render_template('browse_list.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link,
-                           json_link=json_link)
+
+    # test for preferred Media Type
+    best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    if best == 'application/json' or request.values.get('_format') == 'application/json':
+        json_object = {
+            'title': title,
+            'items': items,
+        }
+        return Response(json.dumps(json_object), mimetype='application/json')
+    else:
+        return render_template(
+            'browse_list.html', title=title, items=items, permalink=permalink, rdf_link=rdf_link, json_link=json_link)
+
+
+@routes.route('/licence/index.json')
+def browse_licenses_json():
+    return redirect('/licence/?_format=application/json')
 
 
 @routes.route('/rule', methods=['GET'])
