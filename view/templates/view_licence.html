@@ -9,144 +9,86 @@
     <tbody>
         <tr>
             <th>Type:</th>
-            <td>Licence</td>
+            <td>{% if licence['TYPE'] is not none %}{{ licence['TYPE'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Comment:</th>
-            <td></td>
+            <td>{% if licence['COMMENT'] is not none %}{{ licence['COMMENT'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Status:</th>
-            <td></td>
+            <td>{% if licence['STATUS'] is not none %}{{ licence['STATUS'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Version:</th>
-            <td></td>
+            <td>{% if licence['HAS_VERSION'] is not none %}{{ licence['HAS_VERSION'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Created:</th>
-            <td></td>
+            <td>{% if licence['CREATED'] is not none %}{{ licence['CREATED'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Jurisdiction:</th>
-            <td></td>
+            <td>{% if licence['JURISDICTION'] is not none %}{{ licence['JURISDICTION'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Legal Code:</th>
-            <td></td>
+            <td>{% if licence['LEGAL_CODE'] is not none %}{{ licence['LEGAL_CODE'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Language:</th>
-            <td></td>
+            <td>{% if licence['LANGUAGE'] is not none %}{{ licence['LANGUAGE'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>Same As:</th>
-            <td></td>
+            <td>{% if licence['SAME_AS'] is not none %}{{ licence['SAME_AS'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>See Also:</th>
-            <td></td>
+            <td>{% if 'SEE_ALSO' in licence %}{{ licence['SEE_ALSO'] }}{% endif %}</td>
         </tr>
         <tr>
-            <th>URL:</th>
-            <td></td>
+            <th>URI:</th>
+            <td>{% if 'URI' in licence %}{{ licence['URI'] }}{% endif %}</td>
         </tr>
     </tbody>
 </table>
 {% endblock %}
 {% block right_column %}
-{% if logo is defined %}<img src="{{ logo }}" alt="Licence Logo">{% endif %}
+{% if logo is defined %}<img src="{{ licence['LOGO'] }}" alt="Licence Logo">{% endif %}
 {% endblock %}
 {% block bottom %}
 <h2>Rules</h2>
+{% for rule in rules %}
 <div class="card">
-    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-1">
-        <h5 class="mb-0">Rule #1</h5>
+    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-{{ loop.index }}">
+        <h5 class="mb-0">{{ rule['LABEL'] }}</h5>
     </div>
-    <div id="rule-1" class="collapse">
+    <div id="rule-{{ loop.index }}" class="collapse">
         <div class="card-body text-center">
             <table class="table table-bordered">
                 <tbody>
                     <tr>
                         <th>Type</th>
-                        <td class="text-left">Permission</td>
+                        <td class="text-left">{{ rule['TYPE'] }}</td>
                     </tr>
                     <tr>
                         <th>Assignors</th>
-                        <td class="text-left"></td>
+                        <td class="text-left">{{ rule['ASSIGNORS']|join(', ') }}</td>
                     </tr>
                     <tr>
                         <th>Assignees</th>
-                        <td class="text-left"></td>
+                        <td class="text-left">{{ rule['ASSIGNEES']|join(', ') }}</td>
                     </tr>
                     <tr>
                         <th>Actions</th>
-                        <td class="text-left">Read</td>
+                        <td class="text-left">{{ rule['ACTIONS']|join(', ') }}</td>
                     </tr>
                 </tbody>
             </table>
-            <a href="{{ url_for('controller.rule_routes', uri='http://example.com/rule/1') }}" type="button" class="btn btn-primary">See Rule</a>
+            <a href="{{ url_for('controller.rule_routes', uri=rule['URI']) }}" type="button" class="btn btn-primary">See Rule</a>
         </div>
     </div>
 </div>
-<div class="card">
-    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-2">
-        <h5 class="mb-0">Rule #2</h5>
-    </div>
-    <div id="rule-2" class="collapse">
-        <div class="card-body text-center">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Type</th>
-                        <td class="text-left">Permission</td>
-                    </tr>
-                    <tr>
-                        <th>Actions</th>
-                        <td class="text-left">Read</td>
-                    </tr>
-                    <tr>
-                        <th>Assignors</th>
-                        <td class="text-left"></td>
-                    </tr>
-                    <tr>
-                        <th>Assignees</th>
-                        <td class="text-left"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <a href="{{ url_for('controller.rule_routes', uri='http://example.com/rule/1') }}" type="button" class="btn btn-primary">See Rule</a>
-        </div>
-    </div>
-</div>
-<div class="card">
-    <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-3">
-        <h5 class="mb-0">Rule #3</h5>
-    </div>
-    <div id="rule-3" class="collapse">
-        <div class="card-body text-center">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Type</th>
-                        <td class="text-left">Permission</td>
-                    </tr>
-                    <tr>
-                        <th>Actions</th>
-                        <td class="text-left">Read</td>
-                    </tr>
-                    <tr>
-                        <th>Assignors</th>
-                        <td class="text-left"></td>
-                    </tr>
-                    <tr>
-                        <th>Assignees</th>
-                        <td class="text-left"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <a href="{{ url_for('controller.rule_routes', uri='http://example.com/rule/1') }}" type="button" class="btn btn-primary">See Rule</a>
-        </div>
-    </div>
-</div>
+{% endfor %}
 {% endblock %}

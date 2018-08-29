@@ -93,10 +93,7 @@ def test_get_policy(mock):
     assert policy['RULES'][0]['LABEL'] == rule_label
 
     # Should get actions associated with the rule
-    expected_action_attributes = ['LABEL', 'URI', 'DEFINITION']
-    action = policy['RULES'][0]['ACTIONS'][0]
-    assert action['URI'] == action_uri
-    assert all(attr in action for attr in expected_action_attributes)
+    assert policy['RULES'][0]['ACTIONS'] == ['Distribute']
 
     # Should get assignors and assignees associated with the rule
     assignors = policy['RULES'][0]['ASSIGNORS']
@@ -107,11 +104,46 @@ def test_get_policy(mock):
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_get_all_policies(mock):
-    policy1 = 'https://example.com#policy1'
-    policy2 = 'https://example.com#policy2'
-    db_access.create_policy(policy1)
-    db_access.create_policy(policy2)
-    assert db_access.get_all_policies() == [policy1, policy2]
+    policy1_uri = 'https://example.com#policy1'
+    policy2_uri = 'https://example.com#policy2'
+    db_access.create_policy(policy1_uri)
+    db_access.create_policy(policy2_uri)
+    rule_uri = 'http://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_label = 'Rule'
+    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.add_rule_to_policy(rule_uri, policy1_uri)
+    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
+    db_access.add_action_to_rule(action_uri, rule_uri)
+    assignor_uri = 'https://example.com#assignor'
+    assignee_uri = 'https://example.com#assignee'
+    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+
+    # Should retrieve every policy
+    policies = db_access.get_all_policies()
+    assert len(policies) == 2
+
+    # Should get all the attributes of the policy
+    policies = db_access.get_all_policies()
+    expected_policy_attributes = ['URI', 'TYPE', 'LABEL', 'JURISDICTION', 'LEGAL_CODE', 'HAS_VERSION', 'LANGUAGE',
+                                  'SEE_ALSO', 'SAME_AS', 'COMMENT', 'LOGO', 'CREATED', 'STATUS']
+    assert all(attr in policies[0] for attr in expected_policy_attributes)
+    assert all(attr in policies[1] for attr in expected_policy_attributes)
+
+    # Should get all of the rules
+    assert policies[0]['RULES'][0]['URI'] == rule_uri
+    assert policies[0]['RULES'][0]['TYPE'] == rule_type
+    assert policies[0]['RULES'][0]['LABEL'] == rule_label
+
+    # Should get actions associated with the rule
+    assert policies[0]['RULES'][0]['ACTIONS'] == ['Distribute']
+
+    # Should get assignors and assignees associated with the rule
+    assignors = policies[0]['RULES'][0]['ASSIGNORS']
+    assignees = policies[0]['RULES'][0]['ASSIGNEES']
+    assert assignors == [assignor_uri]
+    assert assignees == [assignee_uri]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -334,7 +366,10 @@ def test_get_all_rules(mock):
     db_access.create_rule(rule2, rule_type, rule2_label)
     rules = db_access.get_all_rules()
     assert len(rules) == 2
-    assert rules == [{'URI': rule1, 'LABEL': rule1_label}, {'URI': rule2, 'LABEL': rule2_label}]
+    assert rules[0]['URI'] == rule1
+    assert rules[0]['LABEL'] == rule1_label
+    assert rules[0]['TYPE'] == rule_type
+    assert all(attr in rules[0] for attr in ['ACTIONS', 'ASSIGNORS', 'ASSIGNEES'])
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -373,7 +408,8 @@ def test_get_policies_for_rule(mock):
     db_access.create_policy(policy2)
     db_access.add_rule_to_policy(rule_uri, policy2)
     policies = db_access.get_policies_for_rule(rule_uri)
-    assert policies == [policy1, policy2]
+    assert {'URI': policy1, 'LABEL': None} in policies
+    assert {'URI': policy2, 'LABEL': None} in policies
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

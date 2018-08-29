@@ -51,8 +51,8 @@
 {% block bottom %}
 <h2>Licenses that implement this rule:</h2>
 <ul>
-    {% for policy in policies %}
-    <li><a href="{{ url_for('controller.view_licence') }}">{{ policy['LABEL'] }}</a></li>
+    {% for licence in licences %}
+    <li><a href="{{ url_for('controller.licence_routes', uri=licence['URI']) }}">{{ licence['LABEL'] }}</a></li>
     {% endfor %}
 </ul>
 {% endblock %}
