@@ -385,7 +385,8 @@ def get_policies_for_rule(rule_uri):
     Returns a list of all the Policies which use the Rule given
     """
     policies = list()
-    query_str = 'SELECT P.URI, P.LABEL FROM POLICY_HAS_RULE P_R, POLICY P WHERE P_R.RULE_URI = ?'
+    query_str = 'SELECT P.URI, P.LABEL FROM POLICY_HAS_RULE P_R, POLICY P ' \
+                'WHERE P.URI = P_R.POLICY_URI AND P_R.RULE_URI = ?'
     for result in query_db(query_str, (rule_uri,)):
         policies.append(dict(result))
     return policies
@@ -407,7 +408,7 @@ def add_action_to_rule(action_uri, rule_uri):
     multiple Rules
     """
     if not rule_exists(rule_uri):
-        raise ValueError('Rule with URI ' + str(rule_uri) + ' does not exist.')
+        raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
     if not action_exists(action_uri):
         raise ValueError('Action with URI ' + action_uri + ' is not permitted.')
     if rule_has_action(rule_uri, action_uri):

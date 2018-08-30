@@ -6,6 +6,14 @@ import os
 
 db = None
 
+ruletype = dict()
+ruletype['PERMISSION'] = 'http://www.w3.org/ns/odrl/2/permission'
+ruletype['PROHIBITION'] = 'http://www.w3.org/ns/odrl/2/prohibition'
+ruletype['DUTY'] = 'http://www.w3.org/ns/odrl/2/duty'
+
+status = dict()
+status['SUBMITTED'] = 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted'
+
 
 def get_db():
     global db
@@ -22,31 +30,105 @@ def get_db():
 @mock.patch('controller.db_access.get_db', side_effect=get_db)
 def seed(mock):
     # Mocks out get_db() so this can be run independently of the Flask application
-    action = 'http://www.w3.org/ns/odrl/2/acceptTracking'
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule1 = _conf.BASE_URI + '/rule/1'
-    rule2 = _conf.BASE_URI + '/rule/2'
-    rule3 = _conf.BASE_URI + '/rule/3'
-    db_access.create_rule(rule1, rule_type, 'Rule1')
-    db_access.create_rule(rule2, rule_type, 'Rule2')
-    db_access.create_rule(rule3, rule_type, 'Rule3')
-    db_access.add_action_to_rule(action, rule1)
-    db_access.add_action_to_rule(action, rule2)
-    db_access.add_action_to_rule(action, rule3)
-    assignor_uri = _conf.BASE_URI + '/assignor/1'
-    assignee_uri = _conf.BASE_URI + '/assignee/1'
-    db_access.add_assignor_to_rule(assignor_uri, rule1)
-    db_access.add_assignee_to_rule(assignee_uri, rule1)
-    licence_uri = 'http://example.com/licence/example_licence'
-    db_access.create_policy(licence_uri)
-    db_access.set_policy_attribute(licence_uri, 'TYPE', 'http://creativecommons.org/ns#License')
-    db_access.set_policy_attribute(licence_uri, 'LABEL', 'Example Licence')
-    db_access.set_policy_attribute(licence_uri, 'HAS_VERSION', '1.0')
-    db_access.set_policy_attribute(licence_uri, 'COMMENT', 'This is a test licence.')
-    db_access.set_policy_attribute(licence_uri, 'LOGO', '/style/logo.gif')
-    db_access.add_rule_to_policy(rule1, licence_uri)
-    db_access.add_rule_to_policy(rule2, licence_uri)
-    db_access.add_rule_to_policy(rule3, licence_uri)
+    readonly_licence()
+    cc_by_4()
+    cc_by_sa_3_au()
+    cc_by_2_5_au()
+
+
+def readonly_licence():
+    policy_uri = _conf.BASE_URI + '/licence/1'
+    db_access.create_policy(policy_uri)
+    permission_rule_uri = _conf.BASE_URI + '/rule/1'
+    db_access.create_rule(permission_rule_uri, ruletype['PERMISSION'], 'Allow reading')
+    db_access.add_action_to_rule(get_action_uri('Read'), permission_rule_uri)
+    db_access.add_rule_to_policy(permission_rule_uri, policy_uri)
+    db_access.set_policy_attribute(policy_uri, 'LABEL', 'Discovery Read Only License')
+    db_access.set_policy_attribute(policy_uri, 'COMMENT', '''
+        This license only allows for one thing: the assignee may *read* the asset (dataset) for which this license is 
+        assigned. The intent is for the assignee to be able to assess the dataset for purposes such as evaluation for 
+        future use but nothing more: no on-publishing, no distribution etc.
+    ''')
+    db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/disco')
+
+
+def cc_by_4():
+    policy_uri = _conf.BASE_URI + '/licence/2'
+    db_access.create_policy(policy_uri)
+    db_access.set_policy_attribute(policy_uri, 'LABEL', 'Creative Commons CC-BY 4.0')
+    db_access.set_policy_attribute(policy_uri, 'LEGAL_CODE', 'http://creativecommons.org/licenses/by/4.0/')
+    db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-4.0')
+    permission_rule_uri = _conf.BASE_URI + '/rule/3'
+    db_access.create_rule(
+        permission_rule_uri,
+        ruletype['PERMISSION'],
+        'Allow distribution, reproduction and derivative works'
+    )
+    db_access.add_action_to_rule(get_action_uri('Distribute'), permission_rule_uri)
+    db_access.add_action_to_rule(get_action_uri('Reproduce'), permission_rule_uri)
+    db_access.add_action_to_rule(get_action_uri('Derive'), permission_rule_uri)
+    db_access.add_rule_to_policy(permission_rule_uri, policy_uri)
+    duty_rule_uri = _conf.BASE_URI + '/rule/4'
+    db_access.create_rule(
+        duty_rule_uri,
+        ruletype['DUTY'],
+        'Must give credit and keep copyright notices intact'
+    )
+    db_access.add_action_to_rule(get_action_uri('Attribution'), duty_rule_uri)
+    db_access.add_action_to_rule(get_action_uri('Notice'), duty_rule_uri)
+    db_access.add_rule_to_policy(duty_rule_uri, policy_uri)
+
+
+def cc_by_sa_3_au():
+    policy_uri = _conf.BASE_URI + '/licence/3'
+    db_access.create_policy(policy_uri)
+    db_access.set_policy_attribute(policy_uri, 'LABEL', 'Creative Commons CC-BY-SA 3.0 Australia')
+    db_access.set_policy_attribute(policy_uri, 'JURISDICTION', 'http://dbpedia.org/page/Australia')
+    db_access.set_policy_attribute(
+        policy_uri,
+        'LEGAL_CODE',
+        'http://creativecommons.org/licenses/by-sa/3.0/au/legalcode'
+    )
+    db_access.set_policy_attribute(policy_uri, 'HAS_VERSION', '3.0')
+    db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
+    db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://creativecommons.org/licenses/by-sa/3.0/au')
+    db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-sa-3.0-au')
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
+    duty_rule_uri = _conf.BASE_URI + '/rule/5'
+    db_access.create_rule(
+        duty_rule_uri,
+        ruletype['DUTY'],
+        'Must licence derivative works under the same licence'
+    )
+    db_access.add_action_to_rule(get_action_uri('Share Alike'), duty_rule_uri)
+    db_access.add_rule_to_policy(duty_rule_uri, policy_uri)
+
+
+def cc_by_2_5_au():
+    policy_uri = _conf.BASE_URI + '/licence/4'
+    db_access.create_policy(policy_uri)
+    db_access.set_policy_attribute(policy_uri, 'LABEL', 'Creative Commons CC-BY 2.5 Australia')
+    db_access.set_policy_attribute(policy_uri, 'JURISDICTION', 'http://dbpedia.org/page/Australia')
+    db_access.set_policy_attribute(
+        policy_uri,
+        'LEGAL_CODE',
+        'https://creativecommons.org/licenses/by/2.5/au/legalcode'
+    )
+    db_access.set_policy_attribute(policy_uri, 'HAS_VERSION', '1.0')
+    db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
+    db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'https://creativecommons.org/licenses/by/2.5/au/')
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/5', policy_uri)
+
+
+def get_action_uri(action_label):
+    actions = db_access.get_all_actions()
+    for action in actions:
+        if action['LABEL'] == action_label:
+            return action['URI']
+    raise ValueError('Didn\'t find that action')
 
 
 if __name__ == '__main__':

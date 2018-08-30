@@ -406,7 +406,6 @@ def test_get_policies_for_rule(mock):
     db_access.add_rule_to_policy(rule_uri, policy1)
     policy2 = 'https://example.com#policy2'
     db_access.create_policy(policy2)
-    db_access.add_rule_to_policy(rule_uri, policy2)
     policies = db_access.get_policies_for_rule(rule_uri)
     assert {'URI': policy1, 'LABEL': None} in policies
     assert {'URI': policy2, 'LABEL': None} in policies

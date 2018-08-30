@@ -69,8 +69,16 @@
             <table class="table table-bordered">
                 <tbody>
                     <tr>
+                        <th>URI:</th>
+                        <td class="text-left">{{ rule['URI'] }}</td>
+                    </tr>
+                    <tr>
                         <th>Type</th>
                         <td class="text-left">{{ rule['TYPE'] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Actions</th>
+                        <td class="text-left">{{ rule['ACTIONS']|join(', ') }}</td>
                     </tr>
                     <tr>
                         <th>Assignors</th>
@@ -79,10 +87,6 @@
                     <tr>
                         <th>Assignees</th>
                         <td class="text-left">{{ rule['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Actions</th>
-                        <td class="text-left">{{ rule['ACTIONS']|join(', ') }}</td>
                     </tr>
                 </tbody>
             </table>

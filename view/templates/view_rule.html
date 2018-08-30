@@ -12,6 +12,10 @@
             <td>{{ rule['TYPE'] }}</td>
         </tr>
         <tr>
+            <th>URI:</th>
+            <td>{{ rule['URI'] }}</td>
+        </tr>
+        <tr>
             <th>Actions:</th>
             <td>
                 <ul>
@@ -41,15 +45,11 @@
                 </ul>
             </td>
         </tr>
-        <tr>
-            <th>URL:</th>
-            <td>{{ rule['URI'] }}</td>
-        </tr>
     </tbody>
 </table>
 {% endblock %}
 {% block bottom %}
-<h2>Licenses that implement this rule:</h2>
+<h2>Licences that implement this rule:</h2>
 <ul>
     {% for licence in licences %}
     <li><a href="{{ url_for('controller.licence_routes', uri=licence['URI']) }}">{{ licence['LABEL'] }}</a></li>

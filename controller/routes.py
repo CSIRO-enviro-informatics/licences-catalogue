@@ -65,7 +65,7 @@ def view_licence(licence_uri):
     except ValueError:
         abort(404)
         return
-    title = 'Example Licence'
+    title = licence['LABEL']
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(licence)
