@@ -34,6 +34,7 @@ def seed(mock):
     cc_by_4()
     cc_by_sa_3_au()
     cc_by_2_5_au()
+    cc_by_2_au()
 
 
 def readonly_licence():
@@ -66,7 +67,7 @@ def cc_by_4():
     )
     db_access.add_action_to_rule(get_action_uri('Distribute'), permission_rule_uri)
     db_access.add_action_to_rule(get_action_uri('Reproduce'), permission_rule_uri)
-    db_access.add_action_to_rule(get_action_uri('Derive'), permission_rule_uri)
+    db_access.add_action_to_rule(get_action_uri('Derivative Works'), permission_rule_uri)
     db_access.add_rule_to_policy(permission_rule_uri, policy_uri)
     duty_rule_uri = _conf.BASE_URI + '/rule/4'
     db_access.create_rule(
@@ -93,9 +94,18 @@ def cc_by_sa_3_au():
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://creativecommons.org/licenses/by-sa/3.0/au')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-sa-3.0-au')
+    permission_rule_uri = _conf.BASE_URI + '/rule/5'
+    db_access.create_rule(
+        permission_rule_uri,
+        ruletype['PERMISSION'],
+        'Allow distribution, reproduction and derivative works'
+    )
+    db_access.add_action_to_rule(get_action_uri('Distribute'), permission_rule_uri)
+    db_access.add_action_to_rule(get_action_uri('Reproduce'), permission_rule_uri)
+    db_access.add_action_to_rule(get_action_uri('Derive'), permission_rule_uri)
+    db_access.add_rule_to_policy(permission_rule_uri, policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
-    duty_rule_uri = _conf.BASE_URI + '/rule/5'
+    duty_rule_uri = _conf.BASE_URI + '/rule/6'
     db_access.create_rule(
         duty_rule_uri,
         ruletype['DUTY'],
@@ -119,7 +129,25 @@ def cc_by_2_5_au():
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'https://creativecommons.org/licenses/by/2.5/au/')
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/5', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/6', policy_uri)
+
+
+def cc_by_2_au():
+    policy_uri = _conf.BASE_URI + '/licence/5'
+    db_access.create_policy(policy_uri)
+    db_access.set_policy_attribute(policy_uri, 'LABEL', 'Creative Commons CC-BY 2.0 Australia')
+    db_access.set_policy_attribute(policy_uri, 'JURISDICTION', 'http://dbpedia.org/page/Australia')
+    db_access.set_policy_attribute(
+        policy_uri,
+        'LEGAL_CODE',
+        'http://creativecommons.org/licenses/by/2.0/au/legalcode'
+    )
+    db_access.set_policy_attribute(policy_uri, 'HAS_VERSION', '1.0')
+    db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso629-2/eng')
+    db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://creativecommons.org/licenses/by/2.0/au')
+    db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-2.0-au')
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/5', policy_uri)
 
 
