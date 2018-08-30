@@ -16,6 +16,7 @@ def teardown():
 
 
 def rebuild():
+    os.makedirs(os.path.dirname(_conf.DATABASE_PATH), exist_ok=True)
     conn = sqlite3.connect(_conf.DATABASE_PATH)
     conn.execute('PRAGMA foreign_keys = 1')
     conn.execute('''
