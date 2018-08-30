@@ -1,6 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort, Response, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 from controller import db_access
-import json
 import _conf as conf
 
 routes = Blueprint('controller', __name__)
@@ -201,3 +200,8 @@ def view_action(action_uri):
             action=action,
             rules=rules
         )
+
+
+@routes.route('/licence/create')
+def create_licence_form():
+    return render_template('create_licence.html')
