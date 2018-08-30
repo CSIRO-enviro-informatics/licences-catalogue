@@ -55,7 +55,7 @@
 </table>
 {% endblock %}
 {% block right_column %}
-{% if logo is defined %}<img src="{{ licence['LOGO'] }}" alt="Licence Logo">{% endif %}
+{% if logo is not none %}<img src="{{ licence['LOGO'] }}" alt="Licence Logo">{% endif %}
 {% endblock %}
 {% block bottom %}
 <h2>Rules</h2>

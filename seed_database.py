@@ -98,7 +98,7 @@ def cc_by_sa_3_au():
     db_access.create_rule(
         permission_rule_uri,
         ruletype['PERMISSION'],
-        'Allow distribution, reproduction and derivative works'
+        'Allow distribution, reproduction and deriving from the asset'
     )
     db_access.add_action_to_rule(get_action_uri('Distribute'), permission_rule_uri)
     db_access.add_action_to_rule(get_action_uri('Reproduce'), permission_rule_uri)
