@@ -13,9 +13,10 @@ def home():
     return render_template('page_home.html')
 
 
-@routes.route('/search', methods=['GET'])
+@routes.route('/search')
 def search():
-    return render_template('search.html')
+    actions = db_access.get_all_actions()
+    return render_template('search.html', actions=actions)
 
 
 @routes.route('/licence/index.json')
@@ -114,7 +115,7 @@ def view_rules_list():
         if rule['LABEL'] is None:
             rule['LABEL'] = rule['URI']
         items.append({'uri': url_for('controller.rule_routes', uri=rule['URI']), 'label': rule['LABEL']})
-    items = sorted(items, key=lambda item:item['label'].lower())
+    items = sorted(items, key=lambda item: item['label'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(rules)

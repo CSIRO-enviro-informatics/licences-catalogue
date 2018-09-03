@@ -3,55 +3,38 @@
     <h1>Search for a Licence</h1>
     <div class="row mt-5">
         <div class="col-md-5 mb-3">
-            <ul class="list-group">
-                <li class="list-group-item font-weight-bold active">Filter:</li>
-                <li class="list-group-item font-weight-bold">Permissions</li>
-                <li class="list-group-item">
-                    <span class="ml-3">Read</span>
-                    <a href="#!"><i class="fas fa-times text-danger"></i></a>
-                </li>
-                <li class="list-group-item font-weight-bold">Duties</li>
-                <li class="list-group-item">
-                    <span class="ml-3">Attach Policy</span>
-                    <a href="#!"><i class="fas fa-times text-danger"></i></a>
-                </li>
-                <li class="list-group-item font-weight-bold">Prohibitions</li>
-                <li class="list-group-item">
-                    <span class="ml-3">Distribute</span>
-                    <a href="#!"><i class="fas fa-times text-danger"></i></a>
-                </li>
-            </ul>
+            <ul id="filter-list" class="list-group"></ul>
         </div>
         <div class="col-md-7">
             <div class="ml-3">
                 <div class="dropdown mb-3" id="permission-dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="permission-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
                         Add Permission
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="permission-dropdown-button">
-                        <a class="dropdown-item">Read</a>
-                        <a class="dropdown-item">Derive</a>
-                        <a class="dropdown-item">Distribute</a>
-                    </div>
+                    <ul class="dropdown-menu">
+                        {% for action in actions %}
+                        <li class="dropdown-item permission-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
                 <div class="dropdown mb-3" id="duty-dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="duty-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
                         Add Duty
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="duty-dropdown-button">
-                        <a class="dropdown-item">Read</a>
-                        <a class="dropdown-item">Derive</a>
-                        <a class="dropdown-item">Distribute</a>
+                    <div class="dropdown-menu">
+                        {% for action in actions %}
+                        <li class="dropdown-item duty-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                        {% endfor %}
                     </div>
                 </div>
                 <div class="dropdown mb-3" id="prohibition-dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="prohibition-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
                         Add Prohibition
                     </button>
-                    <div class="dropdown-menu" aria-labelledby="prohibition-dropdown-button">
-                        <a class="dropdown-item">Read</a>
-                        <a class="dropdown-item">Derive</a>
-                        <a class="dropdown-item">Distribute</a>
+                    <div class="dropdown-menu">
+                        {% for action in actions %}
+                        <li class="dropdown-item prohibition-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                        {% endfor %}
                     </div>
                 </div>
                 <div class="mt-5">
@@ -223,4 +206,90 @@
             </div>
         </div>
     </div>
+    <ul id="filter-list-template" hidden>
+        <li class="list-group-item font-weight-bold active">Filter:</li>
+        <li id="permission-header" class="list-group-item font-weight-bold">Permissions</li>
+        <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
+        <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
+    </ul>
+    <div id="permission-item-template" hidden>
+        <li class="list-group-item">
+            <span class="ml-3">Read</span>
+            <i class="fas fa-times text-danger delete-permission"></i>
+        </li>
+    </div>
+    <div id="duty-item-template" hidden>
+        <li class="list-group-item">
+            <span class="ml-3">Attach Policy</span>
+            <i class="fas fa-times text-danger delete-duty"></i>
+        </li>
+    </div>
+    <div id="prohibition-item-template" hidden>
+        <li class="list-group-item">
+            <span class="ml-3">Distribute</span>
+            <i class="fas fa-times text-danger delete-prohibition"></i>
+        </li>
+    </div>
+{% endblock %}
+{% block bottom_script %}
+<script>
+    var permissions = []
+    var duties = []
+    var prohibitions = []
+
+    var displayFilter = function() {
+        filterList = $('#filter-list-template').clone()
+        for (i = 0; i < permissions.length; i++) {
+            permissionTemplate = $('#permission-item-template').clone().children()
+            permissionTemplate.find('span').text(permissions[i])
+            permissionTemplate.insertBefore(filterList.find('#duty-header'))
+        }
+        for (i = 0; i < duties.length; i++) {
+            dutyTemplate = $('#duty-item-template').clone().children()
+            dutyTemplate.find('span').text(duties[i])
+            dutyTemplate.insertBefore(filterList.find('#prohibition-header'))
+        }
+        for (i = 0; i < prohibitions.length; i++) {
+            prohibitionTemplate = $('#prohibition-item-template').clone().children()
+            prohibitionTemplate.find('span').text(prohibitions[i])
+            filterList.append(prohibitionTemplate)
+        }
+        $('#filter-list').html(filterList.html())
+    }
+
+    $('body').on('click', '.permission-item', function() {
+        permissions.push($(this).text())
+        displayFilter()
+    })
+
+    $('body').on('click', '.duty-item', function() {
+        duties.push($(this).text())
+        displayFilter()
+    })
+
+    $('body').on('click', '.prohibition-item', function() {
+        prohibitions.push($(this).text())
+        displayFilter()
+    })
+
+    $('body').on('click', '.delete-permission', function() {
+        itemLabel = $(this).siblings('span').first().text()
+        permissions.splice(permissions.indexOf(itemLabel), 1)
+        displayFilter()
+    })
+
+    $('body').on('click', '.delete-duty', function() {
+        itemLabel = $(this).siblings('span').first().text()
+        duties.splice(duties.indexOf(itemLabel), 1)
+        displayFilter()
+    })
+
+    $('body').on('click', '.delete-prohibition', function() {
+        itemLabel = $(this).siblings('span').first().text()
+        prohibitions.splice(prohibitions.indexOf(itemLabel), 1)
+        displayFilter()
+    })
+
+    displayFilter()
+</script>
 {% endblock %}

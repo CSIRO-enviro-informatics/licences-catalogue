@@ -6,7 +6,7 @@
     width: 150px;
 }
 
-.mouseover {
+.mouseover, .fa-times {
     cursor: pointer;
 }
 
@@ -59,4 +59,10 @@
 img {
     max-width: 100%;
     height: auto;
+}
+
+.dropdown-menu {
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
