@@ -39,6 +39,7 @@ def rebuild():
             LOGO            TEXT,
             CREATED         INT,
             STATUS          TEXT,
+            CREATOR         TEXT,
             FOREIGN KEY (TYPE) REFERENCES POLICY_TYPE (TYPE)
         );
     ''')

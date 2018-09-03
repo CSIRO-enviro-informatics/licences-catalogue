@@ -88,11 +88,11 @@ def set_policy_attribute(policy_uri, attr, value):
 
     :param policy_uri:
     :param attr: Permitted attributes - TYPE, LABEL, JURISDICTION, LEGAL_CODE, HAS_VERSION, LANGUAGE, SEE_ALSO, SAME_AS,
-                                        COMMENT, LOGO, STATUS
+                                        COMMENT, LOGO, STATUS, CREATOR
     :param value:
     """
     permitted_attributes = ['TYPE', 'LABEL', 'JURISDICTION', 'LEGAL_CODE', 'HAS_VERSION', 'LANGUAGE', 'SEE_ALSO',
-                            'SAME_AS', 'COMMENT', 'LOGO', 'STATUS']
+                            'SAME_AS', 'COMMENT', 'LOGO', 'STATUS', 'CREATOR']
     attr = attr.upper()
     if attr not in permitted_attributes:
         raise ValueError('Attribute \'' + attr + '\' is not permitted.')
