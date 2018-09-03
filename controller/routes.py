@@ -41,7 +41,10 @@ def view_licence_list():
     licences = db_access.get_all_policies()
     items = list()
     for licence in licences:
+        if licence['LABEL'] is None:
+            licence['LABEL'] = licence['URI']
         items.append({'uri': url_for('controller.licence_routes', uri=licence['URI']), 'label': licence['LABEL']})
+    items = sorted(items, key=lambda item:item['label'].lower())
     # test for preferred Media Type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
@@ -65,6 +68,10 @@ def view_licence(licence_uri):
         abort(404)
         return
     title = licence['LABEL']
+    for rule in rules:
+        if rule['LABEL'] is None:
+            rule['LABEL'] = rule['URI']
+    rules = sorted(rules, key=lambda rule:rule['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(licence)
@@ -104,7 +111,10 @@ def view_rules_list():
     rules = db_access.get_all_rules()
     items = list()
     for rule in rules:
+        if rule['LABEL'] is None:
+            rule['LABEL'] = rule['URI']
         items.append({'uri': url_for('controller.rule_routes', uri=rule['URI']), 'label': rule['LABEL']})
+    items = sorted(items, key=lambda item:item['label'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(rules)
@@ -126,6 +136,10 @@ def view_rule(rule_uri):
     except ValueError:
         abort(404)
         return
+    for licence in licences:
+        if licence['LABEL'] is None:
+            licence['LABEL'] = licence['URI']
+    licences = sorted(licences, key=lambda licence:licence['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(rule)
@@ -163,7 +177,10 @@ def view_actions_list():
     actions = db_access.get_all_actions()
     items = list()
     for action in actions:
+        if action['URI'] is None:
+            action['LABEL'] = action['URI']
         items.append({'uri': url_for('controller.action_routes', uri=action['URI']), 'label': action['LABEL']})
+    items = sorted(items, key=lambda item:item['label'].lower())
     title = 'Action Register'
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
@@ -188,6 +205,10 @@ def view_action(action_uri):
         return
     if action['LABEL'] is None:
         action['LABEL'] = action['URI']
+    for rule in rules:
+        if rule['LABEL'] is None:
+            rule['LABEL'] = rule['URI']
+    rules = sorted(rules, key=lambda rule: rule['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(action)

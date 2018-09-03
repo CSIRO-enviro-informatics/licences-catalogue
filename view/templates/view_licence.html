@@ -28,6 +28,10 @@
             <td>{% if licence['CREATED'] is not none %}{{ licence['CREATED'] }}{% endif %}</td>
         </tr>
         <tr>
+            <th>Creator:</th>
+            <td>{% if licence['CREATOR'] is not none %}{{ licence['CREATOR'] }}{% endif %}</td>
+        </tr>
+        <tr>
             <th>Jurisdiction:</th>
             <td>{% if licence['JURISDICTION'] is not none %}{{ licence['JURISDICTION'] }}{% endif %}</td>
         </tr>

@@ -121,6 +121,7 @@ def get_policy(policy_uri):
                 LOGO - string
                 CREATED - string
                 STATUS - string
+                CREATOR - string
                 RULES - List of Rules
                     Each Rule is a Dictionary containing the following elements:
                         URI - string
@@ -157,6 +158,7 @@ def get_all_policies():
                 LOGO - string
                 CREATED - string
                 STATUS - string
+                CREATOR - string
                 RULES - List of Rules
                     Each Rule is a Dictionary containing the following elements:
                         URI - string
@@ -221,7 +223,7 @@ def get_all_assets():
     return assets
 
 
-def create_rule(rule_uri, rule_type, rule_label):
+def create_rule(rule_uri, rule_type, rule_label=None):
     """
     Creates a new Rule with the given URI and rule type.
 
@@ -236,8 +238,6 @@ def create_rule(rule_uri, rule_type, rule_label):
         raise ValueError('A Rule with that URI already exists.')
     if rule_type not in get_permitted_rule_types():
         raise ValueError('Rule type ' + rule_type + ' is not permitted.')
-    if not rule_label:
-        raise ValueError('Rule must have a label.')
     rule_id = update_db('INSERT INTO RULE (URI, TYPE, LABEL) VALUES (?, ?, ?)', (rule_uri, rule_type, rule_label))
     return rule_id
 

@@ -225,13 +225,9 @@ def test_create_rule(mock):
     with pytest.raises(ValueError):
         db_access.create_rule('rule', 'invalid_type', rule_label)
 
-    # Should raise an exception when no label is provided
+    # Should add a rule
     rule_uri = 'http://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    with pytest.raises(ValueError):
-        db_access.create_rule(rule_uri, rule_type, None)
-
-    # Should add a rule
     rowid = db_access.create_rule(rule_uri, rule_type, rule_label)
     assert db_access.rule_exists(rule_uri)
 
@@ -406,6 +402,7 @@ def test_get_policies_for_rule(mock):
     db_access.add_rule_to_policy(rule_uri, policy1)
     policy2 = 'https://example.com#policy2'
     db_access.create_policy(policy2)
+    db_access.add_rule_to_policy(rule_uri, policy2)
     policies = db_access.get_policies_for_rule(rule_uri)
     assert {'URI': policy1, 'LABEL': None} in policies
     assert {'URI': policy2, 'LABEL': None} in policies

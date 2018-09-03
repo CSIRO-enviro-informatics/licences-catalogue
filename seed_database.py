@@ -44,6 +44,7 @@ def seed(mock):
     gpl_2()
     nem_513a()
     ogl_uk()
+    # test_licence()
 
 
 def add_rules():
@@ -120,6 +121,10 @@ def add_rules():
     rule_uri = _conf.BASE_URI + '/rule/12'
     db_access.create_rule(rule_uri, ruletype['PROHIBITION'], 'Prohibit commercial use')
     db_access.add_action_to_rule(get_action_uri('Commercial Use'), rule_uri)
+
+    # rule_uri = _conf.BASE_URI + '/rule/13'
+    # db_access.create_rule(rule_uri, ruletype['PERMISSION'])
+    # db_access.add_action_to_rule(get_action_uri('Derive'), rule_uri)
 
 
 def readonly_licence():
@@ -327,6 +332,12 @@ def ogl_uk():
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/12', policy_uri)
+
+
+def test_licence():
+    policy_uri = _conf.BASE_URI + '/licence/14'
+    db_access.create_policy(policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/13', policy_uri)
 
 
 def get_action_uri(action_label):
