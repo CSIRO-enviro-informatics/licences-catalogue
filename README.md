@@ -11,17 +11,17 @@ Further project documentation is in the [_docs/](_docs/) folder of this reposito
 This repository is licensed under Creative Commons 4.0 International. See the [LICENSE deed](LICENSE) for details.
 
 ## Contacts
-Project Lead:
+Project Lead:  
 **Nicholas Car**  
 *Senior Experimental Scientist*  
-CSIRO Land & Water, Environmental Informatics Group
-Brisbane, Qld, Australia
-<nicholas.car@csiro.au>
-<http://orcid.org/0000-0002-8742-7730>
+CSIRO Land & Water, Environmental Informatics Group  
+Brisbane, Qld, Australia  
+<nicholas.car@csiro.au>  
+<http://orcid.org/0000-0002-8742-7730>  
 
-Developer:
-**Laura Guillory**
-*Software Engineer*
-CSIRO Land & Water, Environmental Informatics Group
-Brisbane, Qld, Australia
-<laura.guillory@csiro.au>
+Developer:  
+**Laura Guillory**  
+*Software Engineer*  
+CSIRO Land & Water, Environmental Informatics Group  
+Brisbane, Qld, Australia  
+<laura.guillory@csiro.au>  
