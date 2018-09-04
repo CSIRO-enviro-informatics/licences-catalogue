@@ -6,7 +6,7 @@
     width: 150px;
 }
 
-.mouseover, .fa-times {
+.mouseover, .fa-times, .dropdown-item {
     cursor: pointer;
 }
 

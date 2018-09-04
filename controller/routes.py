@@ -19,6 +19,72 @@ def search():
     return render_template('search.html', actions=actions)
 
 
+@routes.route('/_search_results')
+def search_results():
+    permissions = request.args.get('permissions')
+    duties = request.args.get('duties')
+    prohibitions = request.args.get('prohibitions')
+    print(permissions)
+    print(duties)
+    print(prohibitions)
+    perfect_licences = [
+        {'label': 'Licence #1', 'uri': '#!'},
+        {'label': 'Licence #2', 'uri': '#!'},
+        {'label': 'Licence #3', 'uri': '#!'}
+    ]
+    extra_licences = [
+        {
+            'label': 'Licence #4',
+            'uri': '#!',
+            'permissions': ['Derive', 'Distribute'],
+            'duties': ['Derive'],
+            'prohibitions': ['Derive']
+        },
+        {
+            'label': 'Licence #5',
+            'uri': '#!',
+            'permissions': ['Derive'],
+            'duties': ['Derive'],
+            'prohibitions': ['Derive']
+        },
+        {
+            'label': 'Licence #6',
+            'uri': '#!',
+            'permissions': ['Derive'],
+            'duties': ['Derive'],
+            'prohibitions': ['Derive']
+        }
+    ]
+    insufficient_licences = [
+        {
+            'label': 'Licence #7',
+            'uri': '#!',
+            'permissions': ['Derive'],
+            'duties': ['Derive'],
+            'prohibitions': ['Derive']
+        },
+        {
+            'label': 'Licence #8',
+            'uri': '#!',
+            'permissions': ['Derive'],
+            'duties': ['Derive'],
+            'prohibitions': ['Derive']
+        },
+        {
+            'label': 'Licence #9',
+            'uri': '#!',
+            'permissions': ['Derive'],
+            'duties': ['Derive'],
+            'prohibitions': ['Derive']
+        }
+    ]
+    return jsonify(
+        perfect_licences=perfect_licences,
+        extra_licences=extra_licences,
+        insufficient_licences=insufficient_licences
+    )
+
+
 @routes.route('/licence/index.json')
 def view_licence_list_json():
     redirect_url = '/licence/?_format=application/json'
