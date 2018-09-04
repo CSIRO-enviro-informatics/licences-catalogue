@@ -9,6 +9,11 @@ DB_ACCESS
 A layer providing functions for interacting with the database.
 """
 
+ruletype = dict()
+ruletype['PERMISSION'] = 'http://www.w3.org/ns/odrl/2/permission'
+ruletype['PROHIBITION'] = 'http://www.w3.org/ns/odrl/2/prohibition'
+ruletype['DUTY'] = 'http://www.w3.org/ns/odrl/2/duty'
+
 
 def get_db():
     db = getattr(g, '_database', None)

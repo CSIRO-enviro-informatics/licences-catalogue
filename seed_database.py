@@ -6,11 +6,6 @@ import os
 
 db = None
 
-ruletype = dict()
-ruletype['PERMISSION'] = 'http://www.w3.org/ns/odrl/2/permission'
-ruletype['PROHIBITION'] = 'http://www.w3.org/ns/odrl/2/prohibition'
-ruletype['DUTY'] = 'http://www.w3.org/ns/odrl/2/duty'
-
 status = dict()
 status['SUBMITTED'] = 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted'
 
@@ -49,13 +44,13 @@ def seed(mock):
 
 def add_rules():
     rule_uri = _conf.BASE_URI + '/rule/1'
-    db_access.create_rule(rule_uri, ruletype['PERMISSION'], 'Allow reading')
+    db_access.create_rule(rule_uri, db_access.ruletype['PERMISSION'], 'Allow reading')
     db_access.add_action_to_rule(get_action_uri('Read'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/2'
     db_access.create_rule(
         rule_uri,
-        ruletype['PERMISSION'],
+        db_access.ruletype['PERMISSION'],
         'Allow distribution, reproduction and derivative works'
     )
     db_access.add_action_to_rule(get_action_uri('Distribute'), rule_uri)
@@ -65,7 +60,7 @@ def add_rules():
     rule_uri = _conf.BASE_URI + '/rule/3'
     db_access.create_rule(
         rule_uri,
-        ruletype['DUTY'],
+        db_access.ruletype['DUTY'],
         'Must attribute the use of the asset'
     )
     db_access.add_action_to_rule(get_action_uri('Attribution'), rule_uri)
@@ -73,7 +68,7 @@ def add_rules():
     rule_uri = _conf.BASE_URI + '/rule/4'
     db_access.create_rule(
         rule_uri,
-        ruletype['PERMISSION'],
+        db_access.ruletype['PERMISSION'],
         'Allow distribution, reproduction and deriving from the asset'
     )
     db_access.add_action_to_rule(get_action_uri('Distribute'), rule_uri)
@@ -83,43 +78,43 @@ def add_rules():
     rule_uri = _conf.BASE_URI + '/rule/5'
     db_access.create_rule(
         rule_uri,
-        ruletype['DUTY'],
+        db_access.ruletype['DUTY'],
         'Must licence derivative works under the same licence'
     )
     db_access.add_action_to_rule(get_action_uri('Share Alike'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/6'
-    db_access.create_rule(rule_uri, ruletype['PERMISSION'], 'Allow distribution and reproduction')
+    db_access.create_rule(rule_uri, db_access.ruletype['PERMISSION'], 'Allow distribution and reproduction')
     db_access.add_action_to_rule(get_action_uri('Distribute'), rule_uri)
     db_access.add_action_to_rule(get_action_uri('Reproduce'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/7'
-    db_access.create_rule(rule_uri, ruletype['PROHIBITION'], 'Prohibit derivative works')
+    db_access.create_rule(rule_uri, db_access.ruletype['PROHIBITION'], 'Prohibit derivative works')
     db_access.add_action_to_rule(get_action_uri('Derive'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/8'
-    db_access.create_rule(rule_uri, ruletype['DUTY'], 'Copyright and license notices must be kept intact')
+    db_access.create_rule(rule_uri, db_access.ruletype['DUTY'], 'Copyright and license notices must be kept intact')
     db_access.add_action_to_rule(get_action_uri('Notice'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/9'
     db_access.create_rule(
         rule_uri,
-        ruletype['DUTY'],
+        db_access.ruletype['DUTY'],
         'Source code must be provided when exercising some rights granted by the license'
     )
     db_access.add_action_to_rule(get_action_uri('Source Code'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/10'
-    db_access.create_rule(rule_uri, ruletype['PERMISSION'], 'Allow selling the asset')
+    db_access.create_rule(rule_uri, db_access.ruletype['PERMISSION'], 'Allow selling the asset')
     db_access.add_action_to_rule(get_action_uri('Sell'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/11'
-    db_access.create_rule(rule_uri, ruletype['DUTY'], 'Participants')
+    db_access.create_rule(rule_uri, db_access.ruletype['DUTY'], 'Participants')
     db_access.add_assignor_to_rule('http://test.linked.data.gov.au/board/B-0068', rule_uri)
     db_access.add_assignee_to_rule('http://example.com/group/power-companies', rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/12'
-    db_access.create_rule(rule_uri, ruletype['PROHIBITION'], 'Prohibit commercial use')
+    db_access.create_rule(rule_uri, db_access.ruletype['PROHIBITION'], 'Prohibit commercial use')
     db_access.add_action_to_rule(get_action_uri('Commercial Use'), rule_uri)
 
     # rule_uri = _conf.BASE_URI + '/rule/13'

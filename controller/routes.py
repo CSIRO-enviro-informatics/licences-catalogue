@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
-from controller import db_access
+from controller import db_access, functions
 import _conf as conf
 
 routes = Blueprint('controller', __name__)
@@ -27,6 +27,7 @@ def search_results():
     print(permissions)
     print(duties)
     print(prohibitions)
+    functions.get_policies_with_constraints(permissions, duties, prohibitions)
     perfect_licences = [
         {'label': 'Licence #1', 'uri': '#!'},
         {'label': 'Licence #2', 'uri': '#!'},
