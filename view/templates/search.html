@@ -282,9 +282,18 @@
         entry.find('.card-header').children().text(licence_info['LABEL'])
         entry.find('a').attr('href', licence_info['URI'])
         if (licence_type == 'extra' || licence_type == 'insufficient') {
-            entry.find('td:eq(0)').text(licence_info['PERMISSIONS'].join(', '))
-            entry.find('td:eq(1)').text(licence_info['DUTIES'].join(', '))
-            entry.find('td:eq(2)').text(licence_info['PROHIBITIONS'].join(', '))
+            if (licence_info['PROHIBITIONS'].length > 0)
+                entry.find('td:eq(2)').text(licence_info['PROHIBITIONS'].join(', '))
+            else
+                entry.find('tr:eq(2)').remove()
+            if (licence_info['DUTIES'].length > 0)
+                entry.find('td:eq(1)').text(licence_info['DUTIES'].join(', '))
+            else
+                entry.find('tr:eq(1)').remove()
+            if (licence_info['PERMISSIONS'].length > 0)
+                entry.find('td:eq(0)').text(licence_info['PERMISSIONS'].join(', '))
+            else
+                entry.find('tr:eq(0)').remove()
         }
         entry.children().insertAfter(destination)
     }
