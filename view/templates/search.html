@@ -179,17 +179,17 @@
         filterList = $('#filter-list-template').clone()
         for (i = 0; i < permissions.length; i++) {
             permissionTemplate = $('#permission-item-template').clone().children()
-            permissionTemplate.find('span').text(permissions[i]['label'])
+            permissionTemplate.find('span').text(permissions[i]['LABEL'])
             permissionTemplate.insertBefore(filterList.find('#duty-header'))
         }
         for (i = 0; i < duties.length; i++) {
             dutyTemplate = $('#duty-item-template').clone().children()
-            dutyTemplate.find('span').text(duties[i]['label'])
+            dutyTemplate.find('span').text(duties[i]['LABEL'])
             dutyTemplate.insertBefore(filterList.find('#prohibition-header'))
         }
         for (i = 0; i < prohibitions.length; i++) {
             prohibitionTemplate = $('#prohibition-item-template').clone().children()
-            prohibitionTemplate.find('span').text(prohibitions[i]['label'])
+            prohibitionTemplate.find('span').text(prohibitions[i]['LABEL'])
             filterList.append(prohibitionTemplate)
         }
         $('#filter-list').html(filterList.html())
@@ -206,7 +206,7 @@
             list = prohibitions
         actionLabel = $(this).text()
         actionURI = $(this).attr('data-action-uri')
-        list.push({'label': actionLabel, 'uri': actionURI})
+        list.push({'LABEL': actionLabel, 'URI': actionURI})
         displayFilter()
     })
 
@@ -222,7 +222,7 @@
         itemLabel = $(this).siblings('span').first().text()
         var index = -1
         for (i = 0; i < list.length; i++) {
-            if (list[i]['label'] == itemLabel)
+            if (list[i]['LABEL'] == itemLabel)
                 index = i
         }
         if (index == -1)
@@ -233,13 +233,22 @@
 
     // AJAX request to get search results
     $('body').on('click', '#filter-button', function() {
+        var permissions_request = []
+        var duties_request = []
+        var prohibitions_request = []
+        for (i = 0; i < permissions.length; i++)
+            permissions_request.push(permissions[i]['URI'])
+        for (i = 0; i < duties.length; i++)
+            duties_request.push(duties[i]['URI'])
+        for (i = 0; i < prohibitions.length; i++)
+            prohibitions_request.push(prohibitions[i]['URI'])
         $.ajax({
             dataType: 'json',
             url: '{{ url_for("controller.search_results") }}',
             data: {
-                permissions: JSON.stringify(permissions),
-                duties: JSON.stringify(duties),
-                prohibitions: JSON.stringify(prohibitions)
+                permissions: JSON.stringify(permissions_request),
+                duties: JSON.stringify(duties_request),
+                prohibitions: JSON.stringify(prohibitions_request)
             },
             success: function(data) {
                 updateResults(data['perfect_licences'], data['extra_licences'], data['insufficient_licences'])
@@ -249,9 +258,6 @@
 
     // Updates results at bottom
     var updateResults = function(perfect_licences, extra_licences, insufficient_licences) {
-        console.log(perfect_licences)
-        console.log(extra_licences)
-        console.log(insufficient_licences)
         resultsTemplate = $('#results-template').clone()
         for (i = 0; i < perfect_licences.length; i++)
             addLicenceEntry('perfect', perfect_licences[i], resultsTemplate.find('#perfect-licence-header'))
@@ -267,12 +273,12 @@
         entry = $('#' + licence_type + '-licence-template').clone()
         entry.find('.card-header').attr('data-target', '#' + licence_type + '-licence-' + i)
         entry.find('.collapse').attr('id', licence_type + '-licence-' + i)
-        entry.find('.card-header').children().text(licence_info['label'])
-        entry.find('a').attr('href', licence_info['uri'])
+        entry.find('.card-header').children().text(licence_info['LABEL'])
+        entry.find('a').attr('href', licence_info['URI'])
         if (licence_type == 'extra' || licence_type == 'insufficient') {
-            entry.find('td:eq(0)').text(licence_info['permissions'].join(', '))
-            entry.find('td:eq(1)').text(licence_info['duties'].join(', '))
-            entry.find('td:eq(2)').text(licence_info['prohibitions'].join(', '))
+            entry.find('td:eq(0)').text(licence_info['PERMISSIONS'].join(', '))
+            entry.find('td:eq(1)').text(licence_info['DUTIES'].join(', '))
+            entry.find('td:eq(2)').text(licence_info['PROHIBITIONS'].join(', '))
         }
         entry.children().insertAfter(destination)
     }

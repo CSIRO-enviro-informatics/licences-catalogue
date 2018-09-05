@@ -22,7 +22,7 @@ def is_valid_uri(uri):
     return True if re.match('\w+:(/?/?)[^\s]+', uri) else False
 
 
-def get_policies_with_constraints(permissions, duties, prohibitions):
+def get_policies_with_constraints(desired_permissions, desired_duties, desired_prohibitions):
     perfect_fit_licences = []
     extra_conditions_licences = []
     missing_conditions_licences = []
@@ -33,41 +33,57 @@ def get_policies_with_constraints(permissions, duties, prohibitions):
         policy_duties = set()
         policy_prohibitions = set()
         for rule in policy['RULES']:
+            action_uris = [action['URI'] for action in rule['ACTIONS']]
             if rule['TYPE'] == db_access.ruletype['PERMISSION']:
-                policy_permissions = policy_permissions.union(set(rule['ACTIONS']))
+                policy_permissions = policy_permissions.union(action_uris)
             elif rule['TYPE'] == db_access.ruletype['DUTY']:
-                policy_duties = policy_duties.union(set(rule['ACTIONS']))
+                policy_duties = policy_duties.union(action_uris)
             elif rule['TYPE'] == db_access.ruletype['PROHIBITION']:
-                policy_prohibitions = policy_prohibitions.union(set(rule['ACTIONS']))
+                policy_prohibitions = policy_prohibitions.union(action_uris)
 
-        # todo: Compare desired conditions and policy conditions
-        policy_has_extra_conditions = None
-        policy_is_missing_conditions = None
-        extra_conditions = {'permissions': None, 'duties': None, 'prohibitions': None}
-        missing_conditions = {'permissions': None, 'duties': None, 'prohibitions': None}
+        # Compare desired conditions and policy conditions
+        desired_permissions = set(desired_permissions)
+        desired_duties = set(desired_duties)
+        desired_prohibitions = set(desired_prohibitions)
+        extra_conditions = {
+            'permissions': policy_permissions - desired_permissions,
+            'duties': policy_duties - desired_duties,
+            'prohibitions': policy_prohibitions - desired_prohibitions}
+        missing_conditions = {
+            'permissions': desired_permissions - policy_permissions,
+            'duties': desired_duties - policy_duties,
+            'prohibitions': desired_prohibitions - policy_prohibitions
+        }
+        if all(len(value) == 0 for label, value in extra_conditions.items()):
+            policy_has_extra_conditions = False
+        else:
+            policy_has_extra_conditions = True
+        if all(len(value) == 0 for label, value in missing_conditions.items()):
+            policy_has_missing_conditions = False
+        else:
+            policy_has_missing_conditions = True
 
         # Place the policy in a category, or don't
-        if not policy_has_extra_conditions and not policy_is_missing_conditions:
-            perfect_fit_licences.append({'label': policy['LABEL'], 'uri': policy['URI']})
-        elif policy_has_extra_conditions and not policy_is_missing_conditions:
+        if not policy_has_extra_conditions and not policy_has_missing_conditions:
+            perfect_fit_licences.append({'LABEL': policy['LABEL'], 'URI': policy['URI']})
+        elif policy_has_extra_conditions and not policy_has_missing_conditions:
             extra_conditions_licences.append({
-                'label': policy['LABEL'],
-                'uri': policy['URI'],
-                'permissions': extra_conditions['permissions'],
-                'duties': extra_conditions['duties'],
-                'prohibitions': extra_conditions['prohibitions']
+                'LABEL': policy['LABEL'],
+                'URI': policy['URI'],
+                'PERMISSIONS': list(extra_conditions['permissions']),
+                'DUTIES': list(extra_conditions['duties']),
+                'PROHIBITIONS': list(extra_conditions['prohibitions'])
             })
-        elif not policy_has_extra_conditions and policy_is_missing_conditions:
+        elif not policy_has_extra_conditions and policy_has_missing_conditions:
             missing_conditions_licences.append({
-                'label': policy['LABEL'],
-                'uri': policy['URI'],
-                'permissions': missing_conditions['permissions'],
-                'duties': missing_conditions['duties'],
-                'prohibitions': missing_conditions['prohibitions']
+                'LABEL': policy['LABEL'],
+                'URI': policy['URI'],
+                'PERMISSIONS': list(missing_conditions['permissions']),
+                'DUTIES': list(missing_conditions['duties']),
+                'PROHIBITIONS': list(missing_conditions['prohibitions'])
             })
-        print(policy['LABEL'])
-        print(list(policy_permissions))
-        print(list(policy_duties))
-        print(list(policy_prohibitions))
-
-    return {'perfect': perfect_fit_licences, 'extra': extra_conditions_licences, 'missing': missing_conditions_licences}
+    return {
+        'perfect': perfect_fit_licences,
+        'extra': extra_conditions_licences,
+        'insufficient': missing_conditions_licences
+    }

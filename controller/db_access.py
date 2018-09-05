@@ -324,10 +324,7 @@ def get_rules_for_policy(policy_uri):
     rules = list()
     for rule_result in query_db(query_str, (policy_uri,)):
         rule = dict(rule_result)
-        actions = list()
-        for action in get_actions_for_rule(rule['URI']):
-            actions.append(action['LABEL'])
-        rule['ACTIONS'] = actions
+        rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
         rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
         rule['ASSIGNEES'] = get_assignees_for_rule(rule['URI'])
         rules.append(rule)
@@ -433,7 +430,7 @@ def get_actions_for_rule(rule_uri):
     Returns a list of all the Actions which are assigned to a given Rule
     """
     query_str = '''
-        SELECT A.URI, A.LABEL, A.DEFINITION, A.rowid FROM ACTION A, RULE_HAS_ACTION R_A 
+        SELECT A.URI, A.LABEL, A.DEFINITION FROM ACTION A, RULE_HAS_ACTION R_A 
         WHERE R_A.RULE_URI = ?
         AND R_A.ACTION_URI = A.URI
     '''

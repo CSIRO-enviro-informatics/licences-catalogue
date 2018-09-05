@@ -93,7 +93,11 @@ def test_get_policy(mock):
     assert policy['RULES'][0]['LABEL'] == rule_label
 
     # Should get actions associated with the rule
-    assert policy['RULES'][0]['ACTIONS'] == ['Distribute']
+    assert policy['RULES'][0]['ACTIONS'] == [{
+        'URI': 'http://www.w3.org/ns/odrl/2/distribute',
+        'LABEL': 'Distribute',
+        'DEFINITION': 'To supply the Asset to third-parties.'
+    }]
 
     # Should get assignors and assignees associated with the rule
     assignors = policy['RULES'][0]['ASSIGNORS']
@@ -137,7 +141,11 @@ def test_get_all_policies(mock):
     assert policies[0]['RULES'][0]['LABEL'] == rule_label
 
     # Should get actions associated with the rule
-    assert policies[0]['RULES'][0]['ACTIONS'] == ['Distribute']
+    assert policies[0]['RULES'][0]['ACTIONS'] == [{
+        'URI': 'http://www.w3.org/ns/odrl/2/distribute',
+        'LABEL': 'Distribute',
+        'DEFINITION': 'To supply the Asset to third-parties.'
+    }]
 
     # Should get assignors and assignees associated with the rule
     assignors = policies[0]['RULES'][0]['ASSIGNORS']
@@ -300,7 +308,6 @@ def test_get_rule(mock):
     assert action['LABEL'] == 'Distribute'
     assert action['URI'] == action_uri
     assert action['DEFINITION'] == 'To supply the Asset to third-parties.'
-    assert 'rowid' in action
 
     # Should get assignors and assignees associated with the rule
     assert rule['ASSIGNORS'] == [assignor_uri]

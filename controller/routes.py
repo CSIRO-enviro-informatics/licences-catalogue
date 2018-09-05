@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 from controller import db_access, functions
 import _conf as conf
+import json
 
 routes = Blueprint('controller', __name__)
 
@@ -21,68 +22,15 @@ def search():
 
 @routes.route('/_search_results')
 def search_results():
-    permissions = request.args.get('permissions')
-    duties = request.args.get('duties')
-    prohibitions = request.args.get('prohibitions')
-    print(permissions)
-    print(duties)
-    print(prohibitions)
-    functions.get_policies_with_constraints(permissions, duties, prohibitions)
-    perfect_licences = [
-        {'label': 'Licence #1', 'uri': '#!'},
-        {'label': 'Licence #2', 'uri': '#!'},
-        {'label': 'Licence #3', 'uri': '#!'}
-    ]
-    extra_licences = [
-        {
-            'label': 'Licence #4',
-            'uri': '#!',
-            'permissions': ['Derive', 'Distribute'],
-            'duties': ['Derive'],
-            'prohibitions': ['Derive']
-        },
-        {
-            'label': 'Licence #5',
-            'uri': '#!',
-            'permissions': ['Derive'],
-            'duties': ['Derive'],
-            'prohibitions': ['Derive']
-        },
-        {
-            'label': 'Licence #6',
-            'uri': '#!',
-            'permissions': ['Derive'],
-            'duties': ['Derive'],
-            'prohibitions': ['Derive']
-        }
-    ]
-    insufficient_licences = [
-        {
-            'label': 'Licence #7',
-            'uri': '#!',
-            'permissions': ['Derive'],
-            'duties': ['Derive'],
-            'prohibitions': ['Derive']
-        },
-        {
-            'label': 'Licence #8',
-            'uri': '#!',
-            'permissions': ['Derive'],
-            'duties': ['Derive'],
-            'prohibitions': ['Derive']
-        },
-        {
-            'label': 'Licence #9',
-            'uri': '#!',
-            'permissions': ['Derive'],
-            'duties': ['Derive'],
-            'prohibitions': ['Derive']
-        }
-    ]
+    permissions = json.loads(request.args.get('permissions'))
+    duties = json.loads(request.args.get('duties'))
+    prohibitions = json.loads(request.args.get('prohibitions'))
+    results = functions.get_policies_with_constraints(permissions, duties, prohibitions)
+    print(results)
     return jsonify(
-        perfect_licences=perfect_licences,
-        extra_licences=extra_licences,
-        insufficient_licences=insufficient_licences
+        perfect_licences=results['perfect'],
+        extra_licences=results['extra'],
+        insufficient_licences=results['insufficient']
     )
 
 
