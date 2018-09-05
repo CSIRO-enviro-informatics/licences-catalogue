@@ -71,9 +71,9 @@ def test_get_policy(mock):
     # Should get all the attributes of the policy
     db_access.create_policy(policy_uri)
     rule_uri = 'http://example.com#rule'
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_type_uri = 'http://www.w3.org/ns/odrl/2/permission'
     rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_rule(rule_uri, rule_type_uri, rule_label)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
     db_access.add_action_to_rule(action_uri, rule_uri)
@@ -89,7 +89,8 @@ def test_get_policy(mock):
 
     # Should get all of the rules
     assert policy['RULES'][0]['URI'] == rule_uri
-    assert policy['RULES'][0]['TYPE'] == rule_type
+    assert policy['RULES'][0]['TYPE_URI'] == rule_type_uri
+    assert policy['RULES'][0]['TYPE_LABEL'] == 'Permission'
     assert policy['RULES'][0]['LABEL'] == rule_label
 
     # Should get actions associated with the rule
@@ -137,7 +138,8 @@ def test_get_all_policies(mock):
 
     # Should get all of the rules
     assert policies[0]['RULES'][0]['URI'] == rule_uri
-    assert policies[0]['RULES'][0]['TYPE'] == rule_type
+    assert policies[0]['RULES'][0]['TYPE_URI'] == rule_type
+    assert policies[0]['RULES'][0]['TYPE_LABEL'] == 'Permission'
     assert policies[0]['RULES'][0]['LABEL'] == rule_label
 
     # Should get actions associated with the rule
@@ -392,9 +394,9 @@ def test_rule_exists(mock):
 def test_get_permitted_rule_types(mock):
     permitted_rule_types = db_access.get_permitted_rule_types()
     assert permitted_rule_types == [
-        'http://www.w3.org/ns/odrl/2/permission',
-        'http://www.w3.org/ns/odrl/2/prohibition',
-        'http://www.w3.org/ns/odrl/2/duty'
+        {'URI': 'http://www.w3.org/ns/odrl/2/permission', 'LABEL': 'Permission'},
+        {'URI': 'http://www.w3.org/ns/odrl/2/prohibition', 'LABEL': 'Prohibition'},
+        {'URI': 'http://www.w3.org/ns/odrl/2/duty', 'LABEL': 'Duty'}
     ]
 
 
@@ -447,6 +449,11 @@ def test_get_all_actions(mock):
     assert actions
     for action in actions:
         assert all(x in ['URI', 'LABEL', 'DEFINITION'] for x in action)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_action_label(mock):
+    assert db_access.get_action_label('http://www.w3.org/ns/odrl/2/acceptTracking') == 'Accept Tracking'
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

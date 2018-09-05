@@ -9,11 +9,6 @@ DB_ACCESS
 A layer providing functions for interacting with the database.
 """
 
-ruletype = dict()
-ruletype['PERMISSION'] = 'http://www.w3.org/ns/odrl/2/permission'
-ruletype['PROHIBITION'] = 'http://www.w3.org/ns/odrl/2/prohibition'
-ruletype['DUTY'] = 'http://www.w3.org/ns/odrl/2/duty'
-
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -130,7 +125,8 @@ def get_policy(policy_uri):
                 RULES - List of Rules
                     Each Rule is a Dictionary containing the following elements:
                         URI - string
-                        TYPE - string
+                        TYPE_URI - string
+                        TYPE_LABEL - string
                         LABEL - string
                         ASSIGNORS - List of strings
                         ASSIGNEES - List of strings
@@ -167,7 +163,8 @@ def get_all_policies():
                 RULES - List of Rules
                     Each Rule is a Dictionary containing the following elements:
                         URI - string
-                        TYPE - string
+                        TYPE_URI - string
+                        TYPE_LABEL - string
                         LABEL - string
                         ASSIGNORS - List of strings
                         ASSIGNEES - List of strings
@@ -241,7 +238,7 @@ def create_rule(rule_uri, rule_type, rule_label=None):
     """
     if rule_exists(rule_uri):
         raise ValueError('A Rule with that URI already exists.')
-    if rule_type not in get_permitted_rule_types():
+    if not any(rule_type == permitted_type['URI'] for permitted_type in get_permitted_rule_types()):
         raise ValueError('Rule type ' + rule_type + ' is not permitted.')
     rule_id = update_db('INSERT INTO RULE (URI, TYPE, LABEL) VALUES (?, ?, ?)', (rule_uri, rule_type, rule_label))
     return rule_id
@@ -311,15 +308,17 @@ def get_rules_for_policy(policy_uri):
     :return: A List of Rules
                 Each Rule is a Dictionary containing the following elements:
                     URI - string
-                    TYPE - string
+                    TYPE_URI - string
+                    TYPE_LABEL - string
                     LABEL - string
                     ASSIGNORS - List of strings
                     ASSIGNEES - List of strings
                     ACTIONS - List of strings
     """
     query_str = '''
-        SELECT R.URI, R.TYPE, R.LABEL FROM RULE R, POLICY_HAS_RULE P_R, POLICY P
-        WHERE R.URI = P_R.RULE_URI AND P_R.POLICY_URI = P.URI AND P.URI = ?
+        SELECT R.URI, R.TYPE AS TYPE_URI, RT.LABEL AS TYPE_LABEL, R.LABEL 
+        FROM RULE R, POLICY_HAS_RULE P_R, RULE_TYPE RT
+        WHERE RT.URI = R.TYPE AND R.URI = P_R.RULE_URI AND P_R.POLICY_URI = ?
     '''
     rules = list()
     for rule_result in query_db(query_str, (policy_uri,)):
@@ -371,14 +370,16 @@ def get_permitted_rule_types():
     """
     Returns a list of all the rules types which are permitted
 
-    Should be: http://www.w3.org/ns/odrl/2/permission
-               http://www.w3.org/ns/odrl/2/prohibition
-               http://www.w3.org/ns/odrl/2/duty
-    However, they can be add/removed from the database at will so using this method to check is advised
+    Should be: [
+        {'URI': 'http://www.w3.org/ns/odrl/2/permission', 'LABEL': 'Permission'},
+        {'URI': 'http://www.w3.org/ns/odrl/2/prohibition', 'LABEL': 'Prohibition'},
+        {'URI': 'http://www.w3.org/ns/odrl/2/duty', 'LABEL': 'Duty'}
+    ]
+    However, they can be added/removed from the database at will so using this method to check is advised
     """
     permitted_rule_types = list()
-    for rule_type in query_db('SELECT TYPE FROM RULE_TYPE'):
-        permitted_rule_types.append(rule_type['TYPE'])
+    for rule_type in query_db('SELECT URI, LABEL FROM RULE_TYPE'):
+        permitted_rule_types.append(dict(rule_type))
     return permitted_rule_types
 
 
@@ -447,7 +448,7 @@ def get_rules_using_action(action_uri):
     """
     rules = list()
     query_str = '''
-        SELECT R.URI, R.TYPE, R.LABEL
+        SELECT R.URI, R.URI, R.LABEL
         FROM RULE R, RULE_HAS_ACTION R_A
         WHERE R.URI = R_A.RULE_URI AND R_A.ACTION_URI = ?'''
     for result in query_db(query_str, (action_uri,)):
@@ -484,6 +485,13 @@ def get_all_actions():
     for result in query_db('SELECT URI, LABEL, DEFINITION FROM ACTION'):
         actions.append(dict(result))
     return actions
+
+
+def get_action_label(action_uri):
+    """
+    Accepts an Action's URI and returns its Label
+    """
+    return query_db('SELECT LABEL FROM ACTION WHERE URI = ?', (action_uri,), one=True)['LABEL']
 
 
 def add_assignor_to_rule(assignor_uri, rule_uri):

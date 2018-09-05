@@ -52,7 +52,8 @@ def rebuild():
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS RULE_TYPE (
-            TYPE    TEXT    NOT NULL    PRIMARY KEY
+            URI     TEXT    NOT NULL    PRIMARY KEY,
+            LABEL   TEXT    NOT NULL
         );
     ''')
     conn.execute('''
@@ -60,7 +61,7 @@ def rebuild():
             URI     TEXT    NOT NULL    PRIMARY KEY,
             TYPE    TEXT    NOT NULL,
             LABEL   TEXT,
-            FOREIGN KEY (TYPE) REFERENCES RULE_TYPE(TYPE)
+            FOREIGN KEY (TYPE) REFERENCES RULE_TYPE(URI)
         );
     ''')
     conn.execute('''
@@ -108,9 +109,9 @@ def rebuild():
         INSERT INTO POLICY_TYPE (TYPE) VALUES ('http://creativecommons.org/ns#License');
     ''')
     conn.execute('''
-        INSERT INTO RULE_TYPE (TYPE) VALUES ('http://www.w3.org/ns/odrl/2/permission'),
-                                            ('http://www.w3.org/ns/odrl/2/prohibition'),
-                                            ('http://www.w3.org/ns/odrl/2/duty');
+        INSERT INTO RULE_TYPE (URI, LABEL) VALUES ('http://www.w3.org/ns/odrl/2/permission', 'Permission'),
+                                            ('http://www.w3.org/ns/odrl/2/prohibition', 'Prohibition'),
+                                            ('http://www.w3.org/ns/odrl/2/duty', 'Duty');
     ''')
     conn.execute('''
         INSERT INTO ACTION (LABEL, URI, DEFINITION) 

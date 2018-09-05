@@ -1,5 +1,6 @@
 import re
 from controller import db_access
+from flask import url_for
 
 
 def create_policy(policy_uri, attributes=None):
@@ -34,11 +35,11 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
         policy_prohibitions = set()
         for rule in policy['RULES']:
             action_uris = [action['URI'] for action in rule['ACTIONS']]
-            if rule['TYPE'] == db_access.ruletype['PERMISSION']:
+            if rule['TYPE_LABEL'] == 'Permission':
                 policy_permissions = policy_permissions.union(action_uris)
-            elif rule['TYPE'] == db_access.ruletype['DUTY']:
+            elif rule['TYPE_LABEL'] == 'Duty':
                 policy_duties = policy_duties.union(action_uris)
-            elif rule['TYPE'] == db_access.ruletype['PROHIBITION']:
+            elif rule['TYPE_LABEL'] == 'Prohibition':
                 policy_prohibitions = policy_prohibitions.union(action_uris)
 
         # Compare desired conditions and policy conditions
@@ -65,22 +66,31 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
 
         # Place the policy in a category, or don't
         if not policy_has_extra_conditions and not policy_has_missing_conditions:
-            perfect_fit_licences.append({'LABEL': policy['LABEL'], 'URI': policy['URI']})
+            perfect_fit_licences.append({
+                'LABEL': policy['LABEL'],
+                'URI': url_for('controller.licence_routes', uri=policy['URI'])
+            })
         elif policy_has_extra_conditions and not policy_has_missing_conditions:
+            extra_permissions = [db_access.get_action_label(action) for action in extra_conditions['permissions']]
+            extra_duties = [db_access.get_action_label(action) for action in extra_conditions['duties']]
+            extra_prohibitions = [db_access.get_action_label(action) for action in extra_conditions['prohibitions']]
             extra_conditions_licences.append({
                 'LABEL': policy['LABEL'],
-                'URI': policy['URI'],
-                'PERMISSIONS': list(extra_conditions['permissions']),
-                'DUTIES': list(extra_conditions['duties']),
-                'PROHIBITIONS': list(extra_conditions['prohibitions'])
+                'URI': url_for('controller.licence_routes', uri=policy['URI']),
+                'PERMISSIONS': extra_permissions,
+                'DUTIES': extra_duties,
+                'PROHIBITIONS': extra_prohibitions
             })
         elif not policy_has_extra_conditions and policy_has_missing_conditions:
+            missing_permissions = [db_access.get_action_label(action) for action in missing_conditions['permissions']]
+            missing_duties = [db_access.get_action_label(action) for action in missing_conditions['duties']]
+            missing_prohibitions = [db_access.get_action_label(action) for action in missing_conditions['prohibitions']]
             missing_conditions_licences.append({
                 'LABEL': policy['LABEL'],
-                'URI': policy['URI'],
-                'PERMISSIONS': list(missing_conditions['permissions']),
-                'DUTIES': list(missing_conditions['duties']),
-                'PROHIBITIONS': list(missing_conditions['prohibitions'])
+                'URI': url_for('controller.licence_routes', uri=policy['URI']),
+                'PERMISSIONS': missing_permissions,
+                'DUTIES': missing_duties,
+                'PROHIBITIONS': missing_prohibitions
             })
     return {
         'perfect': perfect_fit_licences,

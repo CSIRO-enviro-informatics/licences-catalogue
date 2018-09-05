@@ -26,7 +26,6 @@ def search_results():
     duties = json.loads(request.args.get('duties'))
     prohibitions = json.loads(request.args.get('prohibitions'))
     results = functions.get_policies_with_constraints(permissions, duties, prohibitions)
-    print(results)
     return jsonify(
         perfect_licences=results['perfect'],
         extra_licences=results['extra'],
@@ -87,7 +86,8 @@ def view_licence(licence_uri):
     for rule in rules:
         if rule['LABEL'] is None:
             rule['LABEL'] = rule['URI']
-    rules = sorted(rules, key=lambda rule:rule['LABEL'].lower())
+        rule['ACTIONS'] = [action['LABEL'] for action in rule['ACTIONS']]
+    rules = sorted(rules, key=lambda rule: rule['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(licence)
