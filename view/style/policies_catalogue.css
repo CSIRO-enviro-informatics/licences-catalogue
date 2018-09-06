@@ -66,3 +66,22 @@ img {
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+center {
+    margin: auto;
+}
+
+.nav-link {
+    background: rgba(0,0,0,.03);
+}
+
+.next-button {
+    width: auto;
+    min-width: 200px;
+}
+
+form#licence-create-form textarea,
+form#licence-create-form input,
+form#licence-create-form select {
+    width: 100%;
+}
