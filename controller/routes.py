@@ -241,4 +241,8 @@ def view_action(action_uri):
 
 @routes.route('/licence/create')
 def create_licence_form():
-    return render_template('create_licence.html')
+    rules = db_access.get_all_rules()
+    rules.sort(key=lambda rule: rule['LABEL'])
+    for rule in rules:
+        rule['LINK'] = url_for('controller.rule_routes', uri=rule['URI'])
+    return render_template('create_licence.html', rules=rules)

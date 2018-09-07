@@ -337,14 +337,20 @@ def get_all_rules():
     :return: A List of Rules
                 Each Rule is a Dictionary containing the following elements:
                     URI - string
-                    TYPE - string
+                    TYPE_URI - string
+                    TYPE_STRING - string
                     LABEL - string
                     ASSIGNORS - List of strings
                     ASSIGNEES - List of strings
                     ACTIONS - List of strings
     """
     rules = list()
-    for rule_result in query_db('SELECT * FROM RULE'):
+    query_str = '''
+        SELECT R.URI, R.LABEL, R.TYPE AS TYPE_URI, RT.LABEL AS TYPE_LABEL 
+        FROM RULE R, RULE_TYPE RT 
+        WHERE R.TYPE = RT.URI
+    '''
+    for rule_result in query_db(query_str):
         rule = dict(rule_result)
         actions = list()
         for action in get_actions_for_rule(rule['URI']):

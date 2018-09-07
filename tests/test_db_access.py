@@ -373,7 +373,8 @@ def test_get_all_rules(mock):
     assert len(rules) == 2
     assert rules[0]['URI'] == rule1
     assert rules[0]['LABEL'] == rule1_label
-    assert rules[0]['TYPE'] == rule_type
+    assert rules[0]['TYPE_URI'] == rule_type
+    assert rules[0]['TYPE_LABEL'] == 'Permission'
     assert all(attr in rules[0] for attr in ['ACTIONS', 'ASSIGNORS', 'ASSIGNEES'])
 
 
