@@ -338,7 +338,7 @@ def get_all_rules():
                 Each Rule is a Dictionary containing the following elements:
                     URI - string
                     TYPE_URI - string
-                    TYPE_STRING - string
+                    TYPE_LABEL - string
                     LABEL - string
                     ASSIGNORS - List of strings
                     ASSIGNEES - List of strings

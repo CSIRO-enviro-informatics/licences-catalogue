@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1 class="text-center">Create a Licence</h1>
-<ul class="nav nav-pills justify-content-center nav-justified ml-5 mr-5 mt-5">
+<ul class="nav nav-pills justify-content-center nav-justified ml-5 mr-5 mt-3">
     <li class="nav-item">
         <a class="nav-link active" data-toggle="pill" href="#step-1">Select Rules</a>
     </li>
@@ -12,7 +12,7 @@
         <a class="nav-link" data-toggle="pill" href="#step-3">Additional Information</a>
     </li>
 </ul>
-<div class="tab-content mt-5 mb-5">
+<div class="tab-content mt-3 mb-5">
     <div class="tab-pane fade show active" id="step-1">
         <h2 class="text-center">Select your rules</h2>
         <div class="row">
@@ -27,24 +27,7 @@
                 <ul class="list-group selected-rules mb-3">
                     <li class="list-group-item font-weight-bold active">Selected Rules:</li>
                 </ul>
-                <ul class="list-group">
-                    <li class="list-group-item font-weight-bold active">Selected Conditions:</li>
-                    <li id="permission-header" class="list-group-item font-weight-bold">Permissions</li>
-                    <li class="list-group-item permission-item">
-                        <span class="ml-3">Read</span>
-                        <i class="fas fa-times text-danger delete-item"></i>
-                    </li>
-                    <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
-                    <li class="list-group-item duty-item">
-                        <span class="ml-3">Attach Policy</span>
-                        <i class="fas fa-times text-danger delete-item"></i>
-                    </li>
-                    <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
-                    <li class="list-group-item prohibition-item">
-                        <span class="ml-3">Distribute</span>
-                        <i class="fas fa-times text-danger delete-item"></i>
-                    </li>
-                </ul>
+                <ul id="conditions-list" class="list-group"></ul>
             </div>
         </div>
         <div class="text-center mt-5">
@@ -297,8 +280,8 @@
 </div>
 <div id="rule-card-template" hidden>
     <div class="card">
-        <div class="card-header mouseover" data-toggle="collapse" data-target="#rule-1">Rule Label</div>
-        <div id="rule-1" class="collapse" data-parent="#accordion">
+        <div class="card-header mouseover" data-toggle="collapse">Rule Label</div>
+        <div class="collapse">
             <div class="card-body text-center">
                 <table class="table table-bordered">
                     <tbody>
@@ -333,58 +316,160 @@
 <div id="selected-rule-template" hidden>
     <li class="list-group-item">
         <span class="ml-3">Rule #1</span>
-        <a href="#!"><i class="fas fa-times text-danger"></i></a>
+        <a href="#!"><i class="fas fa-times text-danger delete-item"></i></a>
     </li>
 </div>
+<div id="permission-item-template" hidden>
+    <li class="list-group-item permission-item">
+        <span class="ml-3"></span>
+    </li>
+</div>
+<div id="duty-item-template" hidden>
+    <li class="list-group-item duty-item">
+        <span class="ml-3"></span>
+    </li>
+</div>
+<div id="prohibition-item-template" hidden>
+    <li class="list-group-item prohibition-item">
+        <span class="ml-3"></span>
+    </li>
+</div>
+<div id="assignor-item-template" hidden>
+    <li class="list-group-item assignor-item">
+        <span class="ml-3"></span>
+    </li>
+</div>
+<div id="assignee-item-template" hidden>
+    <li class="list-group-item assignee-item">
+        <span class="ml-3"></span>
+    </li>
+</div>
+<ul id="conditions-list-template" class="list-group" hidden>
+    <li class="list-group-item font-weight-bold active">Selected Conditions:</li>
+    <li id="permission-header" class="list-group-item font-weight-bold">Permissions</li>
+    <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
+    <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
+    <li id="assignor-header" class="list-group-item font-weight-bold">Assignors</li>
+    <li id="assignee-header" class="list-group-item font-weight-bold">Assignees</li>
+    <li id="end-header" hidden></li>
+</ul>
 {% endblock %}
 {% block bottom_script %}
 <script id="rules-json" type="application/json">
 {% if rules %}{{ rules|tojson|safe }}{% endif %}
 </script>
 <script>
-$('body').on('click', '.previous-button', function() {
-    $('.nav-link.active').parent().prev('li').find('a').trigger('click')
-})
-$('body').on('click', '.next-button', function() {
-    $('.nav-link.active').parent().next('li').find('a').trigger('click')
-})
+    //Moves to next step in form
+    $('body').on('click', '.previous-button', function() {
+        $('.nav-link.active').parent().prev('li').find('a').trigger('click')
+    })
+    //Moves to previous step in form
+    $('body').on('click', '.next-button', function() {
+        $('.nav-link.active').parent().next('li').find('a').trigger('click')
+    })
 
-try {
-    var rules = JSON.parse($('#rules-json').html());
-} catch(err) {
-    var rules = []
-}
+    //Load available rules from JSON
+    try {
+        var rules = JSON.parse($('#rules-json').html());
+    } catch(err) {
+        var rules = []
+    }
 
-var updateRuleSelectList = function() {
-    for (i = 0; i < rules.length; i++) {
-        if (!('SELECTED' in rules[i]) || rules[i]['SELECTED'] == false) {
-            rule_card = $('#rule-card-template').clone()
-            rule_card.find('.card-header').text(rules[i]['LABEL']).attr('data-target', '#rule-' + i)
-            rule_card.find('.collapse').attr('id', 'rule-' + i)
-            rule_card.find('td:eq(0)').text(rules[i]['URI'])
-            rule_card.find('td:eq(1)').text(rules[i]['TYPE_LABEL'])
-            rule_card.find('td:eq(2)').text(rules[i]['ACTIONS'].join(', '))
-            rule_card.find('td:eq(3)').text(rules[i]['ASSIGNORS'].join(', '))
-            rule_card.find('td:eq(4)').text(rules[i]['ASSIGNEES'].join(', '))
-            rule_card.find('.card-body').children('a').attr('href', rules[i]['LINK'])
-            rule_card.find('.card-body').children('button').attr('data-rule', rules[i]['URI'])
-            $('#accordion').append(rule_card.children())
+    var updateRuleSelectList = function() {
+        $('#accordion').empty()
+        for (i = 0; i < rules.length; i++) {
+            if (!('SELECTED' in rules[i]) || rules[i]['SELECTED'] == false) {
+                rule_card = $('#rule-card-template').clone()
+                rule_card.find('.card-header').text(rules[i]['LABEL']).attr('data-target', '#rule-' + i)
+                rule_card.find('.collapse').attr('id', 'rule-' + i)
+                rule_card.find('td:eq(0)').text(rules[i]['URI'])
+                rule_card.find('td:eq(1)').text(rules[i]['TYPE_LABEL'])
+                rule_card.find('td:eq(2)').text(rules[i]['ACTIONS'].join(', '))
+                rule_card.find('td:eq(3)').text(rules[i]['ASSIGNORS'].join(', '))
+                rule_card.find('td:eq(4)').text(rules[i]['ASSIGNEES'].join(', '))
+                rule_card.find('.card-body').children('a').attr('href', rules[i]['LINK'])
+                rule_card.find('.card-body').children('button').attr('data-rule', rules[i]['URI'])
+                $('#accordion').append(rule_card.children())
+            }
         }
     }
-}
 
-$('body').on('click', '.add-rule', function() {
-    var uri = $(this).attr('data-rule')
-    for (i = 0; i < rules.length; i++) {
-        if (rules[i]['URI'] == uri) {
-            rules[i]['SELECTED'] = true
-            var selected_rule_item = $('#selected-rule-template').clone()
-            selected_rule_item.find('span').text(rules[i]['LABEL'])
-            $('.selected-rules').append(selected_rule_item.children())
+    //Adds a rule to the selection
+    $('body').on('click', '.add-rule', function() {
+        var uri = $(this).attr('data-rule')
+        for (i = 0; i < rules.length; i++) {
+            if (rules[i]['URI'] == uri && (!('SELECTED' in rules[i]) || rules[i]['SELECTED'] == false)) {
+                rules[i]['SELECTED'] = true
+                var selected_rule_item = $('#selected-rule-template').clone()
+                selected_rule_item.find('span').text(rules[i]['LABEL'])
+                selected_rule_item.find('li').attr('data-rule', uri)
+                $('.selected-rules').append(selected_rule_item.children())
+            }
         }
-    }
-})
+        updateRuleSelectList()
+        updateConditionList()
+    })
 
-updateRuleSelectList()
+    var updateConditionList = function() {
+        conditions_list = $('#conditions-list-template').clone()
+        permissions = []
+        duties = []
+        prohibitions = []
+        assignors = []
+        assignees = []
+        for (i = 0; i < rules.length; i++) {
+            if ('SELECTED' in rules[i] && rules[i]['SELECTED'] == true) {
+                rule_type = rules[i]['TYPE_LABEL']
+                var rule_type_list
+                if (rule_type == 'Permission')
+                    rule_type_list = permissions
+                else if (rule_type == 'Duty')
+                    rule_type_list = duties
+                else if (rule_type == 'Prohibition')
+                    rule_type_list = prohibitions
+                else
+                    return
+                for (j = 0; j < rules[i]['ACTIONS'].length; j++)
+                    if (!rule_type_list.includes(rules[i]['ACTIONS'][j]))
+                        rule_type_list.push(rules[i]['ACTIONS'][j])
+                for (j = 0; j < rules[i]['ASSIGNORS'].length; j++)
+                    if (!assignors.includes(rules[i]['ASSIGNORS'][j]))
+                        assignors.push(rules[i]['ASSIGNORS'][j])
+                for (j = 0; j < rules[i]['ASSIGNEES'].length; j++)
+                    if (!assignees.includes(rules[i]['ASSIGNEES'][j]))
+                        assignees.push(rules[i]['ASSIGNEES'][j])
+            }
+        }
+        for (i = 0; i < permissions.length; i++)
+            addConditionItem('permission', permissions[i], conditions_list.find('#duty-header'))
+        for (i = 0; i < duties.length; i++)
+            addConditionItem('duty', duties[i], conditions_list.find('#prohibition-header'))
+        for (i = 0; i < prohibitions.length; i++)
+            addConditionItem('prohibition', prohibitions[i], conditions_list.find('#assignor-header'))
+        for (i = 0; i < assignors.length; i++)
+            addConditionItem('assignor', assignors[i], conditions_list.find('#assignee-header'))
+        for (i = 0; i < assignees.length; i++)
+            addConditionItem('assignee', assignees[i], conditions_list.find('#end-header'))
+        $('#conditions-list').html(conditions_list.children())
+    }
+
+    var addConditionItem = function(condition_type, condition_label, destination) {
+        condition_item = $('#' + condition_type + '-item-template').clone()
+        condition_item.find('span').text(condition_label)
+        condition_item.children().insertBefore(destination)
+    }
+
+    // Removes items from rule selection when X clicked
+    $('body').on('click', '.delete-item', function() {
+        for (i = 0; i < rules.length; i++)
+            if (rules[i]['URI'] == $(this).closest('li').attr('data-rule'))
+                rules[i]['SELECTED'] = false
+        $(this).closest('.list-group-item').remove()
+        updateRuleSelectList()
+        updateConditionList()
+    })
+
+    updateRuleSelectList()
+    updateConditionList()
 </script>
 {% endblock %}
