@@ -24,23 +24,39 @@
     position: relative;
 }
 
-.clipboard-icon .clipboard-tooltip {
+.hover-target .hover-tooltip-top {
     visibility: hidden;
-    width: 120px;
     background-color: #555;
+    width: 120px;
     color: #fff;
     text-align: center;
     padding: 5px 0;
     border-radius: 6px;
     position: absolute;
     z-index : 1;
-    bottom: 125%;
-    margin-left: -70px;
+    bottom: 120%;
+    left: 50%;
+    margin-left: -60px;
     opacity: 0;
     transition: opacity 0.3s;
 }
 
-.clipboard-icon .clipboard-tooltip::after {
+.hover-target .hover-tooltip-right {
+    visibility: hidden;
+    background-color: #555;
+    width: 300px;
+    color: #fff;
+    text-align: center;
+    padding: 5px 2px;
+    border-radius: 6px;
+    position: absolute;
+    top: 0px;
+    left: 105%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.hover-target .hover-tooltip-top::after {
     content: "";
     position: absolute;
     top: 100%;
@@ -51,7 +67,23 @@
     border-color: #555 transparent transparent transparent;
 }
 
-.clipboard-icon:hover .clipboard-tooltip {
+.hover-target .hover-tooltip-right::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 100%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+}
+
+.hover-target:hover .hover-tooltip-top {
+    visibility: visible;
+    opacity: 1;
+}
+
+.hover-target:hover .hover-tooltip-right {
     visibility: visible;
     opacity: 1;
 }
@@ -84,4 +116,8 @@ form#licence-create-form textarea,
 form#licence-create-form input,
 form#licence-create-form select {
     width: 100%;
+}
+
+.list-group-item.active {
+    z-index: auto;
 }

@@ -321,27 +321,42 @@
 </div>
 <div id="permission-item-template" hidden>
     <li class="list-group-item permission-item">
-        <span class="ml-3"></span>
+        <div class="hover-target">
+            <span class="ml-3 item-label"></span>
+            <span class="hover-tooltip-right">From Rule:</span>
+        </div>
     </li>
 </div>
 <div id="duty-item-template" hidden>
     <li class="list-group-item duty-item">
-        <span class="ml-3"></span>
+        <div class="hover-target">
+            <span class="ml-3 item-label"></span>
+            <span class="hover-tooltip-right">From Rule:</span>
+        </div>
     </li>
 </div>
 <div id="prohibition-item-template" hidden>
     <li class="list-group-item prohibition-item">
-        <span class="ml-3"></span>
+        <div class="hover-target">
+            <span class="ml-3 item-label"></span>
+            <span class="hover-tooltip-right">From Rule:</span>
+        </div>
     </li>
 </div>
 <div id="assignor-item-template" hidden>
     <li class="list-group-item assignor-item">
-        <span class="ml-3"></span>
+        <div class="hover-target">
+            <span class="ml-3 item-label"></span>
+            <span class="hover-tooltip-right">From Rule:</span>
+        </div>
     </li>
 </div>
 <div id="assignee-item-template" hidden>
     <li class="list-group-item assignee-item">
-        <span class="ml-3"></span>
+        <div class="hover-target">
+            <span class="ml-3 item-label"></span>
+            <span class="hover-tooltip-right">From Rule:</span>
+        </div>
     </li>
 </div>
 <ul id="conditions-list-template" class="list-group" hidden>
@@ -417,9 +432,11 @@
         prohibitions = []
         assignors = []
         assignees = []
-        for (i = 0; i < rules.length; i++) {
+        //Goes through each rule that is currently selected, and adds its conditions to the above
+        for (var i = 0; i < rules.length; i++) {
             if ('SELECTED' in rules[i] && rules[i]['SELECTED'] == true) {
                 rule_type = rules[i]['TYPE_LABEL']
+                rule_label = rules[i]['LABEL']
                 var rule_type_list
                 if (rule_type == 'Permission')
                     rule_type_list = permissions
@@ -429,33 +446,64 @@
                     rule_type_list = prohibitions
                 else
                     return
-                for (j = 0; j < rules[i]['ACTIONS'].length; j++)
-                    if (!rule_type_list.includes(rules[i]['ACTIONS'][j]))
-                        rule_type_list.push(rules[i]['ACTIONS'][j])
-                for (j = 0; j < rules[i]['ASSIGNORS'].length; j++)
-                    if (!assignors.includes(rules[i]['ASSIGNORS'][j]))
-                        assignors.push(rules[i]['ASSIGNORS'][j])
-                for (j = 0; j < rules[i]['ASSIGNEES'].length; j++)
-                    if (!assignees.includes(rules[i]['ASSIGNEES'][j]))
-                        assignees.push(rules[i]['ASSIGNEES'][j])
+                //Add the actions to permissions, duties or prohibitions
+                for (var j = 0; j < rules[i]['ACTIONS'].length; j++) {
+                    action_label = rules[i]['ACTIONS'][j]
+                    action_index = getIndexOfCondition(rule_type_list, action_label)
+                    if (action_index >= 0)
+                        rule_type_list[action_index]['RULES'].push(rule_label)
+                    else
+                        rule_type_list.push({'RULES': [rule_label], 'LABEL': action_label})
+                }
+                //Add the assignors
+                for (var j = 0; j < rules[i]['ASSIGNORS'].length; j++) {
+                    assignor_label = rules[i]['ASSIGNORS'][j]
+                    assignor_index = getIndexOfCondition(rule_type_list, assignor_label)
+                    if (assignor_index >= 0)
+                        assignors[assignor_index]['RULES'].push(rule_label)
+                    else
+                        assignors.push({'RULES': [rule_label], 'LABEL': assignor_label})
+                }
+                //Add the assignees
+                for (var j = 0; j < rules[i]['ASSIGNEES'].length; j++) {
+                    assignee_label = rules[i]['ASSIGNEES'][j]
+                    assignee_index = getIndexOfCondition(rule_type_list, assignee_label)
+                    if (assignee_index >= 0)
+                        assignees[assignee_index]['RULES'].push(rule_label)
+                    else
+                        assignees.push({'RULES': [rule_label], 'LABEL': assignee_label})
+                }
             }
         }
-        for (i = 0; i < permissions.length; i++)
+        for (var i = 0; i < permissions.length; i++)
             addConditionItem('permission', permissions[i], conditions_list.find('#duty-header'))
-        for (i = 0; i < duties.length; i++)
+        for (var i = 0; i < duties.length; i++)
             addConditionItem('duty', duties[i], conditions_list.find('#prohibition-header'))
-        for (i = 0; i < prohibitions.length; i++)
+        for (var i = 0; i < prohibitions.length; i++)
             addConditionItem('prohibition', prohibitions[i], conditions_list.find('#assignor-header'))
-        for (i = 0; i < assignors.length; i++)
+        for (var i = 0; i < assignors.length; i++)
             addConditionItem('assignor', assignors[i], conditions_list.find('#assignee-header'))
-        for (i = 0; i < assignees.length; i++)
+        for (var i = 0; i < assignees.length; i++)
             addConditionItem('assignee', assignees[i], conditions_list.find('#end-header'))
         $('#conditions-list').html(conditions_list.children())
     }
 
-    var addConditionItem = function(condition_type, condition_label, destination) {
+    var getIndexOfCondition = function(list, condition) {
+        for (var i = 0; i < list.length; i++)
+            if (list[i]['LABEL'] == condition)
+                return i
+        return -1
+    }
+
+    var addConditionItem = function(condition_type, condition, destination) {
         condition_item = $('#' + condition_type + '-item-template').clone()
-        condition_item.find('span').text(condition_label)
+        condition_item.find('.item-label').text(condition['LABEL'])
+        tooltip = condition_item.find('.hover-tooltip-right')
+        for (var i = 0; i < condition['RULES'].length; i++) {
+            var div = $('<div></div>')
+            div.text(condition['RULES'][i])
+            tooltip.append(div)
+        }
         condition_item.children().insertBefore(destination)
     }
 

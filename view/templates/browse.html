@@ -11,9 +11,9 @@
             <h5>Permalink</h5>
             <div>
                 <input class="permalink" value="{{ permalink }}" />
-                <div class="clipboard-icon">
+                <div class="hover-target clipboard-icon">
                     <a href="#!" class="far fa-2x fa-clipboard"></a>
-                    <span class="clipboard-tooltip">Copy to clipboard</span>
+                    <span class="hover-tooltip-top">Copy to clipboard</span>
                 </div>
             </div>
             <a href="{{ rdf_link }}" type="button" class="btn btn-primary mt-2 mb-2">View as RDF</a>
@@ -30,7 +30,7 @@
     });
     $('body').on('click', '.clipboard-icon', function() {
         copyToClipboard($('.permalink'));
-        $(this).children('.clipboard-tooltip').text('Copied!');
+        $(this).children('.hover-tooltip').text('Copied!');
     });
     var copyToClipboard = function(target) {
         $(target).focus().select();
