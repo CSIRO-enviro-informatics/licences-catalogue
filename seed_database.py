@@ -55,14 +55,9 @@ def add_rules():
     db_access.add_action_to_rule(get_action_uri('Read'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/2'
-    db_access.create_rule(
-        rule_uri,
-        rule_types_dict['Permission'],
-        'Allow distribution, reproduction and derivative works'
-    )
+    db_access.create_rule(rule_uri, rule_types_dict['Permission'], 'Allow distribution and reproduction')
     db_access.add_action_to_rule(get_action_uri('Distribute'), rule_uri)
     db_access.add_action_to_rule(get_action_uri('Reproduce'), rule_uri)
-    db_access.add_action_to_rule(get_action_uri('Derivative Works'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/3'
     db_access.create_rule(
@@ -72,16 +67,6 @@ def add_rules():
     )
     db_access.add_action_to_rule(get_action_uri('Attribution'), rule_uri)
 
-    rule_uri = _conf.BASE_URI + '/rule/4'
-    db_access.create_rule(
-        rule_uri,
-        rule_types_dict['Permission'],
-        'Allow distribution, reproduction and deriving from the asset'
-    )
-    db_access.add_action_to_rule(get_action_uri('Distribute'), rule_uri)
-    db_access.add_action_to_rule(get_action_uri('Reproduce'), rule_uri)
-    db_access.add_action_to_rule(get_action_uri('Derive'), rule_uri)
-
     rule_uri = _conf.BASE_URI + '/rule/5'
     db_access.create_rule(
         rule_uri,
@@ -89,11 +74,6 @@ def add_rules():
         'Must licence derivative works under the same licence'
     )
     db_access.add_action_to_rule(get_action_uri('Share Alike'), rule_uri)
-
-    rule_uri = _conf.BASE_URI + '/rule/6'
-    db_access.create_rule(rule_uri, rule_types_dict['Permission'], 'Allow distribution and reproduction')
-    db_access.add_action_to_rule(get_action_uri('Distribute'), rule_uri)
-    db_access.add_action_to_rule(get_action_uri('Reproduce'), rule_uri)
 
     rule_uri = _conf.BASE_URI + '/rule/7'
     db_access.create_rule(rule_uri, rule_types_dict['Prohibition'], 'Prohibit derivative works')
@@ -124,9 +104,13 @@ def add_rules():
     db_access.create_rule(rule_uri, rule_types_dict['Prohibition'], 'Prohibit commercial use')
     db_access.add_action_to_rule(get_action_uri('Commercial Use'), rule_uri)
 
-    # rule_uri = _conf.BASE_URI + '/rule/13'
-    # db_access.create_rule(rule_uri, ruletype['PERMISSION'])
-    # db_access.add_action_to_rule(get_action_uri('Derive'), rule_uri)
+    rule_uri = _conf.BASE_URI + '/rule/13'
+    db_access.create_rule(rule_uri, rule_types_dict['Permission'], 'Allow distribution of derivative works')
+    db_access.add_action_to_rule(get_action_uri('Derivative Works'), rule_uri)
+
+    rule_uri = _conf.BASE_URI + '/rule/14'
+    db_access.create_rule(rule_uri, rule_types_dict['Permission'], 'Allow creation of derivative assets')
+    db_access.add_action_to_rule(get_action_uri('Derive'), rule_uri)
 
 
 def readonly_licence():
@@ -134,11 +118,13 @@ def readonly_licence():
     db_access.create_policy(policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/1', policy_uri)
     db_access.set_policy_attribute(policy_uri, 'LABEL', 'Discovery Read Only License')
-    db_access.set_policy_attribute(policy_uri, 'COMMENT', '''
-        This license only allows for one thing: the assignee may *read* the asset (dataset) for which this license is 
-        assigned. The intent is for the assignee to be able to assess the dataset for purposes such as evaluation for 
-        future use but nothing more: no on-publishing, no distribution etc.
-    ''')
+    db_access.set_policy_attribute(
+        policy_uri,
+        'COMMENT',
+        'This license only allows for one thing: the assignee may *read* the asset (dataset) for which this license ' +
+        'is assigned. The intent is for the assignee to be able to assess the dataset for purposes such as ' +
+        'evaluation for future use but nothing more: no on-publishing, no distribution etc.'
+    )
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/disco')
 
 
@@ -151,6 +137,7 @@ def cc_by_4():
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/13', policy_uri)
 
 
 def cc_by_sa_3_au():
@@ -167,10 +154,11 @@ def cc_by_sa_3_au():
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://creativecommons.org/licenses/by-sa/3.0/au')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-sa-3.0-au')
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/5', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/14', policy_uri)
 
 
 def cc_by_2_5_au():
@@ -187,9 +175,10 @@ def cc_by_2_5_au():
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'https://creativecommons.org/licenses/by/2.5/au/')
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/5', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/14', policy_uri)
 
 
 def cc_by_2_au():
@@ -207,8 +196,9 @@ def cc_by_2_au():
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://creativecommons.org/licenses/by/2.0/au')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-2.0-au')
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/14', policy_uri)
 
 
 def cc_by_nc_nd_3_au():
@@ -221,7 +211,7 @@ def cc_by_nc_nd_3_au():
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://creativecommons.org/licenses/by-nc-nd/3.0/au')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-by-nc-nd-3.0-au')
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/6', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/7', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/12', policy_uri)
@@ -238,9 +228,10 @@ def gpl_3():
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://gnu.org/licenses/gpl-3.0.html')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://www.gnu.org/licenses/gpl-3.0.rdf')
     db_access.set_policy_attribute(policy_uri, 'LOGO', 'http://www.gnu.org/graphics/gplv3-127x51.png')
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/9', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/14', policy_uri)
 
 
 def mit():
@@ -250,8 +241,9 @@ def mit():
     db_access.set_policy_attribute(policy_uri, 'LEGAL_CODE', 'http://opensource.org/licenses/MIT')
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/gpl-2.0')
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/10', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/14', policy_uri)
 
 
 def cc_by_sa_4():
@@ -264,6 +256,7 @@ def cc_by_sa_4():
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/5', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/13', policy_uri)
 
 
 def cc_zero_1():
@@ -274,6 +267,7 @@ def cc_zero_1():
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/cc-zero-1.0')
     db_access.set_policy_attribute(policy_uri, 'HAS_VERSION', '1.0')
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/13', policy_uri)
 
 
 def gpl_2():
@@ -287,9 +281,10 @@ def gpl_2():
     db_access.set_policy_attribute(policy_uri, 'SEE_ALSO', 'http://gnu.org/licenses/gpl-2.0.html')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://www.gnu.org/licenses/gpl-2.0.rdf')
     db_access.set_policy_attribute(policy_uri, 'LOGO', 'http://www.gnu.org/graphics/gplv3-127x51.png')
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/9', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/14', policy_uri)
 
 
 def nem_513a():
@@ -331,7 +326,7 @@ def ogl_uk():
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(policy_uri, 'SAME_AS', 'http://test.linked.data.gov.au/license/ogl-uk')
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/3', policy_uri)
-    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/4', policy_uri)
+    db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/2', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/8', policy_uri)
     db_access.add_rule_to_policy(_conf.BASE_URI + '/rule/12', policy_uri)
 
