@@ -20,6 +20,9 @@
 {% endblock %}
 {% block bottom %}
 <h2>Licences that implement this action:</h2>
+{% if not licences %}
+None
+{% endif %}
 <ul>
     {% for licence in licences %}
     <li><a href="{{ url_for('controller.licence_routes', uri=licence['URI']) }}">{{ licence['LABEL'] }}</a></li>

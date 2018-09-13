@@ -63,6 +63,7 @@
 {% endblock %}
 {% block bottom %}
 <h2>Rules</h2>
+{% if not permissions and not duties and not prohibitions %}None{% endif %}
 <ul id="rule-list-template" class="pl-0">
     {% if permissions %}
     <li class="list-group-item font-weight-bold active">Permissions</li>
