@@ -16,9 +16,14 @@
     border-color: #00a9ce !important;
 }
 
-.btn-primary:hover:enabled, .show > btn-primary:focus, .show > .dropdown-toggle:focus, a.btn-primary:hover {
+.btn-primary:hover:enabled, .dropdown-toggle:active, .show > btn-primary:focus, .show > .dropdown-toggle:focus, a.btn-primary:hover {
     background-color: #00779C;
     border-color: #00779C;
+}
+
+.btn:active:enabled {
+    background-color: #00779C !important;
+    border-color: #00779C !important;
 }
 
 .mouseover, .fa-times, .dropdown-item {
