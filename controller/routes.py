@@ -78,16 +78,22 @@ def view_licence_list():
 def view_licence(licence_uri):
     try:
         licence = db_access.get_policy(licence_uri)
-        rules = db_access.get_rules_for_policy(licence_uri)
     except ValueError:
         abort(404)
         return
     title = licence['LABEL']
-    for rule in rules:
+    permissions = []
+    duties = []
+    prohibitions = []
+    for rule in licence['RULES']:
         if rule['LABEL'] is None:
             rule['LABEL'] = rule['URI']
-        rule['ACTIONS'] = [action['LABEL'] for action in rule['ACTIONS']]
-    rules = sorted(rules, key=lambda rule: rule['LABEL'].lower())
+        if rule['TYPE_LABEL'] == 'Permission':
+            permissions.append(rule)
+        elif rule['TYPE_LABEL'] == 'Duty':
+            duties.append(rule)
+        elif rule['TYPE_LABEL'] == 'Prohibition':
+            prohibitions.append(rule)
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(licence)
@@ -100,74 +106,9 @@ def view_licence(licence_uri):
             json_link=url_for('controller.licence_routes', _format='application/json', uri=licence_uri),
             logo=licence['LOGO'],
             licence=licence,
-            rules=rules
-        )
-
-
-@routes.route('/rule/index.json')
-def view_rule_list_json():
-    redirect_url = '/rule/?_format=application/json'
-    uri = request.values.get('uri')
-    if uri is not None:
-        redirect_url += '&uri=' + uri
-    return redirect(redirect_url)
-
-
-@routes.route('/rule/')
-def rule_routes():
-    rule_uri = request.values.get('uri')
-    if rule_uri is None:
-        return view_rules_list()
-    else:
-        return view_rule(rule_uri)
-
-
-def view_rules_list():
-    title = 'Rule Register'
-    rules = db_access.get_all_rules()
-    items = list()
-    for rule in rules:
-        if rule['LABEL'] is None:
-            rule['LABEL'] = rule['URI']
-        items.append({'uri': url_for('controller.rule_routes', uri=rule['URI']), 'label': rule['LABEL']})
-    items = sorted(items, key=lambda item: item['label'].lower())
-    preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
-    if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(rules)
-    else:
-        return render_template(
-            'browse_list.html',
-            title=title,
-            items=items,
-            permalink=conf.BASE_URI + url_for('controller.rule_routes'),
-            rdf_link='#!',
-            json_link=url_for('controller.rule_routes', _format='application/json')
-        )
-
-
-def view_rule(rule_uri):
-    try:
-        rule = db_access.get_rule(rule_uri)
-        licences = db_access.get_policies_for_rule(rule_uri)
-    except ValueError:
-        abort(404)
-        return
-    for licence in licences:
-        if licence['LABEL'] is None:
-            licence['LABEL'] = licence['URI']
-    licences = sorted(licences, key=lambda licence:licence['LABEL'].lower())
-    preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
-    if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(rule)
-    else:
-        return render_template(
-            'view_rule.html',
-            permalink=conf.BASE_URI + url_for('controller.rule_routes', uri=rule_uri),
-            rdf_link='#!',
-            json_link=url_for('controller.rule_routes', _format='application/json', uri=rule_uri),
-            rule=rule,
-            licences=licences,
-            title=rule['LABEL']
+            permissions=permissions,
+            duties=duties,
+            prohibitions=prohibitions
         )
 
 
@@ -215,16 +156,16 @@ def view_actions_list():
 def view_action(action_uri):
     try:
         action = db_access.get_action(action_uri)
-        rules = db_access.get_rules_using_action(action_uri)
+        licences = db_access.get_policies_using_action(action_uri)
     except ValueError:
         abort(404)
         return
     if action['LABEL'] is None:
         action['LABEL'] = action['URI']
-    for rule in rules:
-        if rule['LABEL'] is None:
-            rule['LABEL'] = rule['URI']
-    rules = sorted(rules, key=lambda rule: rule['LABEL'].lower())
+    for policy in licences:
+        if policy['LABEL'] is None:
+            policy['LABEL'] = policy['URI']
+    licences = sorted(licences, key=lambda rule: rule['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         return jsonify(action)
@@ -235,7 +176,7 @@ def view_action(action_uri):
             rdf_link='#!',
             json_link=url_for('controller.action_routes', _format='application/json', uri=action_uri),
             action=action,
-            rules=rules
+            licences=licences
         )
 
 

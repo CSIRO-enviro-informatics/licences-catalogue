@@ -238,11 +238,8 @@ def test_create_rule(mock):
     # Should add a rule
     rule_uri = 'http://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rowid = db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_rule(rule_uri, rule_type, rule_label)
     assert db_access.rule_exists(rule_uri)
-
-    # Should return a rowid
-    int(rowid)
 
     # Should raise an exception when that rule already exists
     with pytest.raises(ValueError):
@@ -525,6 +522,32 @@ def test_get_rules_using_action(mock):
     db_access.add_action_to_rule(action_uri, rule2_uri)
     rules = db_access.get_rules_using_action(action_uri)
     assert all(rule['URI'] in [rule1_uri, rule2_uri] for rule in rules)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_policies_using_action(mock):
+    action_uri = 'http://www.w3.org/ns/odrl/2/acceptTracking'
+    rule1_uri = 'https://example.com#rule1'
+    rule1_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule1_label = 'Rule1'
+    db_access.create_rule(rule1_uri, rule1_type, rule1_label)
+    db_access.add_action_to_rule(action_uri, rule1_uri)
+    rule2_uri = 'https://example.com#rule2'
+    rule2_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule2_label = 'Rule2'
+    db_access.create_rule(rule2_uri, rule2_type, rule2_label)
+    db_access.add_action_to_rule(action_uri, rule2_uri)
+    policy1_uri = 'http://example.com#policy1'
+    policy2_uri = 'http://example.com#policy2'
+    policy3_uri = 'http://example.com#policy3'
+    db_access.create_policy(policy1_uri)
+    db_access.create_policy(policy2_uri)
+    db_access.create_policy(policy3_uri)
+    db_access.add_rule_to_policy(rule1_uri, policy1_uri)
+    db_access.add_rule_to_policy(rule2_uri, policy2_uri)
+    db_access.add_rule_to_policy(rule2_uri, policy3_uri)
+    policies = db_access.get_policies_using_action(action_uri)
+    assert all(policy['URI'] in [policy1_uri, policy2_uri, policy3_uri] for policy in policies)
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

@@ -19,10 +19,10 @@
 </table>
 {% endblock %}
 {% block bottom %}
-<h2>Rules that implement this action:</h2>
+<h2>Licences that implement this action:</h2>
 <ul>
-    {% for rule in rules %}
-    <li><a href="{{ url_for('controller.rule_routes', uri=rule['URI']) }}">{{ rule['LABEL'] }}</a></li>
+    {% for licence in licences %}
+    <li><a href="{{ url_for('controller.licence_routes', uri=licence['URI']) }}">{{ licence['LABEL'] }}</a></li>
     {% endfor %}
 </ul>
 {% endblock %}
