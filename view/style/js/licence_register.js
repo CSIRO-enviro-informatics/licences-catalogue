@@ -76,6 +76,8 @@ $('body').on('click', '.search-button', function() {
 })
 
 var updateSearchResults = function(perfect_licences, extra_licences, insufficient_licences) {
+    //If there is an element with id 'results-all', all results should be displayed
+    //If there is an element with id 'results-best', only the perfect fits should be displayed
     resultsTemplate = $('#results-template').clone()
     if ($('#results-all').length > 0) {
         if (perfect_licences.length > 0)
@@ -100,7 +102,12 @@ var updateSearchResults = function(perfect_licences, extra_licences, insufficien
             licence_entry.find('h5').text(perfect_licences[i]['LABEL'])
             licence_entry.find('.card-header').attr('data-target', '#licence-' + i)
             licence_entry.find('.collapse').attr('id', 'licence-' + i)
-            licence_entry.find('a').attr('href', perfect_licences[i]['URI'])
+            licence_entry.find('a').attr('href', perfect_licences[i]['LINK'])
+            licence_entry.find('td:eq(0)').text(perfect_licences[i]['PERMISSIONS'].join(', '))
+            licence_entry.find('td:eq(1)').text(perfect_licences[i]['DUTIES'].join(', '))
+            licence_entry.find('td:eq(2)').text(perfect_licences[i]['PROHIBITIONS'].join(', '))
+            licence_entry.find('td:eq(3)').text(perfect_licences[i]['ASSIGNORS'].join(', '))
+            licence_entry.find('td:eq(4)').text(perfect_licences[i]['ASSIGNEES'].join(', '))
             resultsTemplate.append(licence_entry.children())
         }
         else
@@ -115,7 +122,7 @@ var addLicenceEntry = function(licence_type, licence_info, destination) {
     entry.find('.card-header').attr('data-target', '#' + licence_type + '-licence-' + i)
     entry.find('.collapse').attr('id', licence_type + '-licence-' + i)
     entry.find('.card-header').children().text(licence_info['LABEL'])
-    entry.find('a').attr('href', licence_info['URI'])
+    entry.find('a').attr('href', licence_info['LINK'])
     if (licence_type == 'extra' || licence_type == 'insufficient') {
         if (licence_info['PROHIBITIONS'].length > 0)
             entry.find('td:eq(2)').text(licence_info['PROHIBITIONS'].join(', '))

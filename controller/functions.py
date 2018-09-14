@@ -33,8 +33,12 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
         policy_permissions = set()
         policy_duties = set()
         policy_prohibitions = set()
+        policy_assignors = []
+        policy_assignees = []
         for rule in policy['RULES']:
             action_uris = [action['URI'] for action in rule['ACTIONS']]
+            policy_assignors.extend(rule['ASSIGNORS'])
+            policy_assignees.extend(rule['ASSIGNEES'])
             if rule['TYPE_LABEL'] == 'Permission':
                 policy_permissions = policy_permissions.union(action_uris)
             elif rule['TYPE_LABEL'] == 'Duty':
@@ -49,7 +53,8 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
         extra_conditions = {
             'permissions': policy_permissions - desired_permissions,
             'duties': policy_duties - desired_duties,
-            'prohibitions': policy_prohibitions - desired_prohibitions}
+            'prohibitions': policy_prohibitions - desired_prohibitions
+        }
         missing_conditions = {
             'permissions': desired_permissions - policy_permissions,
             'duties': desired_duties - policy_duties,
@@ -68,7 +73,12 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
         if not policy_has_extra_conditions and not policy_has_missing_conditions:
             perfect_fit_licences.append({
                 'LABEL': policy['LABEL'],
-                'URI': url_for('controller.licence_routes', uri=policy['URI'])
+                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
+                'PERMISSIONS': [db_access.get_action_label(action) for action in policy_permissions],
+                'DUTIES': [db_access.get_action_label(action) for action in policy_duties],
+                'PROHIBITIONS': [db_access.get_action_label(action) for action in policy_prohibitions],
+                'ASSIGNORS': policy_assignors,
+                'ASSIGNEES': policy_assignees
             })
         elif policy_has_extra_conditions and not policy_has_missing_conditions:
             extra_permissions = [db_access.get_action_label(action) for action in extra_conditions['permissions']]
@@ -76,7 +86,7 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
             extra_prohibitions = [db_access.get_action_label(action) for action in extra_conditions['prohibitions']]
             extra_conditions_licences.append({
                 'LABEL': policy['LABEL'],
-                'URI': url_for('controller.licence_routes', uri=policy['URI']),
+                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
                 'PERMISSIONS': extra_permissions,
                 'DUTIES': extra_duties,
                 'PROHIBITIONS': extra_prohibitions
@@ -87,7 +97,7 @@ def get_policies_with_constraints(desired_permissions, desired_duties, desired_p
             missing_prohibitions = [db_access.get_action_label(action) for action in missing_conditions['prohibitions']]
             missing_conditions_licences.append({
                 'LABEL': policy['LABEL'],
-                'URI': url_for('controller.licence_routes', uri=policy['URI']),
+                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
                 'PERMISSIONS': missing_permissions,
                 'DUTIES': missing_duties,
                 'PROHIBITIONS': missing_prohibitions
