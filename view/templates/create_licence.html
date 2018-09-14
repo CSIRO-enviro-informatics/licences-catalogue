@@ -1,523 +1,264 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h1 class="text-center">Create a Licence</h1>
-<ul class="nav nav-pills justify-content-center nav-justified ml-5 mr-5 mt-3">
-    <li class="nav-item">
-        <a class="nav-link active" data-toggle="pill" href="#step-1">Select Rules</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" href="#step-2">Suggested Licences</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" href="#step-3">Additional Information</a>
-    </li>
-</ul>
-<div class="tab-content mt-3 mb-5">
-    <div class="tab-pane fade show active" id="step-1">
-        <h2 class="text-center">Select your rules</h2>
-        <div class="row">
-            <div class="col-md-8">
-                <div id="accordion"></div>
-                <div class="mt-3">
-                    Or ...
-                    <ul class="mb-0"><li><a href="#!">Create your own rule</a></li></ul>
+    <h1 class="text-center">Create a Licence</h1>
+    <ul class="nav nav-pills justify-content-center nav-justified ml-5 mr-5 mt-3">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="pill" href="#step-1">Select Rules</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link search-button" data-toggle="pill" href="#step-2">Suggested Licences</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="pill" href="#step-3">Licence Info</a>
+        </li>
+    </ul>
+    <div class="tab-content mt-3 mb-5">
+        <div class="tab-pane fade show active" id="step-1">
+            <h2 class="text-center">Select your rules</h2>
+            <div class="row mt-3 mb-3">
+                <div class="col-md-6">
+                    <ul id="rule-list" class="list-group ml-5"></ul>
+                </div>
+                <div class="col-md-6">
+                    <div class="dropdown mb-3" id="permission-dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                            Add Permission
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for action in actions %}
+                            <li class="dropdown-item permission-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="dropdown mb-3" id="duty-dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                            Add Duty
+                        </button>
+                        <div class="dropdown-menu">
+                            {% for action in actions %}
+                            <li class="dropdown-item duty-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="dropdown mb-3" id="prohibition-dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                            Add Prohibition
+                        </button>
+                        <div class="dropdown-menu">
+                            {% for action in actions %}
+                            <li class="dropdown-item prohibition-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <ul class="list-group selected-rules mb-3">
-                    <li class="list-group-item font-weight-bold active">Selected Rules:</li>
-                </ul>
-                <ul id="conditions-list" class="list-group"></ul>
+            <div class="text-center mt-5">
+                <button type="button" class="btn btn-primary previous-button mr-3" disabled="disabled">
+                    <i class="fa fa-chevron-left"></i> Back
+                </button>
+                <button type="button" class="btn btn-primary next-button search-button ml-3">
+                    Continue <i class="fa fa-chevron-right"></i>
+                </button>
             </div>
         </div>
-        <div class="text-center mt-5">
-            <button type="button" class="btn btn-primary previous-button mr-3" disabled="disabled">
-                <i class="fa fa-chevron-left"></i> Back
-            </button>
-            <button type="button" class="btn btn-primary next-button ml-3">
-                Continue <i class="fa fa-chevron-right"></i>
-            </button>
+        <div class="tab-pane fade" id="step-2">
+            <div id="results-best"></div>
+            <div class="text-center mt-5">
+                <button type="button" class="btn btn-primary previous-button mr-3">
+                    <i class="fa fa-chevron-left"></i> Back
+                </button>
+                <button type="button" class="btn btn-primary next-button ml-3">
+                    Create New Licence <i class="fa fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="step-3">
+            <form id="licence-create-form">
+                <table class="table">
+                    <col width="150">
+                    <tbody>
+                        <tr>
+                            <th>Licence Name: </th>
+                            <td><input type="text"/></td>
+                        </tr>
+                        <tr>
+                            <th>Description:</th>
+                            <td><textarea></textarea></td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <select>
+                                    <option>Accepted</option>
+                                    <option>Deprecated</option>
+                                    <option>Experimental</option>
+                                    <option>Reserved</option>
+                                    <option>Submitted</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Version:</th>
+                            <td><input type="text"/></td>
+                        </tr>
+                        <tr>
+                            <th>Jurisdiction:</th>
+                            <td><input type="text"/></td>
+                        </tr>
+                        <tr>
+                            <th>Legal Code:</th>
+                            <td><input type="text"/></td>
+                        </tr>
+                        <tr>
+                            <th>Language:</th>
+                            <td>
+                                <select data-placeholder="Choose a Language...">
+                                    <option value="AF">Afrikanns</option>
+                                    <option value="SQ">Albanian</option>
+                                    <option value="AR">Arabic</option>
+                                    <option value="HY">Armenian</option>
+                                    <option value="EU">Basque</option>
+                                    <option value="BN">Bengali</option>
+                                    <option value="BG">Bulgarian</option>
+                                    <option value="CA">Catalan</option>
+                                    <option value="KM">Cambodian</option>
+                                    <option value="ZH">Chinese (Mandarin)</option>
+                                    <option value="HR">Croation</option>
+                                    <option value="CS">Czech</option>
+                                    <option value="DA">Danish</option>
+                                    <option value="NL">Dutch</option>
+                                    <option value="EN" selected="selected">English</option>
+                                    <option value="ET">Estonian</option>
+                                    <option value="FJ">Fiji</option>
+                                    <option value="FI">Finnish</option>
+                                    <option value="FR">French</option>
+                                    <option value="KA">Georgian</option>
+                                    <option value="DE">German</option>
+                                    <option value="EL">Greek</option>
+                                    <option value="GU">Gujarati</option>
+                                    <option value="HE">Hebrew</option>
+                                    <option value="HI">Hindi</option>
+                                    <option value="HU">Hungarian</option>
+                                    <option value="IS">Icelandic</option>
+                                    <option value="ID">Indonesian</option>
+                                    <option value="GA">Irish</option>
+                                    <option value="IT">Italian</option>
+                                    <option value="JA">Japanese</option>
+                                    <option value="JW">Javanese</option>
+                                    <option value="KO">Korean</option>
+                                    <option value="LA">Latin</option>
+                                    <option value="LV">Latvian</option>
+                                    <option value="LT">Lithuanian</option>
+                                    <option value="MK">Macedonian</option>
+                                    <option value="MS">Malay</option>
+                                    <option value="ML">Malayalam</option>
+                                    <option value="MT">Maltese</option>
+                                    <option value="MI">Maori</option>
+                                    <option value="MR">Marathi</option>
+                                    <option value="MN">Mongolian</option>
+                                    <option value="NE">Nepali</option>
+                                    <option value="NO">Norwegian</option>
+                                    <option value="FA">Persian</option>
+                                    <option value="PL">Polish</option>
+                                    <option value="PT">Portuguese</option>
+                                    <option value="PA">Punjabi</option>
+                                    <option value="QU">Quechua</option>
+                                    <option value="RO">Romanian</option>
+                                    <option value="RU">Russian</option>
+                                    <option value="SM">Samoan</option>
+                                    <option value="SR">Serbian</option>
+                                    <option value="SK">Slovak</option>
+                                    <option value="SL">Slovenian</option>
+                                    <option value="ES">Spanish</option>
+                                    <option value="SW">Swahili</option>
+                                    <option value="SV">Swedish </option>
+                                    <option value="TA">Tamil</option>
+                                    <option value="TT">Tatar</option>
+                                    <option value="TE">Telugu</option>
+                                    <option value="TH">Thai</option>
+                                    <option value="BO">Tibetan</option>
+                                    <option value="TO">Tonga</option>
+                                    <option value="TR">Turkish</option>
+                                    <option value="UK">Ukranian</option>
+                                    <option value="UR">Urdu</option>
+                                    <option value="UZ">Uzbek</option>
+                                    <option value="VI">Vietnamese</option>
+                                    <option value="CY">Welsh</option>
+                                    <option value="XH">Xhosa</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Same As:</th>
+                            <td><input type="text"/></td>
+                        </tr>
+                        <tr>
+                            <th>See Also:</th>
+                            <td><input type="text"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+            <div class="text-center mt-5">
+                <button type="button" class="btn btn-primary previous-button search-button mr-3">
+                    <i class="fa fa-chevron-left"></i> Back
+                </button>
+                <button id="create-licence-button" type="button" class="btn btn-primary ml-3">
+                    Create Licence
+                </button>
+            </div>
         </div>
     </div>
-    <div class="tab-pane fade" id="step-2">
-        <h3 class="text-center">Please consider reusing a licence.</h3>
-        <h3 class="text-center">The following licences are similar to your requirements.</h3>
+    <ul id="rule-list-template" hidden>
+        <li class="list-group-item font-weight-bold active">Filter:</li>
+        <li id="permission-header" class="list-group-item font-weight-bold">Permissions</li>
+        <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
+        <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
+    </ul>
+    <div id="permission-item-template" hidden>
+        <li class="list-group-item permission-item">
+            <span class="ml-3">Read</span>
+            <i class="fas fa-times text-danger delete-item"></i>
+        </li>
+    </div>
+    <div id="duty-item-template" hidden>
+        <li class="list-group-item duty-item">
+            <span class="ml-3">Attach Policy</span>
+            <i class="fas fa-times text-danger delete-item"></i>
+        </li>
+    </div>
+    <div id="prohibition-item-template" hidden>
+        <li class="list-group-item prohibition-item">
+            <span class="ml-3">Distribute</span>
+            <i class="fas fa-times text-danger delete-item"></i>
+        </li>
+    </div>
+    <div id="results-template" hidden>
+        <div id="suggested-licences-found" hidden>
+            <h3 class="text-center">Please consider reusing a licence.</h3>
+            <h3 class="text-center">The following licences are similar to your requirements.</h3>
+        </div>
+        <div id="suggested-licences-not-found" hidden>
+            <h3 class="text-center">There are no appropriate existing licences to re-use.</h3>
+            <h3 class="text-center">Please continue with creating a new licence.</h3>
+        </div>
+    </div>
+    <div id="licence-template" hidden>
         <div class="card">
             <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-1">
                 <h5 class="mb-0">Licence #1</h5>
             </div>
             <div id="licence-1" class="collapse">
                 <div class="card-body text-center">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th>Description</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Permissions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Duties</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Prohibitions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a href="#!" type="button" class="btn btn-primary">See Licence</a>
+                    <a target="_blank" href="#!" type="button" class="btn btn-primary">See Licence</a>
                 </div>
             </div>
         </div>
-        <div class="card">
-            <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-2">
-                <h5 class="mb-0">Licence #2</h5>
-            </div>
-            <div id="licence-2" class="collapse">
-                <div class="card-body text-center">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th>Description</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Permissions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Duties</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Prohibitions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a href="#!" type="button" class="btn btn-primary">See Licence</a>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-3">
-                <h5 class="mb-0">Licence #3</h5>
-            </div>
-            <div id="licence-3" class="collapse">
-                <div class="card-body text-center">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr>
-                                <th>Description</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Permissions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Duties</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Prohibitions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a href="#!" type="button" class="btn btn-primary">See Licence</a>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-5">
-            <button type="button" class="btn btn-primary previous-button mr-3">
-                <i class="fa fa-chevron-left"></i> Back
-            </button>
-            <button type="button" class="btn btn-primary next-button ml-3">
-                Create New Licence Anyway <i class="fa fa-chevron-right"></i>
-            </button>
-        </div>
     </div>
-    <div class="tab-pane fade" id="step-3">
-        <form id="licence-create-form">
-            <table class="table">
-                <col width="150">
-                <tbody>
-                    <tr>
-                        <th>Licence Name: </th>
-                        <td><input type="text"/></td>
-                    </tr>
-                    <tr>
-                        <th>Description:</th>
-                        <td><textarea></textarea></td>
-                    </tr>
-                    <tr>
-                        <th>Status:</th>
-                        <td>
-                            <select>
-                                <option>Accepted</option>
-                                <option>Deprecated</option>
-                                <option>Experimental</option>
-                                <option>Reserved</option>
-                                <option>Submitted</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Version:</th>
-                        <td><input type="text"/></td>
-                    </tr>
-                    <tr>
-                        <th>Jurisdiction:</th>
-                        <td><input type="text"/></td>
-                    </tr>
-                    <tr>
-                        <th>Legal Code:</th>
-                        <td><input type="text"/></td>
-                    </tr>
-                    <tr>
-                        <th>Language:</th>
-                        <td>
-                            <select data-placeholder="Choose a Language...">
-                                <option value="AF">Afrikanns</option>
-                                <option value="SQ">Albanian</option>
-                                <option value="AR">Arabic</option>
-                                <option value="HY">Armenian</option>
-                                <option value="EU">Basque</option>
-                                <option value="BN">Bengali</option>
-                                <option value="BG">Bulgarian</option>
-                                <option value="CA">Catalan</option>
-                                <option value="KM">Cambodian</option>
-                                <option value="ZH">Chinese (Mandarin)</option>
-                                <option value="HR">Croation</option>
-                                <option value="CS">Czech</option>
-                                <option value="DA">Danish</option>
-                                <option value="NL">Dutch</option>
-                                <option value="EN" selected="selected">English</option>
-                                <option value="ET">Estonian</option>
-                                <option value="FJ">Fiji</option>
-                                <option value="FI">Finnish</option>
-                                <option value="FR">French</option>
-                                <option value="KA">Georgian</option>
-                                <option value="DE">German</option>
-                                <option value="EL">Greek</option>
-                                <option value="GU">Gujarati</option>
-                                <option value="HE">Hebrew</option>
-                                <option value="HI">Hindi</option>
-                                <option value="HU">Hungarian</option>
-                                <option value="IS">Icelandic</option>
-                                <option value="ID">Indonesian</option>
-                                <option value="GA">Irish</option>
-                                <option value="IT">Italian</option>
-                                <option value="JA">Japanese</option>
-                                <option value="JW">Javanese</option>
-                                <option value="KO">Korean</option>
-                                <option value="LA">Latin</option>
-                                <option value="LV">Latvian</option>
-                                <option value="LT">Lithuanian</option>
-                                <option value="MK">Macedonian</option>
-                                <option value="MS">Malay</option>
-                                <option value="ML">Malayalam</option>
-                                <option value="MT">Maltese</option>
-                                <option value="MI">Maori</option>
-                                <option value="MR">Marathi</option>
-                                <option value="MN">Mongolian</option>
-                                <option value="NE">Nepali</option>
-                                <option value="NO">Norwegian</option>
-                                <option value="FA">Persian</option>
-                                <option value="PL">Polish</option>
-                                <option value="PT">Portuguese</option>
-                                <option value="PA">Punjabi</option>
-                                <option value="QU">Quechua</option>
-                                <option value="RO">Romanian</option>
-                                <option value="RU">Russian</option>
-                                <option value="SM">Samoan</option>
-                                <option value="SR">Serbian</option>
-                                <option value="SK">Slovak</option>
-                                <option value="SL">Slovenian</option>
-                                <option value="ES">Spanish</option>
-                                <option value="SW">Swahili</option>
-                                <option value="SV">Swedish </option>
-                                <option value="TA">Tamil</option>
-                                <option value="TT">Tatar</option>
-                                <option value="TE">Telugu</option>
-                                <option value="TH">Thai</option>
-                                <option value="BO">Tibetan</option>
-                                <option value="TO">Tonga</option>
-                                <option value="TR">Turkish</option>
-                                <option value="UK">Ukranian</option>
-                                <option value="UR">Urdu</option>
-                                <option value="UZ">Uzbek</option>
-                                <option value="VI">Vietnamese</option>
-                                <option value="CY">Welsh</option>
-                                <option value="XH">Xhosa</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Same As:</th>
-                        <td><input type="text"/></td>
-                    </tr>
-                    <tr>
-                        <th>See Also:</th>
-                        <td><input type="text"/></td>
-                    </tr>
-                </tbody>
-            </table>
-        </form>
-        <div class="text-center mt-5">
-            <button type="button" class="btn btn-primary previous-button mr-3">
-                <i class="fa fa-chevron-left"></i> Back
-            </button>
-            <button id="create-licence-button" type="button" class="btn btn-primary ml-3">
-                Create Licence
-            </button>
-        </div>
-    </div>
-</div>
-<div id="rule-card-template" hidden>
-    <div class="card">
-        <div class="card-header mouseover" data-toggle="collapse">Rule Label</div>
-        <div class="collapse">
-            <div class="card-body text-center">
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <th>URI</th>
-                            <td class="text-left"></td>
-                        </tr>
-                        <tr>
-                            <th>Type</th>
-                            <td class="text-left"></td>
-                        </tr>
-                        <tr>
-                            <th>Actions</th>
-                            <td class="text-left"></td>
-                        </tr>
-                        <tr>
-                            <th>Assignors</th>
-                            <td class="text-left"></td>
-                        </tr>
-                        <tr>
-                            <th>Assignees</th>
-                            <td class="text-left"></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <a href="" target="_blank" type="button" class="btn btn-primary">See Rule</a>
-                <button type="button" class="btn btn-primary add-rule" data-rule="">Add Rule</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="selected-rule-template" hidden>
-    <li class="list-group-item">
-        <span class="ml-3">Rule #1</span>
-        <a href="#!"><i class="fas fa-times text-danger delete-item"></i></a>
-    </li>
-</div>
-<div id="permission-item-template" hidden>
-    <li class="list-group-item permission-item">
-        <div class="hover-target">
-            <span class="ml-3 item-label"></span>
-            <span class="hover-tooltip-right">From Rule:</span>
-        </div>
-    </li>
-</div>
-<div id="duty-item-template" hidden>
-    <li class="list-group-item duty-item">
-        <div class="hover-target">
-            <span class="ml-3 item-label"></span>
-            <span class="hover-tooltip-right">From Rule:</span>
-        </div>
-    </li>
-</div>
-<div id="prohibition-item-template" hidden>
-    <li class="list-group-item prohibition-item">
-        <div class="hover-target">
-            <span class="ml-3 item-label"></span>
-            <span class="hover-tooltip-right">From Rule:</span>
-        </div>
-    </li>
-</div>
-<div id="assignor-item-template" hidden>
-    <li class="list-group-item assignor-item">
-        <div class="hover-target">
-            <span class="ml-3 item-label"></span>
-            <span class="hover-tooltip-right">From Rule:</span>
-        </div>
-    </li>
-</div>
-<div id="assignee-item-template" hidden>
-    <li class="list-group-item assignee-item">
-        <div class="hover-target">
-            <span class="ml-3 item-label"></span>
-            <span class="hover-tooltip-right">From Rule:</span>
-        </div>
-    </li>
-</div>
-<ul id="conditions-list-template" class="list-group" hidden>
-    <li class="list-group-item font-weight-bold active">Selected Conditions:</li>
-    <li id="permission-header" class="list-group-item font-weight-bold">Permissions</li>
-    <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
-    <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
-    <li id="assignor-header" class="list-group-item font-weight-bold">Assignors</li>
-    <li id="assignee-header" class="list-group-item font-weight-bold">Assignees</li>
-    <li id="end-header" hidden></li>
-</ul>
 {% endblock %}
 {% block bottom_script %}
 <script id="rules-json" type="application/json">
 {% if rules %}{{ rules|tojson|safe }}{% endif %}
 </script>
-<script>
-    //Moves to next step in form
-    $('body').on('click', '.previous-button', function() {
-        $('.nav-link.active').parent().prev('li').find('a').trigger('click')
-    })
-    //Moves to previous step in form
-    $('body').on('click', '.next-button', function() {
-        $('.nav-link.active').parent().next('li').find('a').trigger('click')
-    })
-
-    //Load available rules from JSON
-    try {
-        var rules = JSON.parse($('#rules-json').html());
-    } catch(err) {
-        var rules = []
-    }
-
-    var updateRuleSelectList = function() {
-        $('#accordion').empty()
-        for (i = 0; i < rules.length; i++) {
-            if (!('SELECTED' in rules[i]) || rules[i]['SELECTED'] == false) {
-                rule_card = $('#rule-card-template').clone()
-                rule_card.find('.card-header').text(rules[i]['LABEL']).attr('data-target', '#rule-' + i)
-                rule_card.find('.collapse').attr('id', 'rule-' + i)
-                rule_card.find('td:eq(0)').text(rules[i]['URI'])
-                rule_card.find('td:eq(1)').text(rules[i]['TYPE_LABEL'])
-                rule_card.find('td:eq(2)').text(rules[i]['ACTIONS'].join(', '))
-                rule_card.find('td:eq(3)').text(rules[i]['ASSIGNORS'].join(', '))
-                rule_card.find('td:eq(4)').text(rules[i]['ASSIGNEES'].join(', '))
-                rule_card.find('.card-body').children('a').attr('href', rules[i]['LINK'])
-                rule_card.find('.card-body').children('button').attr('data-rule', rules[i]['URI'])
-                $('#accordion').append(rule_card.children())
-            }
-        }
-    }
-
-    //Adds a rule to the selection
-    $('body').on('click', '.add-rule', function() {
-        var uri = $(this).attr('data-rule')
-        for (i = 0; i < rules.length; i++) {
-            if (rules[i]['URI'] == uri && (!('SELECTED' in rules[i]) || rules[i]['SELECTED'] == false)) {
-                rules[i]['SELECTED'] = true
-                var selected_rule_item = $('#selected-rule-template').clone()
-                selected_rule_item.find('span').text(rules[i]['LABEL'])
-                selected_rule_item.find('li').attr('data-rule', uri)
-                $('.selected-rules').append(selected_rule_item.children())
-            }
-        }
-        updateRuleSelectList()
-        updateConditionList()
-    })
-
-    var updateConditionList = function() {
-        conditions_list = $('#conditions-list-template').clone()
-        permissions = []
-        duties = []
-        prohibitions = []
-        assignors = []
-        assignees = []
-        //Goes through each rule that is currently selected, and adds its conditions to the above
-        for (var i = 0; i < rules.length; i++) {
-            if ('SELECTED' in rules[i] && rules[i]['SELECTED'] == true) {
-                rule_type = rules[i]['TYPE_LABEL']
-                rule_label = rules[i]['LABEL']
-                var rule_type_list
-                if (rule_type == 'Permission')
-                    rule_type_list = permissions
-                else if (rule_type == 'Duty')
-                    rule_type_list = duties
-                else if (rule_type == 'Prohibition')
-                    rule_type_list = prohibitions
-                else
-                    return
-                //Add the actions to permissions, duties or prohibitions
-                for (var j = 0; j < rules[i]['ACTIONS'].length; j++) {
-                    action_label = rules[i]['ACTIONS'][j]
-                    action_index = getIndexOfCondition(rule_type_list, action_label)
-                    if (action_index >= 0)
-                        rule_type_list[action_index]['RULES'].push(rule_label)
-                    else
-                        rule_type_list.push({'RULES': [rule_label], 'LABEL': action_label})
-                }
-                //Add the assignors
-                for (var j = 0; j < rules[i]['ASSIGNORS'].length; j++) {
-                    assignor_label = rules[i]['ASSIGNORS'][j]
-                    assignor_index = getIndexOfCondition(rule_type_list, assignor_label)
-                    if (assignor_index >= 0)
-                        assignors[assignor_index]['RULES'].push(rule_label)
-                    else
-                        assignors.push({'RULES': [rule_label], 'LABEL': assignor_label})
-                }
-                //Add the assignees
-                for (var j = 0; j < rules[i]['ASSIGNEES'].length; j++) {
-                    assignee_label = rules[i]['ASSIGNEES'][j]
-                    assignee_index = getIndexOfCondition(rule_type_list, assignee_label)
-                    if (assignee_index >= 0)
-                        assignees[assignee_index]['RULES'].push(rule_label)
-                    else
-                        assignees.push({'RULES': [rule_label], 'LABEL': assignee_label})
-                }
-            }
-        }
-        for (var i = 0; i < permissions.length; i++)
-            addConditionItem('permission', permissions[i], conditions_list.find('#duty-header'))
-        for (var i = 0; i < duties.length; i++)
-            addConditionItem('duty', duties[i], conditions_list.find('#prohibition-header'))
-        for (var i = 0; i < prohibitions.length; i++)
-            addConditionItem('prohibition', prohibitions[i], conditions_list.find('#assignor-header'))
-        for (var i = 0; i < assignors.length; i++)
-            addConditionItem('assignor', assignors[i], conditions_list.find('#assignee-header'))
-        for (var i = 0; i < assignees.length; i++)
-            addConditionItem('assignee', assignees[i], conditions_list.find('#end-header'))
-        $('#conditions-list').html(conditions_list.children())
-    }
-
-    var getIndexOfCondition = function(list, condition) {
-        for (var i = 0; i < list.length; i++)
-            if (list[i]['LABEL'] == condition)
-                return i
-        return -1
-    }
-
-    var addConditionItem = function(condition_type, condition, destination) {
-        condition_item = $('#' + condition_type + '-item-template').clone()
-        condition_item.find('.item-label').text(condition['LABEL'])
-        tooltip = condition_item.find('.hover-tooltip-right')
-        for (var i = 0; i < condition['RULES'].length; i++) {
-            var div = $('<div></div>')
-            div.text(condition['RULES'][i])
-            tooltip.append(div)
-        }
-        condition_item.children().insertBefore(destination)
-    }
-
-    // Removes items from rule selection when X clicked
-    $('body').on('click', '.delete-item', function() {
-        for (i = 0; i < rules.length; i++)
-            if (rules[i]['URI'] == $(this).closest('li').attr('data-rule'))
-                rules[i]['SELECTED'] = false
-        $(this).closest('.list-group-item').remove()
-        updateRuleSelectList()
-        updateConditionList()
-    })
-
-    updateRuleSelectList()
-    updateConditionList()
-</script>
+<script src="{{ url_for('static', filename='js/licence_register.js') }}"></script>
 {% endblock %}
