@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from controller import db_access, functions
 import _conf as conf
 import json
+from uuid import uuid4
 
 routes = Blueprint('controller', __name__)
 
@@ -185,3 +186,12 @@ def create_licence_form():
     actions = db_access.get_all_actions()
     actions.sort(key=lambda action: action['LABEL'])
     return render_template('create_licence.html', actions=actions)
+
+
+@routes.route('/licence/create', methods=['POST'])
+def create_licence():
+    attributes = {'type': 'http://creativecommons.org/ns#License'}
+    attributes.update(request.form.items())
+    uri = 'http://example.com/licence/' + str(uuid4())
+    functions.create_policy(uri, attributes)
+    return redirect(url_for('controller.licence_routes', uri=uri))

@@ -69,7 +69,6 @@ $('body').on('click', '.search-button', function() {
             prohibitions: JSON.stringify(prohibitions.map(x => x['URI']))
         },
         success: function(data) {
-            console.log(data)
             updateSearchResults(data['perfect_licences'], data['extra_licences'], data['insufficient_licences'])
         }
     })

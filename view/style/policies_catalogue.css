@@ -133,7 +133,7 @@ center {
 }
 
 form#licence-create-form textarea,
-form#licence-create-form input,
+form#licence-create-form input[type=text],
 form#licence-create-form select {
     width: 100%;
 }
