@@ -5,18 +5,21 @@ var prohibitions = []
 var updateRuleDisplay = function() {
     ruleDisplay = $('#rule-list-template').clone()
     for (i = 0; i < permissions.length; i++) {
-        permissionTemplate = $('#permission-item-template').clone().children()
-        permissionTemplate.find('span').text(permissions[i]['LABEL'])
+        permissionTemplate = $('#item-template').clone().children()
+        permissionTemplate.find('a').text(permissions[i]['LABEL']).attr('href', permissions[i]['LINK'])
+        permissionTemplate.find('li').addClass('permission-item')
         permissionTemplate.insertBefore(ruleDisplay.find('#duty-header'))
     }
     for (i = 0; i < duties.length; i++) {
-        dutyTemplate = $('#duty-item-template').clone().children()
-        dutyTemplate.find('span').text(duties[i]['LABEL'])
+        dutyTemplate = $('#item-template').clone().children()
+        dutyTemplate.find('a').text(duties[i]['LABEL']).attr('href', duties[i]['LINK'])
+        dutyTemplate.find('li').addClass('duty-item')
         dutyTemplate.insertBefore(ruleDisplay.find('#prohibition-header'))
     }
     for (i = 0; i < prohibitions.length; i++) {
-        prohibitionTemplate = $('#prohibition-item-template').clone().children()
-        prohibitionTemplate.find('span').text(prohibitions[i]['LABEL'])
+        prohibitionTemplate = $('#item-template').clone().children()
+        prohibitionTemplate.find('a').text(prohibitions[i]['LABEL']).attr('href', prohibitions[i]['LINK'])
+        prohibitionTemplate.find('li').addClass('prohibition-item')
         ruleDisplay.append(prohibitionTemplate)
     }
     $('#rule-list').html(ruleDisplay.html())
@@ -33,7 +36,8 @@ $('body').on('click', '.dropdown-item', function() {
         list = prohibitions
     actionLabel = $(this).text()
     actionURI = $(this).attr('data-action-uri')
-    list.push({'LABEL': actionLabel, 'URI': actionURI})
+    actionLink = $(this).attr('data-action-link')
+    list.push({'LABEL': actionLabel, 'URI': actionURI, 'LINK': actionLink})
     updateRuleDisplay()
 })
 

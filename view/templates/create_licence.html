@@ -26,7 +26,7 @@
                         </button>
                         <ul class="dropdown-menu">
                             {% for action in actions %}
-                            <li class="dropdown-item permission-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                            <li class="dropdown-item permission-item" data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -36,7 +36,7 @@
                         </button>
                         <div class="dropdown-menu">
                             {% for action in actions %}
-                            <li class="dropdown-item duty-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                            <li class="dropdown-item duty-item" data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</li>
                             {% endfor %}
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                         </button>
                         <div class="dropdown-menu">
                             {% for action in actions %}
-                            <li class="dropdown-item prohibition-item" data-action-uri="{{ action['URI'] }}">{{ action['LABEL'] }}</li>
+                            <li class="dropdown-item prohibition-item" data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</li>
                             {% endfor %}
                         </div>
                     </div>
@@ -218,21 +218,9 @@
         <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
         <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
     </ul>
-    <div id="permission-item-template" hidden>
-        <li class="list-group-item permission-item">
-            <span class="ml-3">Read</span>
-            <i class="fas fa-times text-danger delete-item"></i>
-        </li>
-    </div>
-    <div id="duty-item-template" hidden>
-        <li class="list-group-item duty-item">
-            <span class="ml-3">Attach Policy</span>
-            <i class="fas fa-times text-danger delete-item"></i>
-        </li>
-    </div>
-    <div id="prohibition-item-template" hidden>
-        <li class="list-group-item prohibition-item">
-            <span class="ml-3">Distribute</span>
+    <div id="item-template" hidden>
+        <li class="list-group-item">
+            <a target="_blank" href="" class="ml-3"></a>
             <i class="fas fa-times text-danger delete-item"></i>
         </li>
     </div>

@@ -18,6 +18,8 @@ def home():
 @routes.route('/search')
 def search():
     actions = db_access.get_all_actions()
+    for action in actions:
+        action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
     return render_template('search.html', actions=actions)
 
 
@@ -185,6 +187,8 @@ def view_action(action_uri):
 def create_licence_form():
     actions = db_access.get_all_actions()
     actions.sort(key=lambda action: action['LABEL'])
+    for action in actions:
+        action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
     return render_template('create_licence.html', actions=actions)
 
 
