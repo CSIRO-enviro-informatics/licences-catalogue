@@ -138,7 +138,7 @@ def view_actions_list():
         if action['URI'] is None:
             action['LABEL'] = action['URI']
         items.append({'uri': url_for('controller.action_routes', uri=action['URI']), 'label': action['LABEL']})
-    items = sorted(items, key=lambda item:item['label'].lower())
+    items = sorted(items, key=lambda item: item['label'].lower())
     title = 'Action Register'
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
@@ -193,5 +193,8 @@ def create_licence():
     attributes = {'type': 'http://creativecommons.org/ns#License'}
     attributes.update(request.form.items())
     uri = 'http://example.com/licence/' + str(uuid4())
-    functions.create_policy(uri, attributes)
+    permissions = json.loads(attributes.pop('permissions'))
+    duties = json.loads(attributes.pop('duties'))
+    prohibitions = json.loads(attributes.pop('prohibitions'))
+    functions.create_policy(uri, attributes, permissions, duties, prohibitions)
     return redirect(url_for('controller.licence_routes', uri=uri))

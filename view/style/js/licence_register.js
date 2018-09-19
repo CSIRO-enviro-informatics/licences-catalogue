@@ -148,4 +148,18 @@ $('body').on('click', '.next-button', function() {
     $('.nav-link.active').parent().next('li').find('a').trigger('click')
 })
 
+$('#licence-create-form').submit(function(event) {
+    var permissions_input = $('<input>').attr('type', 'hidden').attr('name', 'permissions').attr('class', 'hidden-rule-input').val(JSON.stringify(permissions))
+    var duties_input = $('<input>').attr('type', 'hidden').attr('name', 'duties').attr('class', 'hidden-rule-input').val(JSON.stringify(duties))
+    var prohibitions_input = $('<input>').attr('type', 'hidden').attr('name', 'prohibitions').attr('class', 'hidden-rule-input').val(JSON.stringify(prohibitions))
+    $('#licence-create-form').append(permissions_input)
+    $('#licence-create-form').append(duties_input)
+    $('#licence-create-form').append(prohibitions_input)
+})
+
+// Removing hidden inputs just in case the back button was used
+$(window).on('unload', function() {
+    $('.hidden-rule-input').remove()
+})
+
 updateRuleDisplay()

@@ -1,14 +1,19 @@
 import re
 from controller import db_access
 from flask import url_for
+import _conf
+from uuid import uuid4
 
 
-def create_policy(policy_uri, attributes=None):
+def create_policy(policy_uri, attributes=None, permissions=None, duties=None, prohibitions=None):
     """
     :param policy_uri:
     :param attributes:  Dictionary of optional attributes of the policy.
                         Permitted attributes:   type, label, jurisdiction, legal_code, has_version, language, see_also
                                                 same_as, comment, logo, status
+    :param permissions:
+    :param duties:
+    :param prohibitions:
     :return:
     """
     if not is_valid_uri(policy_uri):
@@ -17,6 +22,19 @@ def create_policy(policy_uri, attributes=None):
     if attributes:
         for attr_name, attr_value in attributes.items():
             db_access.set_policy_attribute(policy_uri, attr_name, attr_value)
+    for permission in permissions:
+        create_rule_for_policy(permission['URI'], 'http://www.w3.org/ns/odrl/2/permission', policy_uri)
+    for duty in duties:
+        create_rule_for_policy(duty['URI'], 'http://www.w3.org/ns/odrl/2/duty', policy_uri)
+    for prohibition in prohibitions:
+        create_rule_for_policy(prohibition['URI'], 'http://www.w3.org/ns/odrl/2/prohibition', policy_uri)
+
+
+def create_rule_for_policy(action_uri, rule_type, policy_uri):
+    rule_uri = _conf.BASE_URI + '/rules/' + str(uuid4())
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.add_action_to_rule(action_uri, rule_uri)
+    db_access.add_rule_to_policy(rule_uri, policy_uri)
 
 
 def is_valid_uri(uri):
