@@ -7,19 +7,19 @@ var updateRuleDisplay = function() {
     for (i = 0; i < permissions.length; i++) {
         permissionTemplate = $('#item-template').clone().children()
         permissionTemplate.find('a').text(permissions[i]['LABEL']).attr('href', permissions[i]['LINK'])
-        permissionTemplate.find('li').addClass('permission-item')
+        permissionTemplate.addClass('permission-item')
         permissionTemplate.insertBefore(ruleDisplay.find('#duty-header'))
     }
     for (i = 0; i < duties.length; i++) {
         dutyTemplate = $('#item-template').clone().children()
         dutyTemplate.find('a').text(duties[i]['LABEL']).attr('href', duties[i]['LINK'])
-        dutyTemplate.find('li').addClass('duty-item')
+        dutyTemplate.addClass('duty-item')
         dutyTemplate.insertBefore(ruleDisplay.find('#prohibition-header'))
     }
     for (i = 0; i < prohibitions.length; i++) {
         prohibitionTemplate = $('#item-template').clone().children()
         prohibitionTemplate.find('a').text(prohibitions[i]['LABEL']).attr('href', prohibitions[i]['LINK'])
-        prohibitionTemplate.find('li').addClass('prohibition-item')
+        prohibitionTemplate.addClass('prohibition-item')
         ruleDisplay.append(prohibitionTemplate)
     }
     $('#rule-list').html(ruleDisplay.html())
@@ -39,18 +39,26 @@ $('body').on('click', '.dropdown-item', function() {
     actionLink = $(this).attr('data-action-link')
     list.push({'LABEL': actionLabel, 'URI': actionURI, 'LINK': actionLink})
     updateRuleDisplay()
+    $(this).hide()
 })
 
 // Removes items from rule list when X clicked
 $('body').on('click', '.delete-item', function() {
     var list
-    if ($(this).parent().hasClass('permission-item'))
+    var dropdown
+    if ($(this).parent().hasClass('permission-item')) {
         list = permissions
-    else if ($(this).parent().hasClass('duty-item'))
+        dropdown = $('#permission-dropdown')
+    }
+    else if ($(this).parent().hasClass('duty-item')) {
         list = duties
-    else if ($(this).parent().hasClass('prohibition-item'))
+        dropdown = $('#duty-dropdown')
+    }
+    else if ($(this).parent().hasClass('prohibition-item')) {
         list = prohibitions
-    itemLabel = $(this).siblings('span').first().text()
+        dropdown = $('#prohibition-dropdown')
+    }
+    itemLabel = $(this).siblings('a').first().text()
     var index = -1
     for (i = 0; i < list.length; i++) {
         if (list[i]['LABEL'] == itemLabel)
@@ -59,6 +67,7 @@ $('body').on('click', '.delete-item', function() {
     if (index == -1)
         return
     list.splice(index, 1)
+    dropdown.find('li:contains("' + itemLabel + '")').show()
     updateRuleDisplay()
 })
 
