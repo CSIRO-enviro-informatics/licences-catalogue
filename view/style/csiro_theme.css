@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: normal;
   /*src: url("http://www.csiro.au/themes/default/font/UnitRoundedWeb-Black.woff") format("woff");*/
-  src: url("/style/UnitRoundedWeb-Black.woff") format("woff");
+  src: url("UnitRoundedWeb-Black.woff") format("woff");
 }
 
 body {
@@ -17,7 +17,7 @@ header {
 	text-align:left;
 	width:894px;
 	margin-top:20px;
-	background-image: url('/style/wave-graphic.png');
+	background-image: url('wave-graphic.png');
 	position:relative;
 	height:118px;
 }
