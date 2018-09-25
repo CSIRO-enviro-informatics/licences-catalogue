@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1 class="text-center">Search for a Licence</h1>
-    {% include 'rule_selection.html' %}
+    <ul id="rule-list" class="list-group ml-5 mr-5"></ul>
     <div class="text-center mt-5">
         <button type="button" class="btn btn-primary search-button w-200">Filter Licences</button>
     </div>
@@ -105,7 +105,120 @@
             </div>
         </div>
     </div>
+    <ul id="rule-list-template" hidden>
+        <li class="list-group-item font-weight-bold active">Filter:</li>
+        <li id="permission-header" class="list-group-item font-weight-bold">
+            Permissions <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
+        </li>
+        <li id="duty-header" class="list-group-item font-weight-bold">
+            Duties <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
+        </li>
+        <li id="prohibition-header" class="list-group-item font-weight-bold">
+            Prohibitions <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
+        </li>
+        <div id="end-rule-list"></div>
+    </ul>
+    <div id="rule-item-template" hidden>
+        <li class="list-group-item">
+            <div class="ml-3">
+                <a target="_blank" href=""></a>
+                <i class="fas fa-times fa-lg text-danger delete-rule-item floatright"></i>
+            </div>
+            <div class="ml-4 assignors" hidden></div>
+            <div class="ml-4 assignees" hidden></div>
+        </li>
+    </div>
+    <div id="party-item-template" hidden>
+        <li class="list-group-item p-1">
+            <div class="list-group-item-label pl-1"></div>
+            <i class="fas fa-times text-danger delete-party-item floatright p-1"></i>
+        </li>
+    </div>
+    <div class="modal fade" id="addPermissionModal" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="permissionModalTitle">Add Permission</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Action</span>
+                        </div>
+                        <select id="permission-select mb-5" class="form-control" required>
+                            {% for action in actions %}
+                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addDutyModal" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dutyModalTitle">Add Permission</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Action</span>
+                        </div>
+                        <select id="duty-select mb-5" class="form-control" required>
+                            {% for action in actions %}
+                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="addProhibitionModal" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="prohibitionModalTitle">Add Permission</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Action</span>
+                        </div>
+                        <select id="prohibition-select mb-5" class="form-control" required>
+                            {% for action in actions %}
+                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block bottom_script %}
-<script src="{{ url_for('static', filename='js/licence_register.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/licence_register.js') }}"></script>
 {% endblock %}
