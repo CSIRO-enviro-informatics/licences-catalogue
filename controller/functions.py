@@ -11,9 +11,18 @@ def create_policy(policy_uri, attributes=None, permissions=None, duties=None, pr
     :param attributes:  Dictionary of optional attributes of the policy.
                         Permitted attributes:   type, label, jurisdiction, legal_code, has_version, language, see_also
                                                 same_as, comment, logo, status
-    :param permissions:
-    :param duties:
-    :param prohibitions:
+    :param permissions: List of Permissions. Each Permission should be a Dictionary containing the following elements:
+        URI: string
+        ASSIGNORS: List of strings
+        ASSIGNEES: List of strings
+    :param duties: List of Duties. Each Duty should be a Dictionary containing the following elements:
+        URI: string
+        ASSIGNORS: List of strings
+        ASSIGNEES: List of strings
+    :param prohibitions: List of Prohibitions. Each Prohibition should be a Dictionary containing the following elements:
+        URI: string
+        ASSIGNORS: List of strings
+        ASSIGNEES: List of strings
     :return:
     """
     if not is_valid_uri(policy_uri):
@@ -23,17 +32,22 @@ def create_policy(policy_uri, attributes=None, permissions=None, duties=None, pr
         for attr_name, attr_value in attributes.items():
             db_access.set_policy_attribute(policy_uri, attr_name, attr_value)
     for permission in permissions:
-        create_rule_for_policy(permission['URI'], 'http://www.w3.org/ns/odrl/2/permission', policy_uri)
+        create_rule_for_policy(permission, 'http://www.w3.org/ns/odrl/2/permission', policy_uri)
     for duty in duties:
-        create_rule_for_policy(duty['URI'], 'http://www.w3.org/ns/odrl/2/duty', policy_uri)
+        create_rule_for_policy(duty, 'http://www.w3.org/ns/odrl/2/duty', policy_uri)
     for prohibition in prohibitions:
-        create_rule_for_policy(prohibition['URI'], 'http://www.w3.org/ns/odrl/2/prohibition', policy_uri)
+        create_rule_for_policy(prohibition, 'http://www.w3.org/ns/odrl/2/prohibition', policy_uri)
 
 
-def create_rule_for_policy(action_uri, rule_type, policy_uri):
+def create_rule_for_policy(rule, rule_type, policy_uri):
+    action_uri = rule['URI']
     rule_uri = _conf.BASE_URI + '/rules/' + str(uuid4())
     db_access.create_rule(rule_uri, rule_type)
     db_access.add_action_to_rule(action_uri, rule_uri)
+    for assignor in rule['ASSIGNORS']:
+        db_access.add_assignor_to_rule(assignor, rule_uri)
+    for assignee in rule['ASSIGNEES']:
+        db_access.add_assignee_to_rule(assignee, rule_uri)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
 
 

@@ -15,48 +15,12 @@
     <div class="tab-content mt-3 mb-5">
         <div class="tab-pane fade show active" id="step-1">
             <h2 class="text-center">Select your rules</h2>
-            <div class="row mt-3 mb-3">
-                <div class="col-md-6">
-                    <ul id="rule-list" class="list-group ml-5"></ul>
-                </div>
-                <div class="col-md-6">
-                    <div class="dropdown mb-3" id="permission-dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                            Add Permission
-                        </button>
-                        <ul class="dropdown-menu">
-                            {% for action in actions %}
-                            <li class="dropdown-item permission-item" data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="dropdown mb-3" id="duty-dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                            Add Duty
-                        </button>
-                        <div class="dropdown-menu">
-                            {% for action in actions %}
-                            <li class="dropdown-item duty-item" data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</li>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="dropdown mb-3" id="prohibition-dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                            Add Prohibition
-                        </button>
-                        <div class="dropdown-menu">
-                            {% for action in actions %}
-                            <li class="dropdown-item prohibition-item" data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</li>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include 'rule_selection.html' %}
             <div class="text-center mt-5">
-                <button type="button" class="btn btn-primary previous-button mr-3" disabled="disabled">
+                <button type="button" class="btn btn-primary w-200 previous-button mr-3" disabled="disabled">
                     <i class="fa fa-chevron-left"></i> Back
                 </button>
-                <button type="button" class="btn btn-primary next-button search-button ml-3">
+                <button type="button" class="btn btn-primary w-200 next-button search-button ml-3">
                     Continue <i class="fa fa-chevron-right"></i>
                 </button>
             </div>
@@ -64,10 +28,10 @@
         <div class="tab-pane fade" id="step-2">
             <div id="results-best"></div>
             <div class="text-center mt-5">
-                <button type="button" class="btn btn-primary previous-button mr-3">
+                <button type="button" class="btn btn-primary w-200 previous-button mr-3">
                     <i class="fa fa-chevron-left"></i> Back
                 </button>
-                <button type="button" class="btn btn-primary next-button ml-3">
+                <button type="button" class="btn btn-primary w-200 next-button ml-3">
                     Create New Licence <i class="fa fa-chevron-right"></i>
                 </button>
             </div>
@@ -204,25 +168,13 @@
                     </tbody>
                 </table>
                 <div class="text-center mt-5">
-                    <button type="button" class="btn btn-primary previous-button search-button mr-3">
+                    <button type="button" class="btn btn-primary w-200 previous-button search-button mr-3">
                         <i class="fa fa-chevron-left"></i> Back
                     </button>
-                    <input type="submit" class="btn btn-primary" value="Create Licence"/>
+                    <input type="submit" class="btn btn-primary w-200" value="Create Licence"/>
                 </div>
             </form>
         </div>
-    </div>
-    <ul id="rule-list-template" hidden>
-        <li class="list-group-item font-weight-bold active">Filter:</li>
-        <li id="permission-header" class="list-group-item font-weight-bold">Permissions</li>
-        <li id="duty-header" class="list-group-item font-weight-bold">Duties</li>
-        <li id="prohibition-header" class="list-group-item font-weight-bold">Prohibitions</li>
-    </ul>
-    <div id="item-template" hidden>
-        <li class="list-group-item">
-            <a target="_blank" href="" class="ml-3"></a>
-            <i class="fas fa-times text-danger delete-item"></i>
-        </li>
     </div>
     <div id="results-template" hidden>
         <div id="suggested-licences-found" hidden>
@@ -265,7 +217,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <a target="_blank" href="#!" type="button" class="btn btn-primary">See Licence</a>
+                    <a target="_blank" href="#!" type="button" class="btn btn-primary btn-wide">See Licence</a>
                 </div>
             </div>
         </div>

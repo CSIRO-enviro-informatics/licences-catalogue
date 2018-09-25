@@ -4,59 +4,78 @@ var prohibitions = []
 
 var updateRuleDisplay = function() {
     ruleDisplay = $('#rule-list-template').clone()
-    for (i = 0; i < permissions.length; i++) {
-        permissionTemplate = $('#item-template').clone().children()
-        permissionTemplate.find('a').text(permissions[i]['LABEL']).attr('href', permissions[i]['LINK'])
-        permissionTemplate.addClass('permission-item')
-        permissionTemplate.insertBefore(ruleDisplay.find('#duty-header'))
-    }
-    for (i = 0; i < duties.length; i++) {
-        dutyTemplate = $('#item-template').clone().children()
-        dutyTemplate.find('a').text(duties[i]['LABEL']).attr('href', duties[i]['LINK'])
-        dutyTemplate.addClass('duty-item')
-        dutyTemplate.insertBefore(ruleDisplay.find('#prohibition-header'))
-    }
-    for (i = 0; i < prohibitions.length; i++) {
-        prohibitionTemplate = $('#item-template').clone().children()
-        prohibitionTemplate.find('a').text(prohibitions[i]['LABEL']).attr('href', prohibitions[i]['LINK'])
-        prohibitionTemplate.addClass('prohibition-item')
-        ruleDisplay.append(prohibitionTemplate)
-    }
+    insertRulesOfType('permission', permissions, ruleDisplay.find('#duty-header'))
+    insertRulesOfType('duty', duties, ruleDisplay.find('#prohibition-header'))
+    insertRulesOfType('prohibition', prohibitions, ruleDisplay.find('#end-rule-list'))
     $('#rule-list').html(ruleDisplay.html())
 }
 
-// Adds items to rule list when dropdown selected
-$('body').on('click', '.dropdown-item', function() {
+var insertRulesOfType = function(rule_type, rule_list, destination) {
+    for (i = 0; i < rule_list.length; i++) {
+        template = $('#rule-item-template').clone().children()
+        template.find('a').text(rule_list[i]['LABEL']).attr('href', rule_list[i]['LINK'])
+        template.addClass(rule_type + '-item')
+        if (rule_list[i]['ASSIGNORS'].length > 0)
+            template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rule_list[i]['ASSIGNORS'].join(', '))
+        if (rule_list[i]['ASSIGNEES'].length > 0)
+            template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rule_list[i]['ASSIGNEES'].join(', '))
+        template.insertBefore(destination)
+    }
+}
+
+// Adds items to rule list
+$('body').on('click', '.add-rule', function() {
+    var modal = $(this).closest('.modal')
     var list
-    if ($(this).hasClass('permission-item'))
+    if (modal.attr('id') == 'addPermissionModal')
         list = permissions
-    else if ($(this).hasClass('duty-item'))
+    else if (modal.attr('id') == 'addDutyModal')
         list = duties
-    else if ($(this).hasClass('prohibition-item'))
+    else if (modal.attr('id') == 'addProhibitionModal')
         list = prohibitions
-    actionLabel = $(this).text()
-    actionURI = $(this).attr('data-action-uri')
-    actionLink = $(this).attr('data-action-link')
-    list.push({'LABEL': actionLabel, 'URI': actionURI, 'LINK': actionLink})
+    selectInputField = modal.find('.modal-body').find('select')
+    selectedAction = selectInputField.find('option:selected').first()
+    actionLabel = selectedAction.text()
+    actionURI = selectedAction.attr('data-action-uri')
+    actionLink = selectedAction.attr('data-action-link')
+    assignors = []
+    assignees = []
+    modal.find('.assignor-list').find('.list-group-item-label').each(function() {
+        assignors.push($(this).text())
+    })
+    modal.find('.assignee-list').find('.list-group-item-label').each(function() {
+        assignees.push($(this).text())
+    })
+    list.push({
+        'LABEL': actionLabel,
+        'URI': actionURI,
+        'LINK': actionLink,
+        'ASSIGNORS': assignors,
+        'ASSIGNEES': assignees
+    })
     updateRuleDisplay()
-    $(this).hide()
+    selectedAction.hide()
+    selectInputField.val([])
+    selectInputField.children(':visible').first().attr('selected', 'selected')
+    modal.find('.assignor-list').children(':not(".active")').remove()
+    modal.find('.assignee-list').children(':not(".active")').remove()
 })
 
 // Removes items from rule list when X clicked
-$('body').on('click', '.delete-item', function() {
+$('body').on('click', '.delete-rule-item', function() {
     var list
-    var dropdown
-    if ($(this).parent().hasClass('permission-item')) {
+    var selectInputField
+    if ($(this).closest('li').hasClass('permission-item')) {
         list = permissions
-        dropdown = $('#permission-dropdown')
+        selectInputField = $('#addPermissionModal').find('select')
     }
-    else if ($(this).parent().hasClass('duty-item')) {
+    else if ($(this).closest('li').hasClass('duty-item')) {
         list = duties
-        dropdown = $('#duty-dropdown')
+        selectInputField = $('#addDutyModal').find('select')
     }
-    else if ($(this).parent().hasClass('prohibition-item')) {
+    else if ($(this).closest('li').hasClass('prohibition-item')) {
         list = prohibitions
-        dropdown = $('#prohibition-dropdown')
+        selectInputField = $('#addProhibitionModal').find('select')
     }
     itemLabel = $(this).siblings('a').first().text()
     var index = -1
@@ -67,7 +86,7 @@ $('body').on('click', '.delete-item', function() {
     if (index == -1)
         return
     list.splice(index, 1)
-    dropdown.find('li:contains("' + itemLabel + '")').show()
+    selectInputField.find('option:contains("' + itemLabel + '")').show()
     updateRuleDisplay()
 })
 
@@ -161,6 +180,7 @@ $('body').on('click', '.next-button', function() {
     $('.nav-link.active').parent().next('li').find('a').trigger('click')
 })
 
+// Submits chosen permissions, duties and prohibitions with form
 $('#licence-create-form').submit(function(event) {
     var permissions_input = $('<input>').attr('type', 'hidden').attr('name', 'permissions').attr('class', 'hidden-rule-input').val(JSON.stringify(permissions))
     var duties_input = $('<input>').attr('type', 'hidden').attr('name', 'duties').attr('class', 'hidden-rule-input').val(JSON.stringify(duties))
@@ -173,6 +193,32 @@ $('#licence-create-form').submit(function(event) {
 // Removing hidden inputs just in case the back button was used
 $(window).on('unload', function() {
     $('.hidden-rule-input').remove()
+})
+
+// Adding assignors/assignees to a permission
+$('body').on('click', '.add-party', function() {
+    addParty($(this).parent().siblings('input').first())
+})
+$('body').on('focusout', '.party-input', function() {
+    addParty($(this))
+})
+$('body').on('keyup', '.party-input', function(event) {
+    if (event.keyCode === 13)
+        addParty($(this))
+})
+var addParty = function(input_field) {
+    if (input_field.val().length <= 0)
+        return
+    party = input_field.val()
+    input_field.val('')
+    var new_list_item = $('#party-item-template').clone().children()
+    new_list_item.find('div').text(party)
+    input_field.closest('.input-group').prev().append(new_list_item)
+}
+
+// Removes assignor/assignee from a permission
+$('body').on('click', '.delete-party-item', function() {
+    $(this).parent().remove()
 })
 
 updateRuleDisplay()

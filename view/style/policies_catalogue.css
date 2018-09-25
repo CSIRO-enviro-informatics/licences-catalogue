@@ -1,5 +1,13 @@
-.btn, .dropdown-item {
+.w-200 {
     width: 200px;
+}
+
+.w-170 {
+    width: 180px;
+}
+
+.left-20 {
+    margin-left: -20px;
 }
 
 .btn-col {
@@ -26,7 +34,7 @@
     border-color: #00779C !important;
 }
 
-.mouseover, .fa-times, .dropdown-item {
+.mouseover, .fa-times, .dropdown-item, [data-toggle] {
     cursor: pointer;
 }
 
@@ -119,10 +127,6 @@ img {
     overflow-x: hidden;
 }
 
-center {
-    margin: auto;
-}
-
 .nav-link {
     background: rgba(0,0,0,.03);
 }
@@ -140,4 +144,22 @@ form#licence-create-form select {
 
 .list-group-item.active {
     z-index: auto;
+}
+
+.floatleft {
+    float: left;
+}
+
+.floatright {
+    float: right;
+}
+
+.list-group-item-label {
+    width: 90%;
+    overflow: hidden;
+    float: left;
+}
+
+.delete-rule-item {
+    padding-right: 2px;
 }
