@@ -28,7 +28,7 @@ def search_results():
     permissions = json.loads(request.args.get('permissions'))
     duties = json.loads(request.args.get('duties'))
     prohibitions = json.loads(request.args.get('prohibitions'))
-    results = functions.get_policies_with_constraints(permissions, duties, prohibitions)
+    results = functions.search_policies(permissions, duties, prohibitions)
     return jsonify(
         perfect_licences=results['perfect'],
         extra_licences=results['extra'],
@@ -197,8 +197,15 @@ def create_licence():
     attributes = {'type': 'http://creativecommons.org/ns#License'}
     attributes.update(request.form.items())
     uri = 'http://example.com/licence/' + str(uuid4())
-    permissions = json.loads(attributes.pop('permissions'))
-    duties = json.loads(attributes.pop('duties'))
-    prohibitions = json.loads(attributes.pop('prohibitions'))
-    functions.create_policy(uri, attributes, permissions, duties, prohibitions)
+    rules = []
+    for permission in json.loads(attributes.pop('permissions')):
+        permission['RULE_TYPE'] = 'http://www.w3.org/ns/odrl/2/permission'
+        rules.append(permission)
+    for duty in json.loads(attributes.pop('duties')):
+        duty['RULE_TYPE'] = 'http://www.w3.org/ns/odrl/2/duty'
+        rules.append(duty)
+    for prohibition in json.loads(attributes.pop('prohibitions')):
+        prohibition['RULE_TYPE'] = 'http://www.w3.org/ns/odrl/2/prohibition'
+        rules.append(prohibition)
+    functions.create_policy(uri, attributes, rules)
     return redirect(url_for('controller.licence_routes', uri=uri))
