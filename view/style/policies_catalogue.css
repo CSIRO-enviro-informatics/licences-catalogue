@@ -6,14 +6,6 @@
     width: 180px;
 }
 
-.left-20 {
-    margin-left: -20px;
-}
-
-.btn-col {
-    width: 150px;
-}
-
 .btn-primary, .list-group-item.active, .btn-primary:disabled {
     background-color: #00a9ce;
     border-color: #00a9ce;
@@ -121,19 +113,8 @@ img {
     height: auto;
 }
 
-.dropdown-menu {
-    max-height: 40vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
 .nav-link {
     background: rgba(0,0,0,.03);
-}
-
-.next-button {
-    width: auto;
-    min-width: 200px;
 }
 
 form#licence-create-form textarea,
@@ -158,8 +139,4 @@ form#licence-create-form select {
     width: 90%;
     overflow: hidden;
     float: left;
-}
-
-.delete-rule-item {
-    padding-right: 2px;
 }

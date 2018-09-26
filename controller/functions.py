@@ -44,7 +44,19 @@ def is_valid_uri(uri):
     return True if re.match('\w+:(/?/?)[^\s]+', uri) else False
 
 
-def search_policies(desired_permissions, desired_duties, desired_prohibitions):
+def search_policies(desired_rules):
+    desired_permissions = map(
+        lambda x: x['ACTION']['URI'],
+        filter(lambda x: x['TYPE_LABEL'] == 'Permission', desired_rules)
+    )
+    desired_duties = map(
+        lambda x: x['ACTION']['URI'],
+        filter(lambda x: x['TYPE_LABEL'] == 'Duty', desired_rules)
+    )
+    desired_prohibitions = map(
+        lambda x: x['ACTION']['URI'],
+        filter(lambda x: x['TYPE_LABEL'] == 'Prohibition', desired_rules)
+    )
     perfect_fit_licences = []
     extra_conditions_licences = []
     missing_conditions_licences = []

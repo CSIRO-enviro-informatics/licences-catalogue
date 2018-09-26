@@ -25,10 +25,8 @@ def search():
 
 @routes.route('/_search_results')
 def search_results():
-    permissions = json.loads(request.args.get('permissions'))
-    duties = json.loads(request.args.get('duties'))
-    prohibitions = json.loads(request.args.get('prohibitions'))
-    results = functions.search_policies(permissions, duties, prohibitions)
+    rules = json.loads(request.args.get('rules'))
+    results = functions.search_policies(rules)
     return jsonify(
         perfect_licences=results['perfect'],
         extra_licences=results['extra'],

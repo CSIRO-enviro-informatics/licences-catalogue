@@ -1,43 +1,68 @@
-var permissions = []
-var duties = []
-var prohibitions = []
+rules = []
+ruleTypes = ['permission', 'duty', 'prohibition']
 
 var updateRuleDisplay = function() {
     ruleDisplay = $('#rule-list-template').clone()
-    insertRulesOfType('permission', permissions, ruleDisplay.find('#duty-header'))
-    insertRulesOfType('duty', duties, ruleDisplay.find('#prohibition-header'))
-    insertRulesOfType('prohibition', prohibitions, ruleDisplay.find('#end-rule-list'))
+    for (i = 0; i < rules.length; i++) {
+        template = $('#rule-item-template').clone().children()
+        template.find('a').text(rules[i]['ACTION']['LABEL']).attr('href', rules[i]['ACTION']['LINK'])
+        template.addClass(rules[i]['TYPE_LABEL'].toLowerCase())
+        if (rules[i]['ASSIGNORS'].length > 0)
+            template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rules[i]['ASSIGNORS'].join(', '))
+        if (rules[i]['ASSIGNEES'].length > 0)
+            template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rules[i]['ASSIGNEES'].join(', '))
+        if (rules[i]['TYPE_LABEL'] == 'permission')
+            template.insertBefore(ruleDisplay.find('#duty-header'))
+        if (rules[i]['TYPE_LABEL'] == 'duty')
+            template.insertBefore(ruleDisplay.find('#prohibition-header'))
+        if (rules[i]['TYPE_LABEL'] == 'prohibition')
+            template.insertBefore(ruleDisplay.find('#end-rule-list'))
+    }
     $('#rule-list').html(ruleDisplay.html())
 }
 
-var insertRulesOfType = function(rule_type, rule_list, destination) {
-    for (i = 0; i < rule_list.length; i++) {
-        template = $('#rule-item-template').clone().children()
-        template.find('a').text(rule_list[i]['LABEL']).attr('href', rule_list[i]['LINK'])
-        template.addClass(rule_type + '-item')
-        if (rule_list[i]['ASSIGNORS'].length > 0)
-            template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rule_list[i]['ASSIGNORS'].join(', '))
-        if (rule_list[i]['ASSIGNEES'].length > 0)
-            template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rule_list[i]['ASSIGNEES'].join(', '))
-        template.insertBefore(destination)
-    }
+var updateActionDisplay = function(){
+    $('.add-rule-modal').each(function(){
+        var ruleType
+        for (i = 0; i < ruleTypes.length; i++){
+            if ($(this).hasClass(ruleTypes[i]))
+                ruleType = ruleTypes[i]
+        }
+        if (ruleType == undefined)
+            throw 'Cannot refresh actions - modal has no rule type.'
+        selectInputField = $(this).find('.action-select')
+        selectInputField.children().each(function(){
+            var action_uri = $(this).attr('data-action-uri')
+            $(this).prop('hidden', false)
+            for (i = 0; i < rules.length; i++){
+                if (rules[i]['ACTION']['URI'] == action_uri && (rules[i]['TYPE_LABEL'].toLowerCase() == ruleType || ruleType == 'prohibition' || rules[i]['TYPE_LABEL'] == 'prohibition')){
+                    $(this).prop('hidden', true)
+                }
+            }
+        })
+        selectInputField.val([])
+        selectInputField.children(':visible').first().prop('selected', true)
+    })
 }
 
 // Adds items to rule list
 $('body').on('click', '.add-rule', function() {
     var modal = $(this).closest('.modal')
-    var list
-    if (modal.attr('id') == 'addPermissionModal')
-        list = permissions
-    else if (modal.attr('id') == 'addDutyModal')
-        list = duties
-    else if (modal.attr('id') == 'addProhibitionModal')
-        list = prohibitions
     selectInputField = modal.find('.modal-body').find('select')
     selectedAction = selectInputField.find('option:selected').first()
-    actionLabel = selectedAction.text()
-    actionURI = selectedAction.attr('data-action-uri')
-    actionLink = selectedAction.attr('data-action-link')
+    action = {
+        'LABEL': selectedAction.text(),
+        'URI': selectedAction.attr('data-action-uri'),
+        'LINK': selectedAction.attr('data-action-link')
+    }
+    var typeLabel
+    if (modal.hasClass('add-rule-modal'))
+        for (i = 0; i < ruleTypes.length; i++) {
+            if (modal.hasClass(ruleTypes[i]))
+                typeLabel = ruleTypes[i]
+        }
+    if (typeLabel == undefined)
+        throw "Cannot add rule - unknown rule type."
     assignors = []
     assignees = []
     modal.find('.assignor-list').find('.list-group-item-label').each(function() {
@@ -46,48 +71,39 @@ $('body').on('click', '.add-rule', function() {
     modal.find('.assignee-list').find('.list-group-item-label').each(function() {
         assignees.push($(this).text())
     })
-    list.push({
-        'LABEL': actionLabel,
-        'URI': actionURI,
-        'LINK': actionLink,
+    rules.push({
+        'ACTION': action,
+        'TYPE_LABEL': typeLabel,
         'ASSIGNORS': assignors,
         'ASSIGNEES': assignees
     })
     updateRuleDisplay()
-    selectedAction.hide()
-    selectInputField.val([])
-    selectInputField.children(':visible').first().attr('selected', 'selected')
+    updateActionDisplay()
     modal.find('.assignor-list').children(':not(".active")').remove()
     modal.find('.assignee-list').children(':not(".active")').remove()
 })
 
 // Removes items from rule list when X clicked
 $('body').on('click', '.delete-rule-item', function() {
-    var list
-    var selectInputField
-    if ($(this).closest('li').hasClass('permission-item')) {
-        list = permissions
-        selectInputField = $('#addPermissionModal').find('select')
+    listItem = $(this).closest('li')
+    var ruleTypeLabel
+    for (i = 0; i < ruleTypes.length; i++) {
+        if (listItem.hasClass(ruleTypes[i]))
+            ruleTypeLabel = ruleTypes[i]
     }
-    else if ($(this).closest('li').hasClass('duty-item')) {
-        list = duties
-        selectInputField = $('#addDutyModal').find('select')
-    }
-    else if ($(this).closest('li').hasClass('prohibition-item')) {
-        list = prohibitions
-        selectInputField = $('#addProhibitionModal').find('select')
-    }
-    itemLabel = $(this).siblings('a').first().text()
+    if (ruleTypeLabel == undefined)
+        throw 'Cannot remove rule - unknown rule type.'
+    actionLabel = $(this).siblings('a').first().text()
     var index = -1
-    for (i = 0; i < list.length; i++) {
-        if (list[i]['LABEL'] == itemLabel)
+    for (i = 0; i < rules.length; i++) {
+        if (rules[i]['ACTION']['LABEL'] == actionLabel && rules[i]['TYPE_LABEL'].toLowerCase() == ruleTypeLabel)
             index = i
     }
     if (index == -1)
-        return
-    list.splice(index, 1)
-    selectInputField.find('option:contains("' + itemLabel + '")').show()
+        throw "Cannot remove rule - rule index not found."
+    rules.splice(index, 1)
     updateRuleDisplay()
+    updateActionDisplay()
 })
 
 // AJAX request to get search results
@@ -96,9 +112,7 @@ $('body').on('click', '.search-button', function() {
         dataType: 'json',
         url: '/_search_results',
         data: {
-            permissions: JSON.stringify(permissions.map(x => x['URI'])),
-            duties: JSON.stringify(duties.map(x => x['URI'])),
-            prohibitions: JSON.stringify(prohibitions.map(x => x['URI']))
+            rules: JSON.stringify(rules),
         },
         success: function(data) {
             updateSearchResults(data['perfect_licences'], data['extra_licences'], data['insufficient_licences'])
@@ -180,14 +194,10 @@ $('body').on('click', '.next-button', function() {
     $('.nav-link.active').parent().next('li').find('a').trigger('click')
 })
 
-// Submits chosen permissions, duties and prohibitions with form
+// Submits chosen rules with form
 $('#licence-create-form').submit(function(event) {
-    var permissions_input = $('<input>').attr('type', 'hidden').attr('name', 'permissions').attr('class', 'hidden-rule-input').val(JSON.stringify(permissions))
-    var duties_input = $('<input>').attr('type', 'hidden').attr('name', 'duties').attr('class', 'hidden-rule-input').val(JSON.stringify(duties))
-    var prohibitions_input = $('<input>').attr('type', 'hidden').attr('name', 'prohibitions').attr('class', 'hidden-rule-input').val(JSON.stringify(prohibitions))
-    $('#licence-create-form').append(permissions_input)
-    $('#licence-create-form').append(duties_input)
-    $('#licence-create-form').append(prohibitions_input)
+    var rulesInput = $('<input>').attr('type', 'hidden').attr('name', 'rules').attr('class', 'hidden-rule-input').val(JSON.stringify(rules))
+    $('#licence-create-form').append(rulesInput)
 })
 
 // Removing hidden inputs just in case the back button was used

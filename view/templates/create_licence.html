@@ -238,7 +238,7 @@
         <li class="list-group-item">
             <div class="ml-3">
                 <a target="_blank" href=""></a>
-                <i class="fas fa-times fa-lg text-danger delete-rule-item floatright"></i>
+                <i class="fas fa-times fa-lg text-danger delete-rule-item ml-1"></i>
             </div>
             <div class="ml-4 assignors" hidden></div>
             <div class="ml-4 assignees" hidden></div>
@@ -250,7 +250,7 @@
             <i class="fas fa-times text-danger delete-party-item floatright p-1"></i>
         </li>
     </div>
-    <div class="modal fade" id="addPermissionModal" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
+    <div id="addPermissionModal" class="modal add-rule-modal permission fade" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
@@ -264,7 +264,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">Action</span>
                         </div>
-                        <select id="permission-select mb-5" class="form-control" required>
+                        <select class="form-control action-select permission">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -296,7 +296,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="addDutyModal" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
+    <div id="addDutyModal" class="modal add-rule-modal duty fade" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
@@ -310,7 +310,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">Action</span>
                         </div>
-                        <select id="duty-select mb-5" class="form-control" required>
+                        <select class="form-control action-select duty">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -342,7 +342,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="addProhibitionModal" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
+    <div id="addProhibitionModal" class="modal add-rule-modal prohibition fade" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
@@ -356,7 +356,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">Action</span>
                         </div>
-                        <select id="prohibition-select mb-5" class="form-control" required>
+                        <select class="form-control action-select prohibition">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -390,8 +390,5 @@
     </div>
 {% endblock %}
 {% block bottom_script %}
-    <script id="rules-json" type="application/json">
-        {% if rules %}{{ rules|tojson|safe }}{% endif %}
-    </script>
     <script src="{{ url_for('static', filename='js/licence_register.js') }}"></script>
 {% endblock %}
