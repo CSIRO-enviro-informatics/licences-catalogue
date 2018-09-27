@@ -2,10 +2,6 @@
     width: 200px;
 }
 
-.w-170 {
-    width: 180px;
-}
-
 .btn-primary, .list-group-item.active, .btn-primary:disabled {
     background-color: #00a9ce;
     border-color: #00a9ce;
@@ -42,70 +38,6 @@
     text-align: center;
     height: 45px;
     position: relative;
-}
-
-.hover-target .hover-tooltip-top {
-    visibility: hidden;
-    background-color: #555;
-    width: 120px;
-    color: #fff;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
-    position: absolute;
-    z-index : 1;
-    bottom: 120%;
-    left: 50%;
-    margin-left: -60px;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.hover-target .hover-tooltip-right {
-    visibility: hidden;
-    background-color: #555;
-    width: 300px;
-    color: #fff;
-    text-align: center;
-    padding: 5px 2px;
-    border-radius: 6px;
-    position: absolute;
-    top: 0px;
-    left: 105%;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.hover-target .hover-tooltip-top::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #555 transparent transparent transparent;
-}
-
-.hover-target .hover-tooltip-right::after {
-    content: "";
-    position: absolute;
-    top: 10px;
-    right: 100%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: transparent #555 transparent transparent;
-}
-
-.hover-target:hover .hover-tooltip-top {
-    visibility: visible;
-    opacity: 1;
-}
-
-.hover-target:hover .hover-tooltip-right {
-    visibility: visible;
-    opacity: 1;
 }
 
 img {
