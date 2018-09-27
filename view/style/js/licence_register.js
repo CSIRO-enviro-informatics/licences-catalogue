@@ -41,7 +41,9 @@ var updateActionDisplay = function(){
             }
         })
         selectInputField.val([])
-        selectInputField.children(':visible').first().prop('selected', true)
+        selectInputField.children().filter(function(){
+            return $(this).css('display') != 'none'
+        }).first().prop('selected', true)
     })
 }
 
@@ -159,7 +161,6 @@ var updateSearchResults = function(perfect_licences, extra_licences, insufficien
             resultsTemplate.find('#suggested-licences-not-found').removeAttr('hidden')
         $('#results-best').html(resultsTemplate.children())
     }
-
 }
 
 var addLicenceEntry = function(licence_type, licence_info, destination) {
