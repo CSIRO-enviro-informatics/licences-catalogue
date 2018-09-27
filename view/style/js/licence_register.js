@@ -19,6 +19,8 @@ var updateRuleDisplay = function() {
             template.insertBefore(ruleDisplay.find('#end-rule-list'))
     }
     $('#rule-list').html(ruleDisplay.html())
+    // Enable all bootstrap tooltips on page
+    $('[data-toggle="tooltip"]').tooltip()
 }
 
 var updateActionDisplay = function(){
