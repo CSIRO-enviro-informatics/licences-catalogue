@@ -145,17 +145,19 @@ var updateSearchResults = function(perfect_licences, extra_licences, insufficien
     else if ($('#results-best').length > 0) {
         if (perfect_licences.length > 0) {
             resultsTemplate.find('#suggested-licences-found').removeAttr('hidden')
-            licence_entry = $('#licence-template').clone()
-            licence_entry.find('h5').text(perfect_licences[i]['LABEL'])
-            licence_entry.find('.card-header').attr('data-target', '#licence-' + i)
-            licence_entry.find('.collapse').attr('id', 'licence-' + i)
-            licence_entry.find('a').attr('href', perfect_licences[i]['LINK'])
-            licence_entry.find('td:eq(0)').text(perfect_licences[i]['PERMISSIONS'].join(', '))
-            licence_entry.find('td:eq(1)').text(perfect_licences[i]['DUTIES'].join(', '))
-            licence_entry.find('td:eq(2)').text(perfect_licences[i]['PROHIBITIONS'].join(', '))
-            licence_entry.find('td:eq(3)').text(perfect_licences[i]['ASSIGNORS'].join(', '))
-            licence_entry.find('td:eq(4)').text(perfect_licences[i]['ASSIGNEES'].join(', '))
-            resultsTemplate.append(licence_entry.children())
+            for (i = 0; i < perfect_licences.length; i++){
+                licence_entry = $('#licence-template').clone()
+                licence_entry.find('h5').text(perfect_licences[i]['LABEL'])
+                licence_entry.find('.card-header').attr('data-target', '#licence-' + i)
+                licence_entry.find('.collapse').attr('id', 'licence-' + i)
+                licence_entry.find('a').attr('href', perfect_licences[i]['LINK'])
+                licence_entry.find('td:eq(0)').text(perfect_licences[i]['PERMISSIONS'].join(', '))
+                licence_entry.find('td:eq(1)').text(perfect_licences[i]['DUTIES'].join(', '))
+                licence_entry.find('td:eq(2)').text(perfect_licences[i]['PROHIBITIONS'].join(', '))
+                licence_entry.find('td:eq(3)').text(perfect_licences[i]['ASSIGNORS'].join(', '))
+                licence_entry.find('td:eq(4)').text(perfect_licences[i]['ASSIGNEES'].join(', '))
+                resultsTemplate.append(licence_entry.children())
+            }
         }
         else
             resultsTemplate.find('#suggested-licences-not-found').removeAttr('hidden')
@@ -220,12 +222,19 @@ $('body').on('keyup', '.party-input', function(event) {
 var addParty = function(input_field) {
     if (input_field.val().length <= 0)
         return
+    var isValid = input_field.closest('form').get(0).checkValidity()
+    if (!isValid)
+        return
     party = input_field.val()
     input_field.val('')
     var new_list_item = $('#party-item-template').clone().children()
     new_list_item.find('div').text(party)
     input_field.closest('.input-group').prev().append(new_list_item)
 }
+
+$('.validate-party-form').submit(function(e){
+    e.preventDefault()
+})
 
 // Removes assignor/assignee from a permission
 $('body').on('click', '.delete-party-item', function() {
