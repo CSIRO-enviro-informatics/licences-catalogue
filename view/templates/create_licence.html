@@ -221,19 +221,26 @@
                 </div>
             </div>
         </div>
-    </div><ul id="rule-list-template" hidden>
-    <li class="list-group-item font-weight-bold active">Filter:</li>
-    <li id="permission-header" class="list-group-item font-weight-bold">
-        Permissions <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
-    </li>
-    <li id="duty-header" class="list-group-item font-weight-bold">
-        Duties <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
-    </li>
-    <li id="prohibition-header" class="list-group-item font-weight-bold">
-        Prohibitions <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
-    </li>
-    <div id="end-rule-list"></div>
-</ul>
+    </div>
+    <ul id="rule-list-template" hidden>
+        <li class="list-group-item font-weight-bold active">Filter:</li>
+        <li id="permission-header" class="list-group-item font-weight-bold">
+            Permissions
+            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></i>
+            <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
+        </li>
+        <li id="duty-header" class="list-group-item font-weight-bold">
+            Duties
+            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></i>
+            <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
+        </li>
+        <li id="prohibition-header" class="list-group-item font-weight-bold">
+            Prohibitions
+            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></i>
+            <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
+        </li>
+        <div id="end-rule-list"></div>
+    </ul>
     <div id="rule-item-template" hidden>
         <li class="list-group-item">
             <div class="ml-3">
@@ -262,7 +269,10 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Action</span>
+                            <span class="input-group-text">
+                                Action
+                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
+                            </span>
                         </div>
                         <select class="form-control action-select permission">
                             {% for action in actions %}
@@ -271,7 +281,10 @@
                         </select>
                     </div>
                     <ul class="list-group mb-2 assignor-list">
-                        <li class="list-group-item font-weight-bold active">Assignors:</li>
+                        <li class="list-group-item font-weight-bold active">
+                            Assignors
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
+                        </li>
                     </ul>
                     <div class="input-group mb-4">
                         <input class="form-control party-input" placeholder="Enter a new assignor ..."/>
@@ -280,7 +293,10 @@
                         </div>
                     </div>
                     <ul class="list-group mb-2 assignee-list">
-                        <li class="list-group-item font-weight-bold active">Assignees:</li>
+                        <li class="list-group-item font-weight-bold active">
+                            Assignees
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
+                        </li>
                     </ul>
                     <div class="input-group mb-4">
                         <input class="form-control party-input" placeholder="Enter a new assignee ..."/>
@@ -308,7 +324,10 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Action</span>
+                            <span class="input-group-text">
+                                Action
+                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
+                            </span>
                         </div>
                         <select class="form-control action-select duty">
                             {% for action in actions %}
@@ -317,7 +336,10 @@
                         </select>
                     </div>
                     <ul class="list-group mb-2 assignor-list">
-                        <li class="list-group-item font-weight-bold active">Assignors:</li>
+                        <li class="list-group-item font-weight-bold active">
+                            Assignors
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
+                        </li>
                     </ul>
                     <div class="input-group mb-4">
                         <input class="form-control party-input" placeholder="Enter a new assignor ..."/>
@@ -326,7 +348,10 @@
                         </div>
                     </div>
                     <ul class="list-group mb-2 assignee-list">
-                        <li class="list-group-item font-weight-bold active">Assignees:</li>
+                        <li class="list-group-item font-weight-bold active">
+                            Assignees
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
+                        </li>
                     </ul>
                     <div class="input-group mb-4">
                         <input class="form-control party-input" placeholder="Enter a new assignee ..."/>
@@ -354,7 +379,10 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Action</span>
+                            <span class="input-group-text">
+                                Action
+                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
+                            </span>
                         </div>
                         <select class="form-control action-select prohibition">
                             {% for action in actions %}
@@ -363,7 +391,10 @@
                         </select>
                     </div>
                     <ul class="list-group mb-2 assignor-list">
-                        <li class="list-group-item font-weight-bold active">Assignors:</li>
+                        <li class="list-group-item font-weight-bold active">
+                            Assignors
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
+                        </li>
                     </ul>
                     <div class="input-group mb-4">
                         <input class="form-control party-input" placeholder="Enter a new assignor ..."/>
@@ -372,7 +403,10 @@
                         </div>
                     </div>
                     <ul class="list-group mb-2 assignee-list">
-                        <li class="list-group-item font-weight-bold active">Assignees:</li>
+                        <li class="list-group-item font-weight-bold active">
+                            Assignees
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
+                        </li>
                     </ul>
                     <div class="input-group mb-4">
                         <input class="form-control party-input" placeholder="Enter a new assignee ..."/>

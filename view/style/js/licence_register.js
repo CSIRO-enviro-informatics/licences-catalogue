@@ -233,3 +233,5 @@ $('body').on('click', '.delete-party-item', function() {
 })
 
 updateRuleDisplay()
+// Enable all bootstrap tooltips on page
+$('[data-toggle="tooltip"]').tooltip()
