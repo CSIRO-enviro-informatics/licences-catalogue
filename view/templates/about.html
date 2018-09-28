@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>About this tool</h1>
+    <p>This is a Linked Data catalogue of licences presented as Policies according to the <a href="https://www.w3.org/TR/odrl-model/">ODRL Information Model 2.2</a>.</p>
+    <p>The technology used is Python Flask - a bare-bones HTTP framework - configured as a simple Model-View-Controller application with the application data being stored in SQLite. Data from the database will also be available as RDF data in a future release.</p>
+    <p>Further project documentation is in the <a href="https://github.com/CSIRO-enviro-informatics/policies-catalogue/tree/master/_docs">_docs/</a> folder of the repository that contains this application's sourcecode:</p>
+    <ul><li>
+        <a href="https://github.com/CSIRO-enviro-informatics/policies-catalogue">
+            https://github.com/CSIRO-enviro-informatics/policies-catalogue
+        </a>
+    </li></ul>
+    <h2>License</h2>
+    <p>The content of this API is licensed for use under the GNU v3 License. See the <a href="LICENSE">license deed</a> for details.</p>
+    <h2>Contacts</h2>
+    <p>If stuff breaks or doesn't work the way you expect it should or you want things extended, either add issues to the codebase (see above) or contact:</p>
+    <p>
+        <strong>Nicholas Car</strong><br />
+        <em>Senior Experimental Scientist</em><br />
+        CSIRO Land &amp; Water, Environmental Informatics Group<br />
+        Brisbane, Queensland<br />
+        <a href="mailto:nicholas.car@csiro.au">nicholas.car@csiro.au</a><br />
+        ORCID: <a href="https://orcid.org/0000-0002-8742-7730">0000-0002-8742-7730</a>
+    </p>
+    <p>
+        <strong>Laura Guillory</strong><br />
+        <em>Software Engineer</em><br />
+        CSIRO Land &amp; Water, Environmental Informatics Group<br />
+        Brisbane, Queensland<br />
+        <a href="mailto:laura.guillory@csiro.au">laura.guillory@csiro.au</a>
+    </p>
+{% endblock %}

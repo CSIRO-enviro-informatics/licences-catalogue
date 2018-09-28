@@ -15,6 +15,11 @@ def home():
     return render_template('page_home.html')
 
 
+@routes.route('/about')
+def about():
+    return render_template('about.html')
+
+
 @routes.route('/search')
 def search():
     actions = db_access.get_all_actions()

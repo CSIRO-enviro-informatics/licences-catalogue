@@ -82,7 +82,7 @@ nav {
     color: white;
     font-weight:bold;
     margin-top:-35px;
-	margin-left: 375px;
+	margin-left: 350px;
     text-align: right;
 }
 
@@ -107,7 +107,7 @@ nav ul li a {
   text-decoration: none;
   font-weight: bold;
   color: white;
-  padding: 3px 5px 3px 5px;
+  padding: 3px 7px 3px 7px;
   border-radius: 8px;
   border: none;
 }
@@ -137,11 +137,17 @@ nav ul li a:hover {
 }
 
 #footer-external {
-        margin: 0 auto;
-        width:894px;
+    margin: 0 auto;
+    width:894px;
 	box-shadow: 0 0 10px -8px #CDCDCD inset, 0 10px 10px -8px #CDCDCD inset;
-	margin-top: -15px;
+	margin-top: -16px;
 	padding-top: 0px;
+	padding-bottom: 10px;
+	background-image: url('footer-top.png');
+	background-position: top center;
+	background-repeat: no-repeat;
+	background-color: #ebf9fa;
+	display: block;
 }
 
 #footer-external-links {
