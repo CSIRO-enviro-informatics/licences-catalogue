@@ -6,101 +6,58 @@
         <button type="button" class="btn btn-primary search-button w-200">Filter Licences</button>
     </div>
     <div class="row mt-5">
-        <div id="results-all" class="col-md-12 text-center"></div>
+        <div id="results" class="col-md-12 text-center"></div>
     </div>
     <div id="results-template" hidden>
-        <h2>Results</h2>
-        <div id="perfect-licence-header" class="row mt-3 mb-3" hidden>
-            <div class="col-md-1">
-                <i class="fas fa-check-circle fa-3x text-success"></i>
-            </div>
-            <div class="col-md-11 mt-2 text-success">
-                <h3>The following licences are a perfect fit with your requirements</h3>
-            </div>
+        <div id="licences-found" hidden>
+            <h2 class="text-center">Results</h2>
         </div>
-        <div id="extra-licence-header" class="row mt-3 mb-3" hidden>
-            <div class="col-md-1 mt-2">
-                <i class="fas fa-exclamation-circle fa-3x text-warning"></i>
-            </div>
-            <div class="col-md-11 text-warning">
-                <h3>The following licences are compatible with your requirements, but have extra conditions</h3>
-            </div>
-        </div>
-        <div id="insufficient-licence-header" class="row mt-3 mb-3" hidden>
-            <div class="col-md-1">
-                <i class="fas fa-times-circle fa-3x text-danger"></i>
-            </div>
-            <div class="col-md-11 mt-2 text-danger">
-                <h3>The following licences are missing some requirements</h3>
-            </div>
+        <div id="licences-not-found" hidden>
+            <h3 class="text-center">No licences found, please try again.</h3>
         </div>
     </div>
-    <div id="perfect-licence-template" hidden>
-        <div class="card perfect-licence">
-            <div class="card-header mouseover" data-toggle="collapse" data-target="#perfect-licence-1">
+    <div id="licence-template" hidden>
+        <div class="card text-center">
+            <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-1">
                 <h5 class="mb-0">Licence #1</h5>
             </div>
-            <div id="perfect-licence-1" class="collapse">
-                <div class="card-body text-center">
-                    <a href="#!" type="button" class="btn btn-primary">See Licence</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="extra-licence-template" hidden>
-        <div class="card extra-licence">
-            <div class="card-header mouseover" data-toggle="collapse" data-target="#extra-licence-1">
-                <h5 class="mb-0"></h5>
-            </div>
-            <div id="extra-licence-1" class="collapse">
-                <div class="card-body text-center">
-                    <h5>This licence has these additional conditions:</h5>
+            <div id="licence-1" class="collapse">
+                <div class="card-body">
+                    <h5 hidden>This licence has these <strong class="text-info">extra rules</strong></h5>
                     <table class="table table-bordered">
                         <tbody>
-                            <tr>
+                            <tr hidden>
                                 <th>Permissions</th>
                                 <td class="text-left"></td>
                             </tr>
-                            <tr>
+                            <tr hidden>
                                 <th>Duties</th>
                                 <td class="text-left"></td>
                             </tr>
-                            <tr>
+                            <tr hidden>
                                 <th>Prohibitions</th>
                                 <td class="text-left"></td>
                             </tr>
                         </tbody>
                     </table>
-                    <a href="#!" type="button" class="btn btn-primary">See Licence</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="insufficient-licence-template" hidden>
-        <div class="card">
-            <div class="card-header mouseover" data-toggle="collapse" data-target="#insufficient-conditions-1">
-                <h5 class="mb-0">Licence #7</h5>
-            </div>
-            <div id="insufficient-conditions-1" class="collapse">
-                <div class="card-body text-center">
-                    <h5>This licence is missing these requirements:</h5>
+                    <h5 hidden>This licence has these <strong class="text-warning">missing rules</strong></h5>
                     <table class="table table-bordered">
                         <tbody>
-                            <tr>
+                            <tr hidden>
                                 <th>Permissions</th>
                                 <td class="text-left"></td>
                             </tr>
-                            <tr>
+                            <tr hidden>
                                 <th>Duties</th>
                                 <td class="text-left"></td>
                             </tr>
-                            <tr>
+                            <tr hidden>
                                 <th>Prohibitions</th>
                                 <td class="text-left"></td>
                             </tr>
                         </tbody>
                     </table>
-                    <a href="#!" type="button" class="btn btn-primary">See Licence</a>
+                    <a target="_blank" href="#!" type="button" class="btn btn-primary w-200">See Licence</a>
                 </div>
             </div>
         </div>
@@ -112,26 +69,26 @@
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
         </li>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></div>
         <li id="duty-header" class="list-group-item font-weight-bold">
             Duties
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
         </li>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
         <li id="prohibition-header" class="list-group-item font-weight-bold">
             Prohibitions
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
         </li>
-        <div id="end-rule-list"></div>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
     </ul>
     <div id="rule-item-template" hidden>
-        <li class="list-group-item">
+        <li class="list-group-item" data-rule-type="" data-action-uri="">
             <div class="ml-3">
                 <a target="_blank" href=""></a>
                 <i class="fas fa-times fa-lg text-danger delete-rule-item ml-1"></i>
             </div>
-            <div class="ml-4 assignors" hidden></div>
-            <div class="ml-4 assignees" hidden></div>
         </li>
     </div>
     <div id="party-item-template" hidden>
@@ -140,11 +97,11 @@
             <i class="fas fa-times text-danger delete-party-item floatright p-1"></i>
         </li>
     </div>
-    <div id="addPermissionModal" class="modal add-rule-modal permission fade" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
+    <div id="addPermissionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/permission" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="permissionModalTitle">Add Permission</h5>
+                    <h5 class="modal-title" id="permissionModalTitle">Add Rule: Permission</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -171,11 +128,11 @@
             </div>
         </div>
     </div>
-    <div id="addDutyModal" class="modal add-rule-modal duty fade" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
+    <div id="addDutyModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="dutyModalTitle">Add Permission</h5>
+                    <h5 class="modal-title" id="dutyModalTitle">Add Rule: Duty</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -202,11 +159,11 @@
             </div>
         </div>
     </div>
-    <div id="addProhibitionModal" class="modal add-rule-modal prohibition fade" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
+    <div id="addProhibitionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/duty" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="prohibitionModalTitle">Add Permission</h5>
+                    <h5 class="modal-title" id="prohibitionModalTitle">Add Rule: Prohibition</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -235,5 +192,7 @@
     </div>
 {% endblock %}
 {% block bottom_script %}
-    <script src="{{ url_for('static', filename='js/licence_register.js') }}"></script>
+    <script id="rule-types-json" type="application/json">
+    {% if rule_types %}{{ rule_types|tojson|safe }}{% endif %}
+    </script>
 {% endblock %}

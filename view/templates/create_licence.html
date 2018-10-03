@@ -26,7 +26,7 @@
             </div>
         </div>
         <div class="tab-pane fade" id="step-2">
-            <div id="results-best"></div>
+            <div id="results"></div>
             <div class="text-center mt-5">
                 <button type="button" class="btn btn-primary w-200 previous-button mr-3">
                     <i class="fa fa-chevron-left"></i> Back
@@ -177,11 +177,11 @@
         </div>
     </div>
     <div id="results-template" hidden>
-        <div id="suggested-licences-found" hidden>
+        <div id="licences-found" hidden>
             <h3 class="text-center">Please consider reusing a licence.</h3>
             <h3 class="text-center">The following licences are similar to your requirements.</h3>
         </div>
-        <div id="suggested-licences-not-found" hidden>
+        <div id="licences-not-found" hidden>
             <h3 class="text-center">There are no appropriate existing licences to re-use.</h3>
             <h3 class="text-center">Please continue with creating a new licence.</h3>
         </div>
@@ -193,31 +193,41 @@
             </div>
             <div id="licence-1" class="collapse">
                 <div class="card-body">
+                    <h5 hidden>This licence has these <strong class="text-info">extra rules</strong></h5>
                     <table class="table table-bordered">
                         <tbody>
-                            <tr>
+                            <tr hidden>
                                 <th>Permissions</th>
                                 <td class="text-left"></td>
                             </tr>
-                            <tr>
+                            <tr hidden>
                                 <th>Duties</th>
                                 <td class="text-left"></td>
                             </tr>
-                            <tr>
+                            <tr hidden>
                                 <th>Prohibitions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Assignors</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr>
-                                <th>Assignees</th>
                                 <td class="text-left"></td>
                             </tr>
                         </tbody>
                     </table>
-                    <a target="_blank" href="#!" type="button" class="btn btn-primary btn-wide">See Licence</a>
+                    <h5 hidden>This licence has these <strong class="text-warning">missing rules</strong></h5>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr hidden>
+                                <th>Permissions</th>
+                                <td class="text-left"></td>
+                            </tr>
+                            <tr hidden>
+                                <th>Duties</th>
+                                <td class="text-left"></td>
+                            </tr>
+                            <tr hidden>
+                                <th>Prohibitions</th>
+                                <td class="text-left"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a target="_blank" href="#!" type="button" class="btn btn-primary w-200">See Licence</a>
                 </div>
             </div>
         </div>
@@ -229,20 +239,22 @@
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
         </li>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></div>
         <li id="duty-header" class="list-group-item font-weight-bold">
             Duties
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
         </li>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
         <li id="prohibition-header" class="list-group-item font-weight-bold">
             Prohibitions
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
         </li>
-        <div id="end-rule-list"></div>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
     </ul>
     <div id="rule-item-template" hidden>
-        <li class="list-group-item">
+        <li class="list-group-item" data-rule-type="" data-action-uri="">
             <div class="ml-3">
                 <a target="_blank" href=""></a>
                 <i class="fas fa-times fa-lg text-danger delete-rule-item ml-1"></i>
@@ -257,11 +269,11 @@
             <i class="fas fa-times text-danger delete-party-item floatright p-1"></i>
         </li>
     </div>
-    <div id="addPermissionModal" class="modal add-rule-modal permission fade" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
+    <div id="addPermissionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/permission" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="permissionModalTitle">Add Permission</h5>
+                    <h5 class="modal-title" id="permissionModalTitle">Add Rule: Permission</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -316,11 +328,11 @@
             </div>
         </div>
     </div>
-    <div id="addDutyModal" class="modal add-rule-modal duty fade" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
+    <div id="addDutyModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="dutyModalTitle">Add Permission</h5>
+                    <h5 class="modal-title" id="dutyModalTitle">Add Rule: Duty</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -375,11 +387,11 @@
             </div>
         </div>
     </div>
-    <div id="addProhibitionModal" class="modal add-rule-modal prohibition fade" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
+    <div id="addProhibitionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/duty" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="prohibitionModalTitle">Add Permission</h5>
+                    <h5 class="modal-title" id="prohibitionModalTitle">Add Rule: Prohibition</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -434,4 +446,9 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block bottom_script %}
+    <script id="rule-types-json" type="application/json">
+    {% if rule_types %}{{ rule_types|tojson|safe }}{% endif %}
+    </script>
 {% endblock %}

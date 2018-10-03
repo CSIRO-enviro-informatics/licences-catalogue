@@ -32,11 +32,7 @@ def search():
 def search_results():
     rules = json.loads(request.args.get('rules'))
     results = functions.search_policies(rules)
-    return jsonify(
-        perfect_licences=results['perfect'],
-        extra_licences=results['extra'],
-        insufficient_licences=results['insufficient']
-    )
+    return jsonify(results=results)
 
 
 @routes.route('/licence/index.json')
@@ -189,7 +185,7 @@ def view_action(action_uri):
 @routes.route('/licence/create')
 def create_licence_form():
     actions = db_access.get_all_actions()
-    actions.sort(key=lambda action: action['LABEL'])
+    actions.sort(key=lambda x: x['LABEL'])
     for action in actions:
         action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
     return render_template('create_licence.html', actions=actions)

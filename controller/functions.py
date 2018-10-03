@@ -45,98 +45,45 @@ def is_valid_uri(uri):
 
 
 def search_policies(desired_rules):
-    desired_permissions = map(
-        lambda x: x['ACTION']['URI'],
-        filter(lambda x: x['TYPE_LABEL'] == 'Permission', desired_rules)
-    )
-    desired_duties = map(
-        lambda x: x['ACTION']['URI'],
-        filter(lambda x: x['TYPE_LABEL'] == 'Duty', desired_rules)
-    )
-    desired_prohibitions = map(
-        lambda x: x['ACTION']['URI'],
-        filter(lambda x: x['TYPE_LABEL'] == 'Prohibition', desired_rules)
-    )
-    perfect_fit_licences = []
-    extra_conditions_licences = []
-    missing_conditions_licences = []
     policies = db_access.get_all_policies()
+    results = []
     for policy in policies:
-        # Collect all permissions, duties and prohibitions found in the policy's rules
-        policy_permissions = set()
-        policy_duties = set()
-        policy_prohibitions = set()
-        policy_assignors = []
-        policy_assignees = []
+        # Compare desired rules and policy rules
+        # If any policy rule isn't present in the desired rules, add it to the list of extra rules.
+        extra_rules = []
         for rule in policy['RULES']:
-            action_uris = [action['URI'] for action in rule['ACTIONS']]
-            policy_assignors.extend(rule['ASSIGNORS'])
-            policy_assignees.extend(rule['ASSIGNEES'])
-            if rule['TYPE_LABEL'] == 'Permission':
-                policy_permissions = policy_permissions.union(action_uris)
-            elif rule['TYPE_LABEL'] == 'Duty':
-                policy_duties = policy_duties.union(action_uris)
-            elif rule['TYPE_LABEL'] == 'Prohibition':
-                policy_prohibitions = policy_prohibitions.union(action_uris)
+            policy_rule_matches_a_desired_rule = False
+            for desired_rule in desired_rules:
+                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
+                    for action in rule['ACTIONS']:
+                        for desired_action in desired_rule['ACTIONS']:
+                            if action['URI'] == desired_action['URI']:
+                                policy_rule_matches_a_desired_rule = True
+            if not policy_rule_matches_a_desired_rule:
+                extra_rules.append(rule)
+        # If any desired rule isn't present in the policy's rules, add it to the list of missing rules.
+        missing_rules = []
+        for desired_rule in desired_rules:
+            desired_rule_matches_a_policy_rule = False
+            for rule in policy['RULES']:
+                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
+                    for action in rule['ACTIONS']:
+                        for desired_action in desired_rule['ACTIONS']:
+                            if action['URI'] == desired_action['URI']:
+                                desired_rule_matches_a_policy_rule = True
+            if not desired_rule_matches_a_policy_rule:
+                missing_rules.append(desired_rule)
 
-        # Compare desired conditions and policy conditions
-        desired_permissions = set(desired_permissions)
-        desired_duties = set(desired_duties)
-        desired_prohibitions = set(desired_prohibitions)
-        extra_conditions = {
-            'permissions': policy_permissions - desired_permissions,
-            'duties': policy_duties - desired_duties,
-            'prohibitions': policy_prohibitions - desired_prohibitions
-        }
-        missing_conditions = {
-            'permissions': desired_permissions - policy_permissions,
-            'duties': desired_duties - policy_duties,
-            'prohibitions': desired_prohibitions - policy_prohibitions
-        }
-        if all(len(value) == 0 for label, value in extra_conditions.items()):
-            policy_has_extra_conditions = False
-        else:
-            policy_has_extra_conditions = True
-        if all(len(value) == 0 for label, value in missing_conditions.items()):
-            policy_has_missing_conditions = False
-        else:
-            policy_has_missing_conditions = True
+        # Give the policy a rank based on how many differences it has from the desired rules
+        num_differences = len(extra_rules) + len(missing_rules)
 
-        # Place the policy in a category, or don't
-        if not policy_has_extra_conditions and not policy_has_missing_conditions:
-            perfect_fit_licences.append({
-                'LABEL': policy['LABEL'],
-                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
-                'PERMISSIONS': [db_access.get_action_label(action) for action in policy_permissions],
-                'DUTIES': [db_access.get_action_label(action) for action in policy_duties],
-                'PROHIBITIONS': [db_access.get_action_label(action) for action in policy_prohibitions],
-                'ASSIGNORS': policy_assignors,
-                'ASSIGNEES': policy_assignees
-            })
-        elif policy_has_extra_conditions and not policy_has_missing_conditions:
-            extra_permissions = [db_access.get_action_label(action) for action in extra_conditions['permissions']]
-            extra_duties = [db_access.get_action_label(action) for action in extra_conditions['duties']]
-            extra_prohibitions = [db_access.get_action_label(action) for action in extra_conditions['prohibitions']]
-            extra_conditions_licences.append({
-                'LABEL': policy['LABEL'],
-                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
-                'PERMISSIONS': extra_permissions,
-                'DUTIES': extra_duties,
-                'PROHIBITIONS': extra_prohibitions
-            })
-        elif not policy_has_extra_conditions and policy_has_missing_conditions:
-            missing_permissions = [db_access.get_action_label(action) for action in missing_conditions['permissions']]
-            missing_duties = [db_access.get_action_label(action) for action in missing_conditions['duties']]
-            missing_prohibitions = [db_access.get_action_label(action) for action in missing_conditions['prohibitions']]
-            missing_conditions_licences.append({
-                'LABEL': policy['LABEL'],
-                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
-                'PERMISSIONS': missing_permissions,
-                'DUTIES': missing_duties,
-                'PROHIBITIONS': missing_prohibitions
-            })
-    return {
-        'perfect': perfect_fit_licences,
-        'extra': extra_conditions_licences,
-        'insufficient': missing_conditions_licences
-    }
+        results.append({
+            'LABEL': policy['LABEL'],
+            'LINK': url_for('controller.licence_routes', uri=policy['URI']),
+            'MISSING_RULES': missing_rules,
+            'EXTRA_RULES': extra_rules,
+            'DIFFERENCES': num_differences
+        })
+
+    results.sort(key=lambda x: x['DIFFERENCES'])
+    return results

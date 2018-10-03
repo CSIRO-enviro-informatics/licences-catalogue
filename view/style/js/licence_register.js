@@ -1,22 +1,20 @@
-rules = []
-ruleTypes = ['permission', 'duty', 'prohibition']
+var rules = []
 
 var updateRuleDisplay = function() {
-    ruleDisplay = $('#rule-list-template').clone()
-    for (i = 0; i < rules.length; i++) {
-        template = $('#rule-item-template').clone().children()
-        template.find('a').text(rules[i]['ACTION']['LABEL']).attr('href', rules[i]['ACTION']['LINK'])
-        template.addClass(rules[i]['TYPE_LABEL'].toLowerCase())
-        if (rules[i]['ASSIGNORS'].length > 0)
-            template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rules[i]['ASSIGNORS'].join(', '))
-        if (rules[i]['ASSIGNEES'].length > 0)
-            template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rules[i]['ASSIGNEES'].join(', '))
-        if (rules[i]['TYPE_LABEL'] == 'permission')
-            template.insertBefore(ruleDisplay.find('#duty-header'))
-        if (rules[i]['TYPE_LABEL'] == 'duty')
-            template.insertBefore(ruleDisplay.find('#prohibition-header'))
-        if (rules[i]['TYPE_LABEL'] == 'prohibition')
-            template.insertBefore(ruleDisplay.find('#end-rule-list'))
+    var ruleDisplay = $('#rule-list-template').clone()
+    for (var i = 0; i < rules.length; i++) {
+        for (var j = 0; j < rules[i]['ACTIONS'].length; j++){
+            action = rules[i]['ACTIONS'][j]
+            var template = $('#rule-item-template').clone().children()
+            template.find('a').text(action['LABEL']).attr('href', action['LINK'])
+            template.attr('data-rule-type', rules[i]['TYPE_URI'])
+            template.attr('data-action-uri', action['URI'])
+            if (rules[i]['ASSIGNORS'].length > 0)
+                template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rules[i]['ASSIGNORS'].join(', '))
+            if (rules[i]['ASSIGNEES'].length > 0)
+                template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rules[i]['ASSIGNEES'].join(', '))
+            template.insertBefore(ruleDisplay.find('.list-end-section[data-rule-type="' + rules[i]['TYPE_URI'] + '"]'))
+        }
     }
     $('#rule-list').html(ruleDisplay.html())
     // Enable all bootstrap tooltips on page
@@ -25,20 +23,20 @@ var updateRuleDisplay = function() {
 
 var updateActionDisplay = function(){
     $('.add-rule-modal').each(function(){
-        var ruleType
-        for (i = 0; i < ruleTypes.length; i++){
-            if ($(this).hasClass(ruleTypes[i]))
-                ruleType = ruleTypes[i]
-        }
-        if (ruleType == undefined)
-            throw 'Cannot refresh actions - modal has no rule type.'
-        selectInputField = $(this).find('.action-select')
+        var ruleType = $(this).attr('data-rule-type')
+        var selectInputField = $(this).find('.action-select')
         selectInputField.children().each(function(){
             var action_uri = $(this).attr('data-action-uri')
             $(this).prop('hidden', false)
-            for (i = 0; i < rules.length; i++){
-                if (rules[i]['ACTION']['URI'] == action_uri && (rules[i]['TYPE_LABEL'].toLowerCase() == ruleType || ruleType == 'prohibition' || rules[i]['TYPE_LABEL'] == 'prohibition')){
-                    $(this).prop('hidden', true)
+            for (var i = 0; i < rules.length; i++){
+                for (var j = 0; j < rules[i]['ACTIONS'].length; j++){
+                    action = rules[i]['ACTIONS'][j]
+                    if (action['URI'] == action_uri
+                    && (rules[i]['TYPE_URI'] == ruleType
+                        || ruleType == 'http://www.w3.org/ns/odrl/2/prohibition'
+                        || rules[i]['TYPE_URI'] == 'http://www.w3.org/ns/odrl/2/prohibition')){
+                        $(this).prop('hidden', true)
+                    }
                 }
             }
         })
@@ -52,23 +50,15 @@ var updateActionDisplay = function(){
 // Adds items to rule list
 $('body').on('click', '.add-rule', function() {
     var modal = $(this).closest('.modal')
-    selectInputField = modal.find('.modal-body').find('select')
-    selectedAction = selectInputField.find('option:selected').first()
-    action = {
+    var selectInputField = modal.find('.modal-body').find('select')
+    var selectedAction = selectInputField.find('option:selected').first()
+    var action = {
         'LABEL': selectedAction.text(),
         'URI': selectedAction.attr('data-action-uri'),
         'LINK': selectedAction.attr('data-action-link')
     }
-    var typeLabel
-    if (modal.hasClass('add-rule-modal'))
-        for (i = 0; i < ruleTypes.length; i++) {
-            if (modal.hasClass(ruleTypes[i]))
-                typeLabel = ruleTypes[i]
-        }
-    if (typeLabel == undefined)
-        throw "Cannot add rule - unknown rule type."
-    assignors = []
-    assignees = []
+    var assignors = []
+    var assignees = []
     modal.find('.assignor-list').find('.list-group-item-label').each(function() {
         assignors.push($(this).text())
     })
@@ -76,8 +66,8 @@ $('body').on('click', '.add-rule', function() {
         assignees.push($(this).text())
     })
     rules.push({
-        'ACTION': action,
-        'TYPE_LABEL': typeLabel,
+        'ACTIONS': [action],
+        'TYPE_URI': modal.attr('data-rule-type'),
         'ASSIGNORS': assignors,
         'ASSIGNEES': assignees
     })
@@ -89,19 +79,15 @@ $('body').on('click', '.add-rule', function() {
 
 // Removes items from rule list when X clicked
 $('body').on('click', '.delete-rule-item', function() {
-    listItem = $(this).closest('li')
-    var ruleTypeLabel
-    for (i = 0; i < ruleTypes.length; i++) {
-        if (listItem.hasClass(ruleTypes[i]))
-            ruleTypeLabel = ruleTypes[i]
-    }
-    if (ruleTypeLabel == undefined)
-        throw 'Cannot remove rule - unknown rule type.'
-    actionLabel = $(this).siblings('a').first().text()
+    var listItem = $(this).closest('li')
     var index = -1
-    for (i = 0; i < rules.length; i++) {
-        if (rules[i]['ACTION']['LABEL'] == actionLabel && rules[i]['TYPE_LABEL'].toLowerCase() == ruleTypeLabel)
-            index = i
+    for (var i = 0; i < rules.length; i++) {
+        for (var j = 0; j < rules[i]['ACTIONS'].length; j++){
+            action = rules[i]['ACTIONS'][j]
+            if (action['URI'] == listItem.attr('data-action-uri')
+                && rules[i]['TYPE_URI'] == listItem.attr('data-rule-type'))
+                index = i
+        }
     }
     if (index == -1)
         throw "Cannot remove rule - rule index not found."
@@ -119,75 +105,71 @@ $('body').on('click', '.search-button', function() {
             rules: JSON.stringify(rules),
         },
         success: function(data) {
-            updateSearchResults(data['perfect_licences'], data['extra_licences'], data['insufficient_licences'])
+            updateSearchResults(data['results'])
         }
     })
 })
 
-var updateSearchResults = function(perfect_licences, extra_licences, insufficient_licences) {
-    //If there is an element with id 'results-all', all results should be displayed
-    //If there is an element with id 'results-best', only the perfect fits should be displayed
-    resultsTemplate = $('#results-template').clone()
-    if ($('#results-all').length > 0) {
-        if (perfect_licences.length > 0)
-            resultsTemplate.find('#perfect-licence-header').removeAttr('hidden')
-        if (extra_licences.length > 0)
-            resultsTemplate.find('#extra-licence-header').removeAttr('hidden')
-        if (insufficient_licences.length > 0)
-            resultsTemplate.find('#insufficient-licence-header').removeAttr('hidden')
-        for (i = 0; i < perfect_licences.length; i++)
-            addLicenceEntry('perfect', perfect_licences[i], resultsTemplate.find('#perfect-licence-header'))
-        for (i = 0; i < extra_licences.length; i++)
-            addLicenceEntry('extra', extra_licences[i], resultsTemplate.find('#extra-licence-header'))
-        for (i = 0; i < insufficient_licences.length; i++) {
-            addLicenceEntry('insufficient', insufficient_licences[i], resultsTemplate.find('#insufficient-licence-header'))
-        }
-        $('#results-all').html(resultsTemplate.children())
-    }
-    else if ($('#results-best').length > 0) {
-        if (perfect_licences.length > 0) {
-            resultsTemplate.find('#suggested-licences-found').removeAttr('hidden')
-            for (i = 0; i < perfect_licences.length; i++){
-                licence_entry = $('#licence-template').clone()
-                licence_entry.find('h5').text(perfect_licences[i]['LABEL'])
-                licence_entry.find('.card-header').attr('data-target', '#licence-' + i)
-                licence_entry.find('.collapse').attr('id', 'licence-' + i)
-                licence_entry.find('a').attr('href', perfect_licences[i]['LINK'])
-                licence_entry.find('td:eq(0)').text(perfect_licences[i]['PERMISSIONS'].join(', '))
-                licence_entry.find('td:eq(1)').text(perfect_licences[i]['DUTIES'].join(', '))
-                licence_entry.find('td:eq(2)').text(perfect_licences[i]['PROHIBITIONS'].join(', '))
-                licence_entry.find('td:eq(3)').text(perfect_licences[i]['ASSIGNORS'].join(', '))
-                licence_entry.find('td:eq(4)').text(perfect_licences[i]['ASSIGNEES'].join(', '))
-                resultsTemplate.append(licence_entry.children())
+var updateSearchResults = function(results) {
+    var resultsTemplate = $('#results-template').clone()
+    if (results.length > 0) {
+        resultsTemplate.find('#licences-found').removeAttr('hidden')
+        for (var i = 0; i < results.length; i++){
+            licence_entry = $('#licence-template').clone()
+            licence_entry.find('.card-header').attr('data-target', '#licence-' + i).find('h5').text(results[i]['LABEL'])
+            licence_entry.find('.collapse').attr('id', 'licence-' + i)
+            licence_entry.find('a').attr('href', results[i]['LINK'])
+            if (results[i]['EXTRA_RULES'].length > 0) {
+                var header = licence_entry.find('.card-body').children('h5:eq(0)')
+                var table = licence_entry.find('table:eq(0)')
+                displayRulesForResult(header, table, results[i]['EXTRA_RULES'])
             }
+            if (results[i]['MISSING_RULES'].length > 0) {
+                var header = licence_entry.find('.card-body').children('h5:eq(1)')
+                var table = licence_entry.find('table:eq(1)')
+                displayRulesForResult(header, table, results[i]['MISSING_RULES'])
+            }
+            resultsTemplate.append(licence_entry.children())
         }
-        else
-            resultsTemplate.find('#suggested-licences-not-found').removeAttr('hidden')
-        $('#results-best').html(resultsTemplate.children())
     }
+    else
+        resultsTemplate.find('#licences-not-found').removeAttr('hidden')
+    $('#results').html(resultsTemplate.children())
 }
 
-var addLicenceEntry = function(licence_type, licence_info, destination) {
-    entry = $('#' + licence_type + '-licence-template').clone()
-    entry.find('.card-header').attr('data-target', '#' + licence_type + '-licence-' + i)
-    entry.find('.collapse').attr('id', licence_type + '-licence-' + i)
-    entry.find('.card-header').children().text(licence_info['LABEL'])
-    entry.find('a').attr('href', licence_info['LINK'])
-    if (licence_type == 'extra' || licence_type == 'insufficient') {
-        if (licence_info['PROHIBITIONS'].length > 0)
-            entry.find('td:eq(2)').text(licence_info['PROHIBITIONS'].join(', '))
-        else
-            entry.find('tr:eq(2)').remove()
-        if (licence_info['DUTIES'].length > 0)
-            entry.find('td:eq(1)').text(licence_info['DUTIES'].join(', '))
-        else
-            entry.find('tr:eq(1)').remove()
-        if (licence_info['PERMISSIONS'].length > 0)
-            entry.find('td:eq(0)').text(licence_info['PERMISSIONS'].join(', '))
-        else
-            entry.find('tr:eq(0)').remove()
+var displayRulesForResult = function(header, table, rules){
+    var permissions = []
+    var duties = []
+    var prohibitions = []
+    for (var i = 0; i < rules.length; i++) {
+        for (var j = 0; j < rules[i]['ACTIONS'].length; j++) {
+           var action = rules[i]['ACTIONS'][j]
+            switch (rules[i]['TYPE_URI']) {
+                case 'http://www.w3.org/ns/odrl/2/permission':
+                    permissions.push(action['LABEL'])
+                    break
+                case 'http://www.w3.org/ns/odrl/2/prohibition':
+                    duties.push(action['LABEL'])
+                    break
+                case 'http://www.w3.org/ns/odrl/2/duty':
+                    prohibitions.push(action['LABEL'])
+                    break
+            }
+        }
     }
-    entry.children().insertAfter(destination)
+    header.prop('hidden', false)
+    if (permissions.length > 0) {
+        table.find('tr:eq(0)').prop('hidden', false)
+        table.find('td:eq(0)').text(permissions.join(', '))
+    }
+    if (duties.length > 0) {
+        table.find('tr:eq(1)').prop('hidden', false)
+        table.find('td:eq(1)').text(duties.join(', '))
+    }
+    if (prohibitions.length > 0) {
+        table.find('tr:eq(2)').prop('hidden', false)
+        table.find('td:eq(2)').text(prohibitions.join(', '))
+    }
 }
 
 //Moves to next step in form
@@ -227,7 +209,7 @@ var addParty = function(input_field) {
     var isValid = input_field.closest('form').get(0).checkValidity()
     if (!isValid)
         return
-    party = input_field.val()
+    var party = input_field.val()
     input_field.val('')
     var new_list_item = $('#party-item-template').clone().children()
     new_list_item.find('div').text(party)
