@@ -4,6 +4,8 @@ import _conf as conf
 import json
 from uuid import uuid4
 
+CC_LICENCE = 'http:/creativecommons.org/ns#License'
+
 routes = Blueprint('controller', __name__)
 
 
@@ -62,13 +64,31 @@ def view_licence_list():
         items.append({
             'uri': policy['URI'],
             'label': policy['LABEL'] if policy['LABEL'] else policy['URI'],
-            'link': url_for('controller.licence_routes', uri=policy['URI'])
+            'link': url_for('controller.licence_routes', uri=policy['URI']),
+            'comment': policy['COMMENT']
         })
     items = sorted(items, key=lambda item: item['label'].lower())
     # test for preferred Media Type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(items)
+        register_uri = url_for('controller.licence_routes', _external=True)
+        register_json = {
+            register_uri: {
+                'type': 'http://purl.org/linked-data/registry#Register',
+                'label': "Licence Register",
+                'comment': 'This is a register (controlled list) of machine-readable Licenses which are a particular '
+                           'type of Policy.',
+                'containedItemClass': CC_LICENCE
+            }
+        }
+        for item in items:
+            register_json[item['uri']] = {
+                'type': CC_LICENCE,
+                'label': item['label'],
+                'comment': item['comment'],
+                'register': register_uri
+            }
+        return jsonify(register_json)
     else:
         return render_template(
             'browse_list.html',
@@ -102,7 +122,8 @@ def view_licence(policy_uri):
             prohibitions.append(rule)
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(licence)
+        licence_json = {}
+        return jsonify(licence_json)
     else:
         return render_template(
             'view_licence.html',
