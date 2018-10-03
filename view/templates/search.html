@@ -75,13 +75,13 @@
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
         </li>
-        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
         <li id="prohibition-header" class="list-group-item font-weight-bold">
             Prohibitions
             <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></i>
             <i class="fas fa-plus fa-lg text-success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
         </li>
-        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
+        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
     </ul>
     <div id="rule-item-template" hidden>
         <li class="list-group-item" data-rule-type="" data-action-uri="">
@@ -128,7 +128,7 @@
             </div>
         </div>
     </div>
-    <div id="addDutyModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
+    <div id="addDutyModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/duty" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
@@ -159,7 +159,7 @@
             </div>
         </div>
     </div>
-    <div id="addProhibitionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/duty" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
+    <div id="addProhibitionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content text-center">
                 <div class="modal-header">
@@ -190,9 +190,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-{% block bottom_script %}
-    <script id="rule-types-json" type="application/json">
-    {% if rule_types %}{{ rule_types|tojson|safe }}{% endif %}
-    </script>
 {% endblock %}

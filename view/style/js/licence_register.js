@@ -1,3 +1,6 @@
+var PERMISSION_URI = 'http://www.w3.org/ns/odrl/2/permission'
+var DUTY_URI = 'http://www.w3.org/ns/odrl/2/duty'
+var PROHIBITION_URI = 'http://www.w3.org/ns/odrl/2/prohibition'
 var rules = []
 
 var updateRuleDisplay = function() {
@@ -26,15 +29,14 @@ var updateActionDisplay = function(){
         var ruleType = $(this).attr('data-rule-type')
         var selectInputField = $(this).find('.action-select')
         selectInputField.children().each(function(){
-            var action_uri = $(this).attr('data-action-uri')
             $(this).prop('hidden', false)
             for (var i = 0; i < rules.length; i++){
                 for (var j = 0; j < rules[i]['ACTIONS'].length; j++){
                     action = rules[i]['ACTIONS'][j]
-                    if (action['URI'] == action_uri
-                    && (rules[i]['TYPE_URI'] == ruleType
-                        || ruleType == 'http://www.w3.org/ns/odrl/2/prohibition'
-                        || rules[i]['TYPE_URI'] == 'http://www.w3.org/ns/odrl/2/prohibition')){
+                    if (action['URI'] == $(this).attr('data-action-uri')
+                        && (rules[i]['TYPE_URI'] == ruleType
+                        || ruleType == PROHIBITION_URI
+                        || rules[i]['TYPE_URI'] == PROHIBITION_URI)){
                         $(this).prop('hidden', true)
                     }
                 }
@@ -145,13 +147,13 @@ var displayRulesForResult = function(header, table, rules){
         for (var j = 0; j < rules[i]['ACTIONS'].length; j++) {
            var action = rules[i]['ACTIONS'][j]
             switch (rules[i]['TYPE_URI']) {
-                case 'http://www.w3.org/ns/odrl/2/permission':
+                case PERMISSION_URI:
                     permissions.push(action['LABEL'])
                     break
-                case 'http://www.w3.org/ns/odrl/2/prohibition':
+                case PROHIBITION_URI:
                     duties.push(action['LABEL'])
                     break
-                case 'http://www.w3.org/ns/odrl/2/duty':
+                case DUTY_URI:
                     prohibitions.push(action['LABEL'])
                     break
             }
