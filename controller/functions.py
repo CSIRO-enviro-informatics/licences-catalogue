@@ -45,7 +45,13 @@ def is_valid_uri(uri):
 
 
 def search_policies(desired_rules):
-    policies = db_access.get_all_policies()
+    policy_uris = db_access.get_all_policies()
+    policies = []
+    for policy_uri in policy_uris:
+        policy = db_access.get_policy(policy_uri)
+        policy['RULES'] = [db_access.get_rule(rule_uri) for rule_uri in db_access.get_rules_for_policy(policy_uri)]
+        policies.append(policy)
+
     results = []
     for policy in policies:
         # Compare desired rules and policy rules
@@ -54,7 +60,7 @@ def search_policies(desired_rules):
         for rule in policy['RULES']:
             policy_rule_matches_a_desired_rule = False
             for desired_rule in desired_rules:
-                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
+                if rule['TYPE'] == desired_rule['TYPE_URI']:
                     for action in rule['ACTIONS']:
                         for desired_action in desired_rule['ACTIONS']:
                             if action['URI'] == desired_action['URI']:
@@ -66,7 +72,7 @@ def search_policies(desired_rules):
         for desired_rule in desired_rules:
             desired_rule_matches_a_policy_rule = False
             for rule in policy['RULES']:
-                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
+                if rule['TYPE'] == desired_rule['TYPE_URI']:
                     for action in rule['ACTIONS']:
                         for desired_action in desired_rule['ACTIONS']:
                             if action['URI'] == desired_action['URI']:

@@ -2,7 +2,7 @@
 {% block left_column %}
 <ul>
     {% for item in items %}
-    <li><a href="{{ item['uri'] }}">{{ item['label'] }}</a></li>
+    <li><a href="{{ item['link'] }}">{{ item['label'] }}</a></li>
     {% endfor %}
 </ul>
 {% endblock %}

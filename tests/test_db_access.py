@@ -70,41 +70,20 @@ def test_get_policy(mock):
 
     # Should get all the attributes of the policy
     db_access.create_policy(policy_uri)
+    policy_type = 'http://creativecommons.org/ns#License'
+    db_access.set_policy_attribute(policy_uri, 'TYPE', policy_type)
     rule_uri = 'http://example.com#rule'
     rule_type_uri = 'http://www.w3.org/ns/odrl/2/permission'
     rule_label = 'Rule'
     db_access.create_rule(rule_uri, rule_type_uri, rule_label)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
-    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
-    db_access.add_action_to_rule(action_uri, rule_uri)
-    assignor_uri = 'https://example.com#assignor'
-    assignee_uri = 'https://example.com#assignee'
-    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
-    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     policy = db_access.get_policy(policy_uri)
     expected_policy_attributes = ['URI', 'TYPE', 'LABEL', 'JURISDICTION', 'LEGAL_CODE', 'HAS_VERSION', 'LANGUAGE',
-                                  'SEE_ALSO', 'SAME_AS', 'COMMENT', 'LOGO', 'CREATED', 'STATUS']
+                                  'SEE_ALSO', 'SAME_AS', 'COMMENT', 'LOGO', 'CREATED', 'STATUS', 'RULES']
     assert all(attr in policy for attr in expected_policy_attributes)
     assert policy['URI'] == policy_uri
-
-    # Should get all of the rules
-    assert policy['RULES'][0]['URI'] == rule_uri
-    assert policy['RULES'][0]['TYPE_URI'] == rule_type_uri
-    assert policy['RULES'][0]['TYPE_LABEL'] == 'Permission'
-    assert policy['RULES'][0]['LABEL'] == rule_label
-
-    # Should get actions associated with the rule
-    assert policy['RULES'][0]['ACTIONS'] == [{
-        'URI': 'http://www.w3.org/ns/odrl/2/distribute',
-        'LABEL': 'Distribute',
-        'DEFINITION': 'To supply the Asset to third-parties.'
-    }]
-
-    # Should get assignors and assignees associated with the rule
-    assignors = policy['RULES'][0]['ASSIGNORS']
-    assignees = policy['RULES'][0]['ASSIGNEES']
-    assert assignors == [assignor_uri]
-    assert assignees == [assignee_uri]
+    assert policy['TYPE'] == policy_type
+    assert policy['RULES'] == [rule_uri]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -113,47 +92,9 @@ def test_get_all_policies(mock):
     policy2_uri = 'https://example.com#policy2'
     db_access.create_policy(policy1_uri)
     db_access.create_policy(policy2_uri)
-    rule_uri = 'http://example.com#rule'
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
-    db_access.add_rule_to_policy(rule_uri, policy1_uri)
-    action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
-    db_access.add_action_to_rule(action_uri, rule_uri)
-    assignor_uri = 'https://example.com#assignor'
-    assignee_uri = 'https://example.com#assignee'
-    db_access.add_assignor_to_rule(assignor_uri, rule_uri)
-    db_access.add_assignee_to_rule(assignee_uri, rule_uri)
 
     # Should retrieve every policy
-    policies = db_access.get_all_policies()
-    assert len(policies) == 2
-
-    # Should get all the attributes of the policy
-    policies = db_access.get_all_policies()
-    expected_policy_attributes = ['URI', 'TYPE', 'LABEL', 'JURISDICTION', 'LEGAL_CODE', 'HAS_VERSION', 'LANGUAGE',
-                                  'SEE_ALSO', 'SAME_AS', 'COMMENT', 'LOGO', 'CREATED', 'STATUS']
-    assert all(attr in policies[0] for attr in expected_policy_attributes)
-    assert all(attr in policies[1] for attr in expected_policy_attributes)
-
-    # Should get all of the rules
-    assert policies[0]['RULES'][0]['URI'] == rule_uri
-    assert policies[0]['RULES'][0]['TYPE_URI'] == rule_type
-    assert policies[0]['RULES'][0]['TYPE_LABEL'] == 'Permission'
-    assert policies[0]['RULES'][0]['LABEL'] == rule_label
-
-    # Should get actions associated with the rule
-    assert policies[0]['RULES'][0]['ACTIONS'] == [{
-        'URI': 'http://www.w3.org/ns/odrl/2/distribute',
-        'LABEL': 'Distribute',
-        'DEFINITION': 'To supply the Asset to third-parties.'
-    }]
-
-    # Should get assignors and assignees associated with the rule
-    assignors = policies[0]['RULES'][0]['ASSIGNORS']
-    assignees = policies[0]['RULES'][0]['ASSIGNEES']
-    assert assignors == [assignor_uri]
-    assert assignees == [assignee_uri]
+    assert db_access.get_all_policies() == [policy1_uri, policy2_uri]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -299,7 +240,8 @@ def test_get_rule(mock):
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     rule = db_access.get_rule(rule_uri)
     assert rule['URI'] == rule_uri
-    assert rule['TYPE'] == rule_type
+    assert rule['TYPE_URI'] == rule_type
+    assert rule['TYPE_LABEL'] == 'Permission'
     assert rule['LABEL'] == rule_label
 
     # Should get actions associated with the rule
@@ -355,6 +297,27 @@ def test_remove_rule_from_policy(mock):
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     db_access.remove_rule_from_policy(rule_uri, policy_uri)
     assert not db_access.policy_has_rule(policy_uri, rule_uri)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_rules_for_policy(mock):
+    # Should return a list of URIs for all Rules assigned to a Policy
+    policy_uri = 'https://example.com#policy'
+    db_access.create_policy(policy_uri)
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    rule_label = 'Rule'
+    rule1_uri = 'https://example.com#rule1'
+    rule2_uri = 'https://example.com#rule2'
+    db_access.create_rule(rule1_uri, rule_type, rule_label)
+    db_access.create_rule(rule2_uri, rule_type, rule_label)
+    db_access.add_rule_to_policy(rule1_uri, policy_uri)
+    db_access.add_rule_to_policy(rule2_uri, policy_uri)
+    assert db_access.get_rules_for_policy(policy_uri) == [rule1_uri, rule2_uri]
+
+    # Shouldn't include any other Rules
+    rule3_uri = 'https://example.com#rule3'
+    db_access.create_rule(rule3_uri, rule_type, rule_label)
+    assert db_access.get_rules_for_policy(policy_uri) == [rule1_uri, rule2_uri]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

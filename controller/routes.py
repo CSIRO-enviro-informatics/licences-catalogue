@@ -55,17 +55,20 @@ def licence_routes():
 
 def view_licence_list():
     title = 'Licence Register'
-    licences = db_access.get_all_policies()
-    items = list()
-    for licence in licences:
-        if licence['LABEL'] is None:
-            licence['LABEL'] = licence['URI']
-        items.append({'uri': url_for('controller.licence_routes', uri=licence['URI']), 'label': licence['LABEL']})
-    items = sorted(items, key=lambda item:item['label'].lower())
+    items = []
+    policy_uris = db_access.get_all_policies()
+    for policy_uri in policy_uris:
+        policy = db_access.get_policy(policy_uri)
+        items.append({
+            'uri': policy['URI'],
+            'label': policy['LABEL'] if policy['LABEL'] else policy['URI'],
+            'link': url_for('controller.licence_routes', uri=policy['URI'])
+        })
+    items = sorted(items, key=lambda item: item['label'].lower())
     # test for preferred Media Type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(licences)
+        return jsonify(items)
     else:
         return render_template(
             'browse_list.html',
@@ -77,9 +80,9 @@ def view_licence_list():
         )
 
 
-def view_licence(licence_uri):
+def view_licence(policy_uri):
     try:
-        licence = db_access.get_policy(licence_uri)
+        licence = db_access.get_policy(policy_uri)
     except ValueError:
         abort(404)
         return
@@ -87,6 +90,7 @@ def view_licence(licence_uri):
     permissions = []
     duties = []
     prohibitions = []
+    licence['RULES'] = [db_access.get_rule(rule_uri) for rule_uri in licence['RULES']]
     for rule in licence['RULES']:
         if rule['LABEL'] is None:
             rule['LABEL'] = rule['URI']
@@ -103,9 +107,9 @@ def view_licence(licence_uri):
         return render_template(
             'view_licence.html',
             title=title,
-            permalink=conf.BASE_URI + url_for('controller.licence_routes', uri=licence_uri),
+            permalink=conf.BASE_URI + url_for('controller.licence_routes', uri=policy_uri),
             rdf_link='#!',
-            json_link=url_for('controller.licence_routes', _format='application/json', uri=licence_uri),
+            json_link=url_for('controller.licence_routes', _format='application/json', uri=policy_uri),
             logo=licence['LOGO'],
             licence=licence,
             permissions=permissions,

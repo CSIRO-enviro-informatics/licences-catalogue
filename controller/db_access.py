@@ -104,8 +104,7 @@ def set_policy_attribute(policy_uri, attr, value):
 
 def get_policy(policy_uri):
     """
-    Retrieve all the relevant information about a Policy, including its attributes and its Rules. Additionally, the
-    Actions, Assignors and Assignees for each of those rules.
+    Retrieve all the relevant information about a Policy, including its attributes and its Rules.
 
     :return: A Dictionary containing the following elements:
         URI - string
@@ -122,14 +121,7 @@ def get_policy(policy_uri):
         CREATED - string
         STATUS - string
         CREATOR - string
-        RULES - List of Rules. Each Rule is a Dictionary containing the following elements:
-            URI - string
-            TYPE_URI - string
-            TYPE_LABEL - string
-            LABEL - string
-            ASSIGNORS - List of strings
-            ASSIGNEES - List of strings
-            ACTIONS - List of strings
+        RULES - List of URIs (string)
     """
     policy_result = query_db('SELECT * FROM POLICY WHERE URI = ?', (policy_uri,), one=True)
     if policy_result is None:
@@ -141,44 +133,11 @@ def get_policy(policy_uri):
 
 def get_all_policies():
     """
-    Retrieve all the relevant information about all Policies, including their attributes and their Rules. Additionally,
-    the Actions, Assignors and Assignees for each of those rules.
+    Retrieve a list of all Policies.
 
-    :return: A List containing Policies. Each Policy is a Dictionary containing the following elements:
-        URI - string
-        TYPE - string
-        LABEL - string
-        JURISDICTION - string
-        LEGAL_CODE - string
-        HAS_VERSION - string
-        LANGUAGE - string
-        SEE_ALSO - string
-        SAME_AS - string
-        COMMENT - string
-        LOGO - string
-        CREATED - string
-        STATUS - string
-        CREATOR - string
-        RULES - List of Rules
-            Each Rule is a Dictionary containing the following elements:
-                URI - string
-                TYPE_URI - string
-                TYPE_LABEL - string
-                LABEL - string
-                ASSIGNORS - List of strings
-                ASSIGNEES - List of strings
-                ACTIONS -   List of Actions. Each Action is a Dictionary containing the following elements:
-                    URI - string
-                    LABEL - string
-                    DEFINITION - string
+    :return: A List of URIs
     """
-    policies = list()
-    policies_result = query_db('SELECT * FROM POLICY')
-    for policy_result in policies_result:
-        policy = dict(policy_result)
-        policy['RULES'] = get_rules_for_policy(policy['URI'])
-        policies.append(policy)
-    return policies
+    return [result['URI'] for result in query_db('SELECT URI FROM POLICY')]
 
 
 def policy_has_rule(policy_uri, rule_uri):
@@ -260,7 +219,7 @@ def get_rule(rule_uri):
     :return: A Dictionary containing the following elements:
         URI - string
         TYPE_URI - string
-        TYPE - string
+        TYPE_LABEL - string
         LABEL - string
         ASSIGNORS - List of strings
         ASSIGNEES - List of strings
@@ -272,7 +231,12 @@ def get_rule(rule_uri):
     """
     if not rule_exists(rule_uri):
         raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
-    rule = dict(query_db('SELECT URI, TYPE, LABEL FROM RULE WHERE URI = ?', (rule_uri,), one=True))
+    query_str = '''
+        SELECT R.URI, R.LABEL, R.TYPE AS TYPE_URI, RT.LABEL AS TYPE_LABEL
+        FROM RULE R, RULE_TYPE RT
+        WHERE R.TYPE = RT.URI AND R.URI = ?
+    '''
+    rule = dict(query_db(query_str, (rule_uri,), one=True))
     rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
     rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
     rule['ASSIGNEES'] = get_assignees_for_rule(rule['URI'])
@@ -304,63 +268,17 @@ def get_rules_for_policy(policy_uri):
     """
     Retrieves all the Rules used by a Policy with the given URI.
 
-    :return: A List of Rules
-        Each Rule is a Dictionary containing the following elements:
-            URI - string
-            TYPE_URI - string
-            TYPE_LABEL - string
-            LABEL - string
-            ASSIGNORS - List of strings
-            ASSIGNEES - List of strings
-            ACTIONS -   List of Actions. Each Action is a Dictionary containing the following elements:
-                URI - string
-                LABEL - string
-                DEFINITION - string
+    :return: A List of URIs
     """
-    query_str = '''
-        SELECT R.URI, R.TYPE AS TYPE_URI, RT.LABEL AS TYPE_LABEL, R.LABEL 
-        FROM RULE R, POLICY_HAS_RULE P_R, RULE_TYPE RT
-        WHERE RT.URI = R.TYPE AND R.URI = P_R.RULE_URI AND P_R.POLICY_URI = ?
-    '''
-    rules = list()
-    for rule_result in query_db(query_str, (policy_uri,)):
-        rule = dict(rule_result)
-        rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
-        rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
-        rule['ASSIGNEES'] = get_assignees_for_rule(rule['URI'])
-        rules.append(rule)
-    return rules
+    query_str = 'SELECT RULE_URI FROM POLICY_HAS_RULE WHERE POLICY_URI = ?'
+    return [rule_result['RULE_URI'] for rule_result in query_db(query_str, (policy_uri,))]
 
 
 def get_all_rules():
     """
-    Retrieves all the Rules and relevant information.
-
-    :return: A List of Rules. Each Rule is a Dictionary containing the following elements:
-                URI - string
-                TYPE_URI - string
-                TYPE_LABEL - string
-                LABEL - string
-                ASSIGNORS - List of strings
-                ASSIGNEES - List of strings
-                ACTIONS -   List of Actions. Each Action is a Dictionary containing the following elements:
-                    URI - string
-                    LABEL - string
-                    DEFINITION - string
+    Retrieves list of all Rules' URIs
     """
-    rules = list()
-    query_str = '''
-        SELECT R.URI, R.LABEL, R.TYPE AS TYPE_URI, RT.LABEL AS TYPE_LABEL 
-        FROM RULE R, RULE_TYPE RT 
-        WHERE R.TYPE = RT.URI
-    '''
-    for rule_result in query_db(query_str):
-        rule = dict(rule_result)
-        rule['ACTIONS'] = get_actions_for_rule(rule['URI'])
-        rule['ASSIGNORS'] = get_assignors_for_rule(rule['URI'])
-        rule['ASSIGNEES'] = get_assignees_for_rule(rule['URI'])
-        rules.append(rule)
-    return rules
+    return [result['URI'] for result in query_db('SELECT URI FROM RULE')]
 
 
 def rule_exists(rule_uri):
@@ -499,10 +417,7 @@ def get_action(action_uri):
 
 def get_all_actions():
     """
-    Returns a list of all the Actions which are permitted along with their label and definition
-
-    :return A list of Actions
-                Each Action is a dictionary with elements: URI, LABEL, DEFINITION
+    Returns a List of all Actions as URIs
     """
     actions = list()
     for result in query_db('SELECT URI, LABEL, DEFINITION FROM ACTION'):
