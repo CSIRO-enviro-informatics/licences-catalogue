@@ -120,8 +120,7 @@ def rebuild():
                 ('Aggregate', 'http://www.w3.org/ns/odrl/2/aggregate', 
                     'To use the Asset or parts of it as part of a composite collection.'),
                 ('Annotate', 'http://www.w3.org/ns/odrl/2/annotate', 
-                    'To add explanatory notations/commentaries to the Asset without modifying the Asset in any other 
-                    way.'),
+                    'To add explanatory notations/commentaries to the Asset without modifying the Asset in any other way.'),
                 ('Anonymize', 'http://www.w3.org/ns/odrl/2/anonymize', 
                     'To anonymize all or parts of the Asset.'),
                 ('Archive', 'http://www.w3.org/ns/odrl/2/archive', 
@@ -157,8 +156,7 @@ def rebuild():
                 ('Extract', 'http://www.w3.org/ns/odrl/2/extract', 
                     'To extract parts of the Asset and to use it as a new Asset.'),
                 ('Give', 'http://www.w3.org/ns/odrl/2/give', 
-                    'To transfer the ownership of the Asset to a third party without compensation and while deleting the 
-                    original asset.'),
+                    'To transfer the ownership of the Asset to a third party without compensation and while deleting the original asset.'),
                 ('Grant Use', 'http://www.w3.org/ns/odrl/2/grantUse', 
                     'To grant the use of the Asset to third parties.'),
                 ('Include', 'http://www.w3.org/ns/odrl/2/include', 
@@ -168,8 +166,7 @@ def rebuild():
                 ('Inform', 'http://www.w3.org/ns/odrl/2/inform', 
                     'To inform that an action has been performed on or in relation to the Asset.'),
                 ('Install', 'http://www.w3.org/ns/odrl/2/install', 
-                    'To load the computer program Asset onto a storage device which allows operating or running the 
-                    Asset.'),
+                    'To load the computer program Asset onto a storage device which allows operating or running the Asset.'),
                 ('Modify', 'http://www.w3.org/ns/odrl/2/modify', 
                     'To change existing content of the Asset. A new asset is not created by this action.'),
                 ('Move', 'http://www.w3.org/ns/odrl/2/move', 
@@ -195,15 +192,13 @@ def rebuild():
                 ('Review Policy', 'http://www.w3.org/ns/odrl/2/reviewPolicy', 
                     'To review the Policy applicable to the Asset.'),
                 ('Sell', 'http://www.w3.org/ns/odrl/2/sell', 
-                    'To transfer the ownership of the Asset to a third party with compensation and while deleting the 
-                    original asset.'),
+                    'To transfer the ownership of the Asset to a third party with compensation and while deleting the original asset.'),
                 ('Share Alike', 'http://creativecommons.org/ns#ShareAlike', 
                     'Derivative works be licensed under the same terms or compatible terms as the original work.'),
                 ('Sharing', 'http://creativecommons.org/ns#Sharing', 
                     'Permits commercial derivatives, but only non-commercial distribution.'),
                 ('Source Code', 'http://creativecommons.org/ns#SourceCode', 
-                    'Source code (the preferred form for making modifications) must be provided when exercising some 
-                    rights granted by the license.'),
+                    'Source code (the preferred form for making modifications) must be provided when exercising some rights granted by the license.'),
                 ('Stream', 'http://www.w3.org/ns/odrl/2/stream', 
                     'To deliver the Asset in real-time.'),
                 ('Synchronize', 'http://www.w3.org/ns/odrl/2/synchronize', 
@@ -215,8 +210,7 @@ def rebuild():
                 ('Translate', 'http://www.w3.org/ns/odrl/2/translate', 
                     'To translate the original natural language of an Asset into another natural language.'),
                 ('Uninstall', 'http://www.w3.org/ns/odrl/2/uninstall', 
-                    'To unload and delete the computer program Asset from a storage device and disable its readiness for 
-                    operation.'),
+                    'To unload and delete the computer program Asset from a storage device and disable its readiness for operation.'),
                 ('Watermark', 'http://www.w3.org/ns/odrl/2/watermark', 'To apply a watermark to the Asset.')
     ''')
     conn.commit()

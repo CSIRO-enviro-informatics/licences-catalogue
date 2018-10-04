@@ -29,8 +29,9 @@ def create_policy(policy_uri, attributes=None, rules=None):
     if rules:
         for rule in rules:
             rule_uri = _conf.BASE_URI + '/rules/' + str(uuid4())
-            db_access.create_rule(rule_uri, rule['RULE_TYPE'])
-            db_access.add_action_to_rule(rule['URI'], rule_uri)
+            db_access.create_rule(rule_uri, rule['TYPE_URI'])
+            for action in rule['ACTIONS']:
+                db_access.add_action_to_rule(action['URI'], rule_uri)
             if 'ASSIGNORS' in rule:
                 for assignor in rule['ASSIGNORS']:
                     db_access.add_assignor_to_rule(assignor, rule_uri)
@@ -60,7 +61,7 @@ def search_policies(desired_rules):
         for rule in policy['RULES']:
             policy_rule_matches_a_desired_rule = False
             for desired_rule in desired_rules:
-                if rule['TYPE'] == desired_rule['TYPE_URI']:
+                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
                     for action in rule['ACTIONS']:
                         for desired_action in desired_rule['ACTIONS']:
                             if action['URI'] == desired_action['URI']:
@@ -72,7 +73,7 @@ def search_policies(desired_rules):
         for desired_rule in desired_rules:
             desired_rule_matches_a_policy_rule = False
             for rule in policy['RULES']:
-                if rule['TYPE'] == desired_rule['TYPE_URI']:
+                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
                     for action in rule['ACTIONS']:
                         for desired_action in desired_rule['ACTIONS']:
                             if action['URI'] == desired_action['URI']:
