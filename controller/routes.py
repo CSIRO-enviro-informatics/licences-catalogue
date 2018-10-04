@@ -5,6 +5,8 @@ import json
 from uuid import uuid4
 
 CC_LICENCE = 'http:/creativecommons.org/ns#License'
+ODRL_RULE = 'http://www.w3.org/ns/odrl/2/Rule'
+ODRL_ACTION = 'http://www.w3.org/ns/odrl/2/Action'
 
 routes = Blueprint('controller', __name__)
 
@@ -75,7 +77,7 @@ def view_licence_list():
         register_json = {
             register_uri: {
                 'type': 'http://purl.org/linked-data/registry#Register',
-                'label': "Licence Register",
+                'label': 'Licence Register',
                 'comment': 'This is a register (controlled list) of machine-readable Licenses which are a particular '
                            'type of Policy.',
                 'containedItemClass': CC_LICENCE
@@ -102,16 +104,16 @@ def view_licence_list():
 
 def view_licence(policy_uri):
     try:
-        licence = db_access.get_policy(policy_uri)
+        policy = db_access.get_policy(policy_uri)
     except ValueError:
         abort(404)
         return
-    title = licence['LABEL']
+    title = policy['LABEL']
     permissions = []
     duties = []
     prohibitions = []
-    licence['RULES'] = [db_access.get_rule(rule_uri) for rule_uri in licence['RULES']]
-    for rule in licence['RULES']:
+    policy['RULES'] = [db_access.get_rule(rule_uri) for rule_uri in policy['RULES']]
+    for rule in policy['RULES']:
         if rule['LABEL'] is None:
             rule['LABEL'] = rule['URI']
         if rule['TYPE_LABEL'] == 'Permission':
@@ -122,7 +124,33 @@ def view_licence(policy_uri):
             prohibitions.append(rule)
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        licence_json = {}
+        licence_json = {
+            policy['URI']: {
+                'comment': policy['COMMENT'],
+                'created': policy['CREATED'],
+                'creator': policy['CREATOR'],
+                'hasVersion': policy['HAS_VERSION'],
+                'jurisdiction': policy['JURISDICTION'],
+                'label': policy['LABEL'],
+                'language': policy['LANGUAGE'],
+                'legalCode': policy['LEGAL_CODE'],
+                'logo': policy['LOGO'],
+                'sameAs': policy['SAME_AS'],
+                'seeAlso': policy['SEE_ALSO'],
+                'status': policy['STATUS'],
+                'type': policy['TYPE'],
+                'containedItemClass': ODRL_RULE
+            }
+        }
+        for rule in policy['RULES']:
+            licence_json[rule['URI']] = {
+                'label': rule['LABEL'],
+                'type': [rule['TYPE_URI'], ODRL_RULE],
+                'assignors': rule['ASSIGNORS'],
+                'assignees': rule['ASSIGNEES'],
+                'actions': [action['URI'] for action in rule['ACTIONS']],
+                'licence': policy['URI']
+            }
         return jsonify(licence_json)
     else:
         return render_template(
@@ -131,8 +159,8 @@ def view_licence(policy_uri):
             permalink=conf.BASE_URI + url_for('controller.licence_routes', uri=policy_uri),
             rdf_link='#!',
             json_link=url_for('controller.licence_routes', _format='application/json', uri=policy_uri),
-            logo=licence['LOGO'],
-            licence=licence,
+            logo=policy['LOGO'],
+            licence=policy,
             permissions=permissions,
             duties=duties,
             prohibitions=prohibitions
@@ -159,16 +187,37 @@ def action_routes():
 
 def view_actions_list():
     actions = db_access.get_all_actions()
-    items = list()
+    items = []
     for action in actions:
         if action['URI'] is None:
             action['LABEL'] = action['URI']
-        items.append({'uri': url_for('controller.action_routes', uri=action['URI']), 'label': action['LABEL']})
+        items.append({
+            'link': url_for('controller.action_routes', uri=action['URI']),
+            'uri': action['URI'],
+            'label': action['LABEL'],
+            'comment': action['DEFINITION']
+        })
     items = sorted(items, key=lambda item: item['label'].lower())
     title = 'Action Register'
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(actions)
+        register_uri = url_for('controller.action_routes', _external=True)
+        actions_json = {
+            register_uri: {
+                'type': 'http://purl.org/linked-data/registry#Register',
+                'label': 'Action Register',
+                'comment': 'This is a register (controlled list) of machine-readable Actions.',
+                'containedItemClass': ODRL_ACTION
+            }
+        }
+        for item in items:
+            actions_json[item['uri']] = {
+                'type': ODRL_ACTION,
+                'label': item['label'],
+                'comment': item['comment'],
+                'register': register_uri
+            }
+        return jsonify(actions_json)
     else:
         return render_template(
             'browse_list.html',
@@ -195,7 +244,7 @@ def view_action(action_uri):
     licences = sorted(licences, key=lambda rule: rule['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(action)
+        return jsonify({action['URI']: {'label': action['LABEL'], 'definition': action['DEFINITION']}})
     else:
         return render_template(
             'view_action.html',

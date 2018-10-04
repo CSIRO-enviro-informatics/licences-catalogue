@@ -300,9 +300,8 @@ def nem_513a():
         'LEGAL_CODE',
         'https://www.aemc.gov.au/sites/default/files/2018-04/NER%20-%20v107%20-%20Chapter%205.PDF'
     )
-    db_access.set_policy_attribute(policy_uri, 'CREATOR', '''
-        http://data.bioregionalassessments.gov.au/person/car587 http://data.bioregionalassessments.gov.au/person/tet004
-    ''')
+    db_access.set_policy_attribute(policy_uri, 'CREATOR', 'http://data.bioregionalassessments.gov.au/person/car587 http'
+                                                          '://data.bioregionalassessments.gov.au/person/tet004')
     db_access.set_policy_attribute(policy_uri, 'HAS_VERSION', '107')
     db_access.set_policy_attribute(policy_uri, 'LANGUAGE', 'http://www.lexvo.org/page/iso639-3/eng')
     db_access.set_policy_attribute(
