@@ -102,7 +102,7 @@ $('body').on('click', '.delete-rule-item', function() {
 $('body').on('click', '.search-button', function() {
     $.ajax({
         dataType: 'json',
-        url: '/_search_results',
+        url: '_search_results',
         data: {
             rules: JSON.stringify(rules),
         },
