@@ -1,12 +1,40 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, Response
 from controller import db_access, functions
 import _conf as conf
 import json
 from uuid import uuid4
+from rdflib import Graph, RDF, RDFS, Literal, URIRef, XSD, OWL, BNode
+from rdflib.namespace import SKOS, DCTERMS, FOAF
 
-CC_LICENCE = 'http:/creativecommons.org/ns#License'
-ODRL_RULE = 'http://www.w3.org/ns/odrl/2/Rule'
-ODRL_ACTION = 'http://www.w3.org/ns/odrl/2/Action'
+ADMS = 'http://www.w3.org/ns/adms#'
+CREATIVE_COMMONS = 'http://creativecommons.org/ns#'
+ODRL = 'http://www.w3.org/ns/odrl/2/'
+REG = 'http://purl.org/linked-data/registry#'
+JSON_CONTEXT_ACTIONS = {
+    '@vocab': 'http://www.w3.org/ns/odrl/2/',
+    'label': 'http://www.w3.org/2000/01/rdf-schema#label',
+    'definition': 'http://www.w3.org/2004/02/skos/core#definition',
+    'containedItemClass': 'http://purl.org/linked-data/registry#containedItemClass',
+    'comment': 'http://www.w3.org/2000/01/rdf-schema#comment',
+    'register': 'http://purl.org/linked-data/registry#Register'
+}
+JSON_CONTEXT_POLICIES = {
+    '@vocab': 'http://www.w3.org/ns/odrl/2/',
+    'label': 'http://www.w3.org/2000/01/rdf-schema#label',
+    'created': 'http://purl.org/dc/terms/created',
+    'comment': 'http://www.w3.org/2000/01/rdf-schema#comment',
+    'sameAs': 'http://www.w3.org/2002/07/owl#sameAs',
+    'register': 'http://purl.org/linked-data/registry#Register',
+    'containedItemClass': 'http://purl.org/linked-data/registry#containedItemClass',
+    'hasVersion': 'http://purl.org/dc/terms/hasVersion',
+    'language': 'http://purl.org/dc/terms/language',
+    'legalCode': 'http://creativecommons.org/ns#legalcode',
+    'jurisdiction': 'http://creativecommons.org/ns#jurisdiction',
+    'seeAlso': 'http://www.w3.org/2000/01/rdf-schema#seeAlso',
+    'creator': 'http://purl.org/dc/terms/creator',
+    'logo': 'http://xmlns.com/foaf/0.1/logo',
+    'status': 'http://www.w3.org/ns/adms#status'
+}
 
 routes = Blueprint('controller', __name__)
 
@@ -71,21 +99,28 @@ def view_licence_list():
         register_uri = url_for('controller.licence_routes', _external=True)
         register_json = {
             register_uri: {
-                'type': 'http://purl.org/linked-data/registry#Register',
+                'type': REG + 'Register',
                 'label': title,
                 'comment': 'This is a register (controlled list) of machine-readable Licenses which are a particular '
                            'type of Policy.',
-                'containedItemClass': CC_LICENCE
+                'containedItemClass': CREATIVE_COMMONS + 'License'
             }
         }
         for policy in policies:
             register_json[policy['URI']] = {
-                'type': CC_LICENCE,
+                'type': CREATIVE_COMMONS + 'License',
                 'label': policy['LABEL'],
                 'comment': policy['COMMENT'],
                 'register': register_uri
             }
         return jsonify(register_json)
+    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
+        # Display as RDF
+        return Response(get_policy_list_rdf(policies).serialize(format='turtle'), status=200, mimetype='text/turtle')
+    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
+        # Display as JSON-LD
+        json_ld = get_policy_list_rdf(policies).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
+        return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
         for policy in policies:
@@ -101,9 +136,38 @@ def view_licence_list():
             title=title,
             items=items,
             permalink=url_for('controller.licence_routes', _external=True),
-            rdf_link='#!',
-            json_link=url_for('controller.licence_routes', _format='application/json')
+            rdf_link=url_for('controller.licence_routes', _format='text/turtle'),
+            json_link=url_for('controller.licence_routes', _format='application/json'),
+            json_ld_link=url_for('controller.licence_routes', _format='application/ld+json')
         )
+
+
+def get_policy_list_rdf(policies):
+    graph = Graph()
+    graph.bind('odrl', ODRL)
+    graph.bind('cc', CREATIVE_COMMONS)
+    graph.bind('owl', OWL)
+    graph.bind('dct', DCTERMS)
+    graph.bind('foaf', FOAF)
+    graph.bind('adms', ADMS)
+    graph.bind('reg', REG)
+    register_node = URIRef(url_for('controller.licence_routes', _external=True))
+    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
+    graph.add((register_node, RDFS.label, Literal('Licence Register')))
+    graph.add((register_node, RDFS.comment, Literal('This is a register (controlled list) of machine-readable Licenses '
+                                                    'which are a particular type of Policy.')))
+    graph.add((register_node, URIRef(REG + 'containedItemClass'), URIRef(ODRL + 'Policy')))
+    for policy in policies:
+        policy_node = URIRef(policy['URI'])
+        graph.add((policy_node, RDF.type, URIRef(ODRL + 'Policy')))
+        if policy['TYPE']:
+            graph.add((policy_node, RDF.type, URIRef(policy['TYPE'])))
+        if policy['LABEL']:
+            graph.add((policy_node, RDFS.label, Literal(policy['LABEL'], lang='en')))
+        if policy['COMMENT']:
+            graph.add((policy_node, RDFS.comment, Literal(policy['COMMENT'], lang='en')))
+        graph.add((policy_node, URIRef(REG + 'Register'), URIRef(register_node)))
+    return graph
 
 
 def view_licence(policy_uri):
@@ -131,19 +195,26 @@ def view_licence(policy_uri):
                 'seeAlso': policy['SEE_ALSO'],
                 'status': policy['STATUS'],
                 'type': policy['TYPE'],
-                'containedItemClass': ODRL_RULE
+                'containedItemClass': ODRL + 'Rule'
             }
         }
         for rule in rules:
             licence_json[rule['URI']] = {
                 'label': rule['LABEL'],
-                'type': [rule['TYPE_URI'], ODRL_RULE],
+                'type': [rule['TYPE_URI'], ODRL + 'Rule'],
                 'assignors': rule['ASSIGNORS'],
                 'assignees': rule['ASSIGNEES'],
                 'actions': [action['URI'] for action in rule['ACTIONS']],
                 'licence': policy['URI']
             }
         return jsonify(licence_json)
+    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
+        # Display as RDF
+        return Response(get_policy_rdf(policy, rules).serialize(format='turtle'), status=200, mimetype='text/turtle')
+    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
+        # Display as JSON-LD
+        json_ld = get_policy_rdf(policy, rules).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
+        return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
         permissions = []
@@ -162,14 +233,64 @@ def view_licence(policy_uri):
             'view_licence.html',
             title=policy['LABEL'],
             permalink=url_for('controller.licence_routes', uri=policy_uri, _external=True),
-            rdf_link='#!',
+            rdf_link=url_for('controller.licence_routes', _format='text/turtle', uri=policy_uri),
             json_link=url_for('controller.licence_routes', _format='application/json', uri=policy_uri),
+            json_ld_link=url_for('controller.licence_routes', _format='application/ld+json', uri=policy_uri),
             logo=policy['LOGO'],
             licence=policy,
             permissions=permissions,
             duties=duties,
             prohibitions=prohibitions
         )
+
+
+def get_policy_rdf(policy, rules):
+    graph = Graph()
+    graph.bind('odrl', ODRL)
+    graph.bind('cc', CREATIVE_COMMONS)
+    graph.bind('owl', OWL)
+    graph.bind('dct', DCTERMS)
+    graph.bind('foaf', FOAF)
+    graph.bind('adms', ADMS)
+    policy_node = URIRef(policy['URI'])
+    graph.add((policy_node, RDF.type, URIRef(ODRL + 'Policy')))
+    if policy['TYPE']:
+        graph.add((policy_node, RDF.type, URIRef(policy['TYPE'])))
+    if policy['LABEL']:
+        graph.add((policy_node, RDFS.label, Literal(policy['LABEL'], lang='en')))
+    if policy['COMMENT']:
+        graph.add((policy_node, RDFS.comment, Literal(policy['COMMENT'], lang='en')))
+    if policy['CREATED']:
+        graph.add((policy_node, DCTERMS.created, Literal(policy['CREATED'], datatype=XSD.date)))
+    if policy['CREATOR']:
+        graph.add((policy_node, DCTERMS.creator, URIRef(policy['CREATOR'])))
+    if policy['HAS_VERSION']:
+        graph.add((policy_node, DCTERMS.hasVersion, Literal(policy['HAS_VERSION'])))
+    if policy['JURISDICTION']:
+        graph.add((policy_node, URIRef(CREATIVE_COMMONS + 'jurisdiction'), URIRef(policy['JURISDICTION'])))
+    if policy['LANGUAGE']:
+        graph.add((policy_node, DCTERMS.language, URIRef(policy['LANGUAGE'])))
+    if policy['LEGAL_CODE']:
+        graph.add((policy_node, URIRef(CREATIVE_COMMONS + 'legalcode'), URIRef(policy['LEGAL_CODE'])))
+    if policy['LOGO']:
+        graph.add((policy_node, URIRef(FOAF + 'logo'), URIRef(policy['LOGO'])))
+    if policy['SAME_AS']:
+        graph.add((policy_node, OWL.sameAs, URIRef(policy['SAME_AS'])))
+    if policy['SEE_ALSO']:
+        graph.add((policy_node, RDFS.seeAlso, URIRef(policy['SEE_ALSO'])))
+    if policy['STATUS']:
+        graph.add((policy_node, URIRef(ADMS + 'status'), URIRef(policy['STATUS'])))
+    for rule in rules:
+        rule_node = BNode()
+        graph.add((policy_node, URIRef(ODRL + rule['TYPE_LABEL'].lower()), rule_node))
+        graph.add((rule_node, RDF.type, URIRef(ODRL + rule['TYPE_LABEL'])))
+        for action in rule['ACTIONS']:
+            graph.add((rule_node, URIRef(ODRL + 'action'), URIRef(action['URI'])))
+        for assignor in rule['ASSIGNORS']:
+            graph.add((rule_node, URIRef(ODRL + 'assignor'), URIRef(assignor)))
+        for assignee in rule['ASSIGNEES']:
+            graph.add((rule_node, URIRef(ODRL + 'assignee'), URIRef(assignee)))
+    return graph
 
 
 @routes.route('/action/index.json')
@@ -199,20 +320,27 @@ def view_actions_list():
         register_uri = url_for('controller.action_routes', _external=True)
         actions_json = {
             register_uri: {
-                'type': 'http://purl.org/linked-data/registry#Register',
+                'type': REG + 'Register',
                 'label': title,
                 'comment': 'This is a register (controlled list) of machine-readable Actions.',
-                'containedItemClass': ODRL_ACTION
+                'containedItemClass': ODRL + 'Action'
             }
         }
         for action in actions:
             actions_json[action['URI']] = {
-                'type': ODRL_ACTION,
+                'type': ODRL + 'Action',
                 'label': action['LABEL'],
                 'comment': action['DEFINITION'],
                 'register': register_uri
             }
         return jsonify(actions_json)
+    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
+        # Display as RDF
+        return Response(get_action_list_rdf(actions).serialize(format='turtle'), status=200, mimetype='text/turtle')
+    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
+        # Display as JSON-LD
+        json_ld = get_action_list_rdf(actions).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
+        return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
         items = []
@@ -229,36 +357,80 @@ def view_actions_list():
             title=title,
             items=items,
             permalink=url_for('controller.action_routes', _external=True),
-            rdf_link='#!',
-            json_link=url_for('controller.action_routes', _format='application/json')
+            rdf_link=url_for('controller.action_routes', _format='text/turtle'),
+            json_link=url_for('controller.action_routes', _format='application/json'),
+            json_ld_link=url_for('controller.action_routes', _format='application/ld+json')
         )
+
+
+def get_action_list_rdf(actions):
+    graph = Graph()
+    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
+    graph.bind('skos', SKOS)
+    register_node = URIRef(url_for('controller.action_routes', _external=True))
+    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
+    graph.add((register_node, RDFS.label, Literal('Action Register')))
+    graph.add((
+        register_node,
+        RDFS.comment,
+        Literal('This is a register (controlled list) of machine-readable Actions.')
+    ))
+    graph.add((register_node, URIRef(REG + 'containedItemClass'), URIRef(ODRL + 'Action')))
+    for action in actions:
+        action_node = URIRef(action['URI'])
+        graph.add((action_node, RDF.type, URIRef(ODRL + 'Action')))
+        graph.add((action_node, RDFS.label, Literal(action['LABEL'], lang='en')))
+        graph.add((action_node, SKOS.definition, Literal(action['DEFINITION'], lang='en')))
+        graph.add((action_node, URIRef(REG + 'Register'), URIRef(register_node)))
+    return graph
 
 
 def view_action(action_uri):
     try:
         action = db_access.get_action(action_uri)
-        licences = db_access.get_policies_using_action(action_uri)
     except ValueError:
         abort(404)
         return
-    if action['LABEL'] is None:
-        action['LABEL'] = action['URI']
-    for policy in licences:
-        if policy['LABEL'] is None:
-            policy['LABEL'] = policy['URI']
-    licences = sorted(licences, key=lambda rule: rule['LABEL'].lower())
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
+        # Display as JSON
         return jsonify({action['URI']: {'label': action['LABEL'], 'definition': action['DEFINITION']}})
+    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
+        # Display as RDF
+        return Response(get_action_rdf(action).serialize(format='turtle'), status=200, mimetype='text/turtle')
+    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
+        # Display as JSON-LD
+        json_ld = get_action_rdf(action).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
+        return Response(json_ld, status=200, mimetype='application/json')
     else:
+        # Display as HTML
+        policies = db_access.get_policies_using_action(action_uri)
+        if action['LABEL'] is None:
+            action['LABEL'] = action['URI']
+        for policy in policies:
+            if policy['LABEL'] is None:
+                policy['LABEL'] = policy['URI']
+        policies = sorted(policies, key=lambda rule: rule['LABEL'].lower())
         return render_template(
             'view_action.html',
             permalink=conf.BASE_URI + url_for('controller.action_routes', uri=action['URI']),
-            rdf_link='#!',
+            rdf_link=url_for('controller.action_routes', _format='text/turtle', uri=action_uri),
             json_link=url_for('controller.action_routes', _format='application/json', uri=action_uri),
+            json_ld_link=url_for('controller.action_routes', _format='application/ld+json', uri=action_uri),
             action=action,
-            licences=licences
+            licences=policies
         )
+
+
+def get_action_rdf(action):
+    graph = Graph()
+    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
+    graph.bind('skos', SKOS)
+    action_node = URIRef(action['URI'])
+    graph.add((action_node, RDF.type, URIRef(ODRL + 'Action')))
+    graph.add((action_node, RDFS.label, Literal(action['LABEL'], lang='en')))
+    graph.add((action_node, SKOS.definition, Literal(action['DEFINITION'], lang='en')))
+    return graph
 
 
 @routes.route('/licence/create')
