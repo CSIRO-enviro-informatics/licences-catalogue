@@ -82,15 +82,17 @@ def search_policies(desired_rules):
                 missing_rules.append(desired_rule)
 
         # Give the policy a rank based on how many differences it has from the desired rules
-        num_differences = len(extra_rules) + len(missing_rules)
+        # Missing requirements count more than extra ones
+        differences_rank = len(extra_rules) + len(missing_rules) * 2
 
-        results.append({
-            'LABEL': policy['LABEL'],
-            'LINK': url_for('controller.licence_routes', uri=policy['URI']),
-            'MISSING_RULES': missing_rules,
-            'EXTRA_RULES': extra_rules,
-            'DIFFERENCES': num_differences
-        })
+        if differences_rank < 5:  # Don't add policies that are too off-mark
+            results.append({
+                'LABEL': policy['LABEL'],
+                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
+                'MISSING_RULES': missing_rules,
+                'EXTRA_RULES': extra_rules,
+                'DIFFERENCES': differences_rank
+            })
 
     results.sort(key=lambda x: x['DIFFERENCES'])
-    return results
+    return results[:10]
