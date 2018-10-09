@@ -100,9 +100,12 @@ $('body').on('click', '.delete-rule-item', function() {
 
 // AJAX request to get search results
 $('body').on('click', '.search-button', function() {
+    search_url = $('#search-url').attr('data-url')
+    if (search_url == undefined)
+        throw 'Search URL not found'
     $.ajax({
         dataType: 'json',
-        url: '_search_results',
+        url: search_url,
         data: {
             rules: JSON.stringify(rules),
         },

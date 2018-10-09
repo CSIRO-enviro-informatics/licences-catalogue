@@ -57,7 +57,7 @@ def search():
     actions = db_access.get_all_actions()
     for action in actions:
         action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
-    return render_template('search.html', actions=actions)
+    return render_template('search.html', actions=actions, search_url=url_for('controller.search_results'))
 
 
 @routes.route('/_search_results')
@@ -439,13 +439,13 @@ def create_licence_form():
     actions.sort(key=lambda x: x['LABEL'])
     for action in actions:
         action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
-    return render_template('create_licence.html', actions=actions)
+    return render_template('create_licence.html', actions=actions, search_url=url_for('controller.search_results'))
 
 
 @routes.route('/licence/create', methods=['POST'])
 def create_licence():
     attributes = {'type': 'http://creativecommons.org/ns#License'}
     attributes.update(request.form.items())
-    uri = 'http://example.com/licence/' + str(uuid4())
+    uri = conf.BASE_URI + str(uuid4())
     functions.create_policy(uri, attributes, json.loads(attributes.pop('rules')))
     return redirect(url_for('controller.licence_routes', uri=uri))
