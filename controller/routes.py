@@ -444,8 +444,14 @@ def create_licence_form():
 
 @routes.route('/licence/create', methods=['POST'])
 def create_licence():
-    attributes = {'type': 'http://creativecommons.org/ns#License'}
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted'
+    }
     attributes.update(request.form.items())
-    uri = conf.BASE_URI + str(uuid4())
-    functions.create_policy(uri, attributes, json.loads(attributes.pop('rules')))
+    uri = conf.BASE_URI + '/' + str(uuid4())
+    rules = json.loads(attributes.pop('rules'))
+    for rule in rules:
+        rule['ACTIONS'] = [action['URI'] for action in rule['ACTIONS']]
+    functions.create_policy(uri, attributes, rules)
     return redirect(url_for('controller.licence_routes', uri=uri))

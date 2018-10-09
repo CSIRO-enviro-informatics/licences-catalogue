@@ -129,7 +129,7 @@ def rebuild():
                     'To attribute the use of the Asset.'),
                 ('Attribution', 'http://creativecommons.org/ns#Attribution', 
                     'Credit be given to copyright holder and/or author.'),
-                ('Commercial Use', 'http://creativecommons.org/ns#CommericalUse', 
+                ('Commercial Use', 'http://creativecommons.org/ns#CommercialUse', 
                     'Exercising rights for commercial purposes.'),
                 ('Compensate', 'http://www.w3.org/ns/odrl/2/compensate', 
                     'To compensate by transfer of some amount of value, if defined, for using or selling the Asset.'),

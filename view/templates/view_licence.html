@@ -49,11 +49,11 @@
         </tr>
         <tr>
             <th>See Also:</th>
-            <td>{% if 'SEE_ALSO' in licence %}{{ licence['SEE_ALSO'] }}{% endif %}</td>
+            <td>{% if licence['SEE_ALSO'] is not none %}{{ licence['SEE_ALSO'] }}{% endif %}</td>
         </tr>
         <tr>
             <th>URI:</th>
-            <td>{% if 'URI' in licence %}{{ licence['URI'] }}{% endif %}</td>
+            <td>{% if licence['URI'] is not none %}{{ licence['URI'] }}{% endif %}</td>
         </tr>
     </tbody>
 </table>
