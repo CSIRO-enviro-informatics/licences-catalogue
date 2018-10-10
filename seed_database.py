@@ -1,7 +1,7 @@
 import sqlite3
 import _conf
 from unittest import mock
-from controller import functions, db_access
+from controller import functions
 import os
 from uuid import uuid4
 
@@ -25,6 +25,8 @@ def seed(mock):
     # Mocks out get_db() so this can be run independently of the Flask application
     readonly_licence()
     cc_by_4()
+    cc_by_nd_4()
+    cc_by_nc_nd_4()
     cc_by_sa_3_au()
     cc_by_2_5_au()
     cc_by_2_au()
@@ -36,6 +38,14 @@ def seed(mock):
     gpl_2()
     nem_513a()
     ogl_uk()
+    csiro_data_licence()
+    csiro_open_source_software_licence()
+    csiro_binary_software_licence()
+    gpl3_csiro()
+    cc_public_domain()
+    cc_by_3_unported()
+    cc_by_sa_3_unported()
+    cc_by_nc_nd_3_unported()
 
 
 def readonly_licence():
@@ -59,13 +69,54 @@ def cc_by_4():
         'type': 'http://creativecommons.org/ns#License',
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
         'label': 'Creative Commons CC-BY 4.0',
-        'legal_code': 'http://creativecommons.org/licenses/by/4.0/',
+        'legal_code': 'https://creativecommons.org/licenses/by/4.0/legalcode',
+        'see_also': 'https://creativecommons.org/licenses/by/4.0/',
+        'creator': 'https://creativecommons.org',
         'same_as': 'http://test.linked.data.gov.au/license/cc-by-4.0',
     }
     rules = [
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()),
          'TYPE_LABEL': 'Permission', 'ACTIONS': ['Distribute', 'Reproduce', 'Derivative Works']},
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Attribution', 'Notice']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def cc_by_nd_4():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'label': 'Creative Commons CC-BY-ND 4.0',
+        'legal_code': 'https://creativecommons.org/licenses/by-nd/4.0/legalcode',
+        'see_also': 'https://creativecommons.org/licenses/by-nd/4.0/',
+        'creator': 'https://creativecommons.org',
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()),
+         'TYPE_LABEL': 'Permission', 'ACTIONS': ['Distribute', 'Reproduce']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty',
+         'ACTIONS': ['Attribution', 'Notice', 'Derivative Works']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def cc_by_nc_nd_4():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'label': 'Creative Commons CC-BY-NC-ND 4.0',
+        'legal_code': 'https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode',
+        'see_also': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+        'creator': 'https://creativecommons.org'
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()),
+         'TYPE_LABEL': 'Permission', 'ACTIONS': ['Distribute', 'Reproduction']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Attribution', 'Notice']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Prohibition',
+         'ACTIONS': ['Commercial Use', 'Derivative Works']}
     ]
     functions.create_policy(policy_uri, attributes, rules)
 
@@ -81,6 +132,7 @@ def cc_by_sa_3_au():
         'has_version': '3.0',
         'language': 'http://www.lexvo.org/page/iso639-3/eng',
         'see_also': 'http://creativecommons.org/licenses/by-sa/3.0/au',
+        'creator': 'https://creativecommons.org',
         'same_as': 'http://test.linked.data.gov.au/license/cc-by-sa-3.0-au'
     }
     rules = [
@@ -102,6 +154,7 @@ def cc_by_2_5_au():
         'legal_code': 'https://creativecommons.org/licenses/by/2.5/au/legalcode',
         'has_version': '1.0',
         'language': 'http://www.lexvo.org/page/iso639-3/eng',
+        'creator': 'https://creativecommons.org',
         'see_also': 'https://creativecommons.org/licenses/by/2.5/au/'
     }
     rules = [
@@ -124,12 +177,13 @@ def cc_by_2_au():
         'has_version': '1.0',
         'language': 'http://www.lexvo.org/page/iso629-2/eng',
         'see_also': 'http://creativecommons.org/licenses/by/2.0/au',
+        'creator': 'https://creativecommons.org',
         'same_as': 'http://test.linked.data.gov.au/license/cc-by-2.0-au'
     }
     rules = [
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
          'ACTIONS': ['Distribute', 'Reproduce', 'Derive']},
-        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty','ACTIONS': ['Attribution', 'Notice']}
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Attribute', 'Notice']}
     ]
     functions.create_policy(policy_uri, attributes, rules)
 
@@ -144,7 +198,9 @@ def cc_by_nc_nd_3_au():
         'has_version': '3.0',
         'language': 'http://www.lexvo.org/page/iso639-3/eng',
         'see_also': 'http://creativecommons.org/licenses/by-nc-nd/3.0/au',
-        'same_as': 'http://test.linked.data.gov.au/license/cc-by-nc-nd-3.0-au'
+        'same_as': 'http://test.linked.data.gov.au/license/cc-by-nc-nd-3.0-au',
+        'creator': 'https://creativecommons.org',
+        'legal_code': 'http://creativecommons.org/licenses/by-nc-nd/3.0/au/legalcode'
     }
     rules = [
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
@@ -185,8 +241,7 @@ def mit():
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
         'label': 'MIT License',
         'legal_code': 'http://opensource.org/licenses/MIT',
-        'language': 'http://www.lexvo.org/page/iso639-3/eng',
-        'same_as': 'http://test.linked.data.gov.au/license/gpl-2.0'
+        'language': 'http://www.lexvo.org/page/iso639-3/eng'
     }
     rules = [{'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
               'ACTIONS': ['Distribute', 'Reproduce', 'Derive', 'Sell']}]
@@ -199,7 +254,9 @@ def cc_by_sa_4():
         'type': 'http://creativecommons.org/ns#License',
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
         'label': 'Creative Commons CC-BY-SA 4.0',
-        'legal_code': 'http://creativecommons.org/licenses/by-sa/4.0/',
+        'legal_code': 'https://creativecommons.org/licenses/by-sa/4.0/legalcode',
+        'see_also': 'http://creativecommons.org/licenses/by-sa/4.0/',
+        'creator': 'https://creativecommons.org',
         'same_as': 'http://test.linked.data.gov.au/license/cc-by-sa-4.0'
     }
     rules = [
@@ -217,8 +274,10 @@ def cc_zero_1():
         'type': 'http://creativecommons.org/ns#License',
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
         'label': 'Creative Commons CC0',
-        'legal_code': 'http://creativecommons.org/publicdomain/zero/1.0/',
+        'legal_code': 'https://creativecommons.org/publicdomain/zero/1.0/legalcode',
+        'see_also': 'http://creativecommons.org/publicdomain/zero/1.0/',
         'same_as': 'http://test.linked.data.gov.au/license/cc-zero-1.0',
+        'creator': 'https://creativecommons.org',
         'has_version': '1.0'
     }
     rules = [{'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
@@ -272,23 +331,186 @@ def ogl_uk():
         'label': 'UK Non-commercial Government License',
         'has_version': '1.0',
         'language': 'http://www.lexvo.org/page/iso639-3/eng',
-        'same_as': 'http://test.linked.data.gov.au/license/ogl-uk'
+        'same_as': 'http://test.linked.data.gov.au/license/ogl-uk',
+        'legal_code': 'http://www.nationalarchives.gov.uk/doc/non-commercial-government-licence/'
     }
     rules = [
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
-         'ACTIONS': ['Distribute', 'Reproduce']},
+         'ACTIONS': ['Derive', 'Distribute', 'Reproduce']},
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Attribution', 'Notice']},
         {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Prohibition', 'ACTIONS': ['Commercial Use']}
     ]
     functions.create_policy(policy_uri, attributes, rules)
 
 
-def get_action_uri(action_label):
-    actions = db_access.get_all_actions()
-    for action in actions:
-        if action['LABEL'] == action_label:
-            return action['URI']
-    raise ValueError('Didn\'t find that action')
+def csiro_data_licence():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'label': 'CSIRO Data Licence',
+        'comment': 'A licence for files downloaded from CSIRO\'s Data Access Portal',
+        'creator': 'https://data.csiro.au/dap/',
+        'jurisdiction': 'http://dbpedia.org/page/Australian_Capital_Territory',
+        'legal_code': 'https://confluence.csiro.au/plugins/viewsource/viewpagesrc.action?pageId=267124838',
+        'see_also': 'https://confluence.csiro.au/display/daphelp/CSIRO+Data+Licence',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng'
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission', 'ACTIONS': ['Reproduce']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Attribution']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Prohibition',
+         'ACTIONS': ['Grant Use', 'Commercial Use', 'Sell', 'Distribute']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def csiro_open_source_software_licence():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'label': 'CSIRO Open Source Software Licence',
+        'comment': 'Based on MIT/BSD Open Source Licence',
+        'creator': 'https://confluence.csiro.au/display/~coo353',
+        'jurisdiction': 'http://dbpedia.org/page/Australian_Capital_Territory',
+        'legal_code': 'https://confluence.csiro.au/plugins/viewsource/viewpagesrc.action?pageId=267124838',
+        'see_also': 'https://confluence.csiro.au/display/daphelp/CSIRO+Data+Licence',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng'
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission', 'ACTIONS': ['Distribute']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Notice']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def csiro_binary_software_licence():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'label': 'CSIRO Binary Software Licence',
+        'comment': 'This is a template and further rights and obligations are set out in the Supplementary Licence '
+                   'specific to the Software you are licensing from CSIRO.  Both documents together form this '
+                   'agreement.',
+        'creator': 'https://confluence.csiro.au/display/~coo353',
+        'jurisdiction': 'http://dbpedia.org/page/New_South_Wales',
+        'legal_code': 'https://confluence.csiro.au/plugins/viewsource/viewpagesrc.action?pageId=267124802',
+        'see_also': 'https://confluence.csiro.au/display/daphelp/CSIRO+Binary+Software+Licence+Agreement',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng'
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
+         'ACTIONS': ['Install', 'Reproduction']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Notice']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Prohibition',
+         'ACTIONS': ['Concurrent Use', 'Modify', 'Distribute', 'Derive']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def gpl3_csiro():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'label': 'GPL3 with CSIRO Disclaimer',
+        'comment': 'Except where otherwise indicated, including in the Supplementary Licence, CSIRO grants you a '
+                   'licence to the Software on the terms of the GNU General Public Licence version 3 (GPLv3), '
+                   'distributed at: http://www.gnu.org/licenses/gpl.html.',
+        'legal_code': 'https://confluence.csiro.au/plugins/viewsource/viewpagesrc.action?pageId=267124793',
+        'creator': 'http://fsf.org/',
+        'has_version': '1.0',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng',
+        'see_also': 'https://confluence.csiro.au/display/daphelp/GPLv3+Licence+with+CSIRO+Disclaimer',
+        'logo': 'http://www.gnu.org/graphics/gplv3-127x51.png'
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
+         'ACTIONS': ['Distribute', 'Reproduce', 'Derive']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Notice', 'Source Code']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def cc_public_domain():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'label': 'CC Public Domain',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'comment': 'A work with this licence is free of known restrictions under copyright law, including all related'
+                   'and neighbouring rights. You can copy, modify, distribute and perform the work, even for commercial'
+                   ' purposes, all without asking permission.',
+        'see_also': 'https://creativecommons.org/publicdomain/mark/1.0/',
+        'creator': 'https://creativecommons.org',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng'
+    }
+    rules = [{'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
+              'ACTIONS': ['Reproduction', 'Derive', 'Distribution']}]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def cc_by_3_unported():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'label': 'Creative Commons CC-BY 3.0',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'see_also': 'https://creativecommons.org/licenses/by/3.0/',
+        'legal_code': 'https://creativecommons.org/licenses/by/3.0/legalcode',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng',
+        'creator': 'https://creativecommons.org',
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
+         'ACTIONS': ['Reproduction', 'Derive', 'Distribution']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty', 'ACTIONS': ['Attribution', 'Notice']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def cc_by_sa_3_unported():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'label': 'Creative Commons CC-BY-SA 3.0 Unported',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'see_also': 'https://creativecommons.org/licenses/by-sa/3.0/',
+        'legal_code': 'https://creativecommons.org/licenses/by-sa/3.0/legalcode',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng',
+        'creator': 'https://creativecommons.org',
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
+         'ACTIONS': ['Reproduction', 'Derive', 'Distribution']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty',
+         'ACTIONS': ['Attribution', 'Share Alike']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
+
+
+def cc_by_nc_nd_3_unported():
+    policy_uri = _conf.BASE_URI + '/licence/' + str(uuid4())
+    attributes = {
+        'type': 'http://creativecommons.org/ns#License',
+        'label': 'Creative Commons Attribution Noncommercial No Derivatives 3.0 Unported Licence',
+        'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
+        'see_also': 'https://creativecommons.org/licenses/by-nc-nd/3.0/',
+        'legal_code': 'https://creativecommons.org/licenses/by-nc-nd/3.0/legalcode',
+        'language': 'http://www.lexvo.org/page/iso639-3/eng',
+        'creator': 'https://creativecommons.org',
+    }
+    rules = [
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Permission',
+         'ACTIONS': ['Reproduction', 'Distribution']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Duty',
+         'ACTIONS': ['Attribution', 'Notice']},
+        {'URI': _conf.BASE_URI + '/rule/' + str(uuid4()), 'TYPE_LABEL': 'Prohibition',
+         'ACTIONS': ['Commercial Use', 'Derivative Works']}
+    ]
+    functions.create_policy(policy_uri, attributes, rules)
 
 
 if __name__ == '__main__':
