@@ -42,21 +42,21 @@
                     <col width="150">
                     <tbody>
                         <tr>
-                            <th>Licence Name: </th>
-                            <td><input name="label" type="text" required/></td>
+                            <th><label for="label">Licence Name:</label></th>
+                            <td><input id="label" name="label" type="text" required/></td>
                         </tr>
                         <tr>
-                            <th>Description:</th>
-                            <td><textarea name="comment"></textarea></td>
+                            <th><label for="comment">Description:</label></th>
+                            <td><textarea id="comment" name="comment"></textarea></td>
                         </tr>
                         <tr>
-                            <th>Creator:</th>
-                            <td><input name="creator" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
+                            <th><label for="creator">Creator:</label></th>
+                            <td><input id="creator" name="creator" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
                         </tr>
                         <tr>
-                            <th>Status:</th>
+                            <th><label for="status">Status:</label></th>
                             <td>
-                                <select name="status">
+                                <select id="status" name="status">
                                     <option value="">None</option>
                                     <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/accepted">Accepted</option>
                                     <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/deprecated">Deprecated</option>
@@ -67,21 +67,21 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>Version:</th>
-                            <td><input name="has_version" type="text"/></td>
+                            <th><label for="version">Version:</label></th>
+                            <td><input id="version" name="has_version" type="text"/></td>
                         </tr>
                         <tr>
-                            <th>Jurisdiction:</th>
-                            <td><input name="jurisdiction" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
+                            <th><label for="jurisdiction">Jurisdiction:</label></th>
+                            <td><input id="jurisdiction" name="jurisdiction" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
                         </tr>
                         <tr>
-                            <th>Legal Code:</th>
-                            <td><input name="legal_code" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
+                            <th><label for="legal_code">Legal Code:</label></th>
+                            <td><input id="legal_code" name="legal_code" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
                         </tr>
                         <tr>
-                            <th>Language:</th>
+                            <th><label for="language">Language:</label></th>
                             <td>
-                                <select name="language" required>
+                                <select id="language" name="language" required>
                                     <option value="AF">Afrikanns</option>
                                     <option value="SQ">Albanian</option>
                                     <option value="AR">Arabic</option>
@@ -158,12 +158,12 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>Same As:</th>
-                            <td><input name="same_as" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
+                            <th><label for="same_as">Same As:</label></th>
+                            <td><input id="same_as" name="same_as" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
                         </tr>
                         <tr>
-                            <th>See Also:</th>
-                            <td><input name="see_also" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
+                            <th><label for="see_also">See Also:</label></th>
+                            <td><input id="see_also" name="see_also" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
                         </tr>
                     </tbody>
                 </table>
@@ -189,11 +189,11 @@
     <div id="licence-template" hidden>
         <div class="card text-center">
             <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-1">
-                <h5 class="mb-0">Licence #1</h5>
+                <strong class="mb-0">Licence #1</strong>
             </div>
             <div id="licence-1" class="collapse">
                 <div class="card-body">
-                    <h5 hidden>This licence has these <strong class="text-info">extra rules</strong></h5>
+                    <strong hidden>This licence has these <span class="text-info">extra rules</span></strong>
                     <table class="table table-bordered">
                         <tbody>
                             <tr hidden>
@@ -210,7 +210,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <h5 hidden>This licence has these <strong class="text-warning">missing rules</strong></h5>
+                    <strong hidden>This licence has these <span class="text-warning">missing rules</span></strong>
                     <table class="table table-bordered">
                         <tbody>
                             <tr hidden>
@@ -236,28 +236,28 @@
         <li class="list-group-item font-weight-bold active">Filter:</li>
         <li id="permission-header" class="list-group-item font-weight-bold">
             Permissions
-            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></i>
-            <i class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
+            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></span>
+            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addPermissionModal"></span>
         </li>
         <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></div>
         <li id="duty-header" class="list-group-item font-weight-bold">
             Duties
-            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></i>
-            <i class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
+            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></span>
+            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addDutyModal"></span>
         </li>
         <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
         <li id="prohibition-header" class="list-group-item font-weight-bold">
             Prohibitions
-            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></i>
-            <i class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
+            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></span>
+            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addProhibitionModal"></span>
         </li>
         <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
     </ul>
     <div id="rule-item-template" hidden>
         <li class="list-group-item" data-rule-type="" data-action-uri="">
             <div class="ml-3">
-                <a target="_blank" href=""></a>
-                <i class="fas fa-times fa-lg danger delete-rule-item ml-1"></i>
+                <a target="_blank" href="">Rule Label</a>
+                <span class="fas fa-times fa-lg danger delete-rule-item ml-1"></span>
             </div>
             <div class="ml-4 assignors" hidden></div>
             <div class="ml-4 assignees" hidden></div>
@@ -266,7 +266,7 @@
     <div id="party-item-template" hidden>
         <li class="list-group-item p-1">
             <div class="list-group-item-label pl-1"></div>
-            <i class="fas fa-times text-danger delete-party-item floatright p-1"></i>
+            <span class="fas fa-times text-danger delete-party-item floatright p-1"></span>
         </li>
     </div>
     <div id="addPermissionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/permission" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
@@ -281,12 +281,12 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">
+                            <label class="input-group-text" for="add-permission-select">
                                 Action
                                 <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </span>
+                            </label>
                         </div>
-                        <select class="form-control action-select permission">
+                        <select id="add-permission-select" class="form-control action-select permission">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -295,12 +295,12 @@
                     <form class="validate-party-form">
                         <ul class="list-group mb-2 assignor-list">
                             <li class="list-group-item font-weight-bold active">
-                                Assignors
+                                <label for="permission-assignor-input">Assignors</label>
                                 <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
                             </li>
                         </ul>
                         <div class="input-group mb-4">
-                            <input class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <input id="permission-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-success fa fa-plus add-party"></button>
                             </div>
@@ -309,12 +309,12 @@
                     <form class="validate-party-form">
                         <ul class="list-group mb-2 assignee-list">
                             <li class="list-group-item font-weight-bold active">
-                                Assignees
+                                <label for="permission-assignee-input">Assignees</label>
                                 <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
                             </li>
                         </ul>
                         <div class="input-group mb-4">
-                            <input class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <input id="permission-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-success fa fa-plus add-party"></button>
                             </div>
@@ -340,12 +340,12 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">
+                            <label class="input-group-text" for="add-duty-select">
                                 Action
                                 <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </span>
+                            </label>
                         </div>
-                        <select class="form-control action-select duty">
+                        <select id="add-duty-select" class="form-control action-select duty">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -354,12 +354,12 @@
                     <form class="validate-party-form">
                         <ul class="list-group mb-2 assignor-list">
                             <li class="list-group-item font-weight-bold active">
-                                Assignors
+                                <label for="duty-assignor-input"></label>Assignors
                                 <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
                             </li>
                         </ul>
                         <div class="input-group mb-4">
-                            <input class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <input id="duty-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-success fa fa-plus add-party"></button>
                             </div>
@@ -368,12 +368,12 @@
                     <form class="validate-party-form">
                         <ul class="list-group mb-2 assignee-list">
                             <li class="list-group-item font-weight-bold active">
-                                Assignees
+                                <label for="duty-assignee-input">Assignees</label>
                                 <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
                             </li>
                         </ul>
                         <div class="input-group mb-4">
-                            <input class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <input id="duty-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-success fa fa-plus add-party"></button>
                             </div>
@@ -399,12 +399,12 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">
+                            <label class="input-group-text" for="add-prohibition-select">
                                 Action
                                 <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </span>
+                            </label>
                         </div>
-                        <select class="form-control action-select prohibition">
+                        <select id="add-prohibition-select" class="form-control action-select prohibition">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -413,12 +413,12 @@
                     <form class="validate-party-form">
                         <ul class="list-group mb-2 assignor-list">
                             <li class="list-group-item font-weight-bold active">
-                                Assignors
+                                <label for="prohibition-assignor-input">Assignors</label>
                                 <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
                             </li>
                         </ul>
                         <div class="input-group mb-4">
-                            <input class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <input id="prohibition-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-success fa fa-plus add-party"></button>
                             </div>
@@ -427,12 +427,12 @@
                     <form class="validate-party-form">
                         <ul class="list-group mb-2 assignee-list">
                             <li class="list-group-item font-weight-bold active">
-                                Assignees
+                                <label for="prohibition-assignee-input">Assignees</label>
                                 <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
                             </li>
                         </ul>
                         <div class="input-group mb-4">
-                            <input class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <input id="prohibition-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-success fa fa-plus add-party"></button>
                             </div>

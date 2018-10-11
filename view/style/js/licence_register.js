@@ -121,16 +121,16 @@ var updateSearchResults = function(results) {
         resultsTemplate.find('#licences-found').removeAttr('hidden')
         for (var i = 0; i < results.length; i++){
             licence_entry = $('#licence-template').clone()
-            licence_entry.find('.card-header').attr('data-target', '#licence-' + i).find('h5').text(results[i]['LABEL'])
+            licence_entry.find('.card-header').attr('data-target', '#licence-' + i).find('strong').text(results[i]['LABEL'])
             licence_entry.find('.collapse').attr('id', 'licence-' + i)
             licence_entry.find('a').attr('href', results[i]['LINK'])
             if (results[i]['EXTRA_RULES'].length > 0) {
-                var header = licence_entry.find('.card-body').children('h5:eq(0)')
+                var header = licence_entry.find('.card-body').children('strong:eq(0)')
                 var table = licence_entry.find('table:eq(0)')
                 displayRulesForResult(header, table, results[i]['EXTRA_RULES'])
             }
             if (results[i]['MISSING_RULES'].length > 0) {
-                var header = licence_entry.find('.card-body').children('h5:eq(1)')
+                var header = licence_entry.find('.card-body').children('strong:eq(1)')
                 var table = licence_entry.find('table:eq(1)')
                 displayRulesForResult(header, table, results[i]['MISSING_RULES'])
             }

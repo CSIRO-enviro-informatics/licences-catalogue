@@ -8,9 +8,9 @@
             {% block left_column %}{% endblock %}
         </div>
         <div class="col-md-4">
-            <h5>Permalink</h5>
+            <strong><label for="permalink">Permalink</label></strong>
             <div>
-                <input class="permalink" value="{{ permalink }}" />
+                <input id="permalink" class="permalink" value="{{ permalink }}" />
                 <div class="hover-target clipboard-icon">
                     <a href="#!" data-toggle="tooltip" title="Copy to clipboard" class="far fa-2x fa-clipboard"></a>
                 </div>

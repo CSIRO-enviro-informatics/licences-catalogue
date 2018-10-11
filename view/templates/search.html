@@ -19,11 +19,11 @@
     <div id="licence-template" hidden>
         <div class="card text-center">
             <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-1">
-                <h5 class="mb-0">Licence #1</h5>
+                <strong class="mb-0">Licence #1</strong>
             </div>
             <div id="licence-1" class="collapse">
                 <div class="card-body">
-                    <h5 hidden>This licence has these <strong class="text-info">extra rules</strong></h5>
+                    <strong hidden>This licence has these <strong class="text-info">extra rules</strong></strong>
                     <table class="table table-bordered mb-3">
                         <tbody>
                             <tr hidden>
@@ -40,7 +40,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <h5 hidden>This licence has these <strong class="text-warning">missing rules</strong></h5>
+                    <strong hidden>This licence has these <strong class="text-warning">missing rules</strong></strong>
                     <table class="table table-bordered mb-3">
                         <tbody>
                             <tr hidden>
@@ -66,35 +66,35 @@
         <li class="list-group-item font-weight-bold active">Filter:</li>
         <li id="permission-header" class="list-group-item font-weight-bold">
             Permissions
-            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></i>
-            <i class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addPermissionModal"></i>
+            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></span>
+            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addPermissionModal"></span>
         </li>
         <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></div>
         <li id="duty-header" class="list-group-item font-weight-bold">
             Duties
-            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></i>
-            <i class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addDutyModal"></i>
+            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></span>
+            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addDutyModal"></span>
         </li>
         <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
         <li id="prohibition-header" class="list-group-item font-weight-bold">
             Prohibitions
-            <i class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></i>
-            <i class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addProhibitionModal"></i>
+            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></span>
+            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addProhibitionModal"></span>
         </li>
         <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
     </ul>
     <div id="rule-item-template" hidden>
         <li class="list-group-item" data-rule-type="" data-action-uri="">
             <div class="ml-3">
-                <a target="_blank" href=""></a>
-                <i class="fas fa-times fa-lg danger delete-rule-item ml-1"></i>
+                <a target="_blank" href="">Rule Label</a>
+                <span class="fas fa-times fa-lg danger delete-rule-item ml-1"></span>
             </div>
         </li>
     </div>
     <div id="party-item-template" hidden>
         <li class="list-group-item p-1">
             <div class="list-group-item-label pl-1"></div>
-            <i class="fas fa-times text-danger delete-party-item floatright p-1"></i>
+            <span class="fas fa-times text-danger delete-party-item floatright p-1"></span>
         </li>
     </div>
     <div id="addPermissionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/permission" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
@@ -109,12 +109,12 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">
+                            <label class="input-group-text" for="add-permission-select">
                                 Action
                                 <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </span>
+                            </label>
                         </div>
-                        <select class="form-control action-select permission">
+                        <select id="add-permission-select" class="form-control action-select permission">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -140,12 +140,12 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">
+                            <label class="input-group-text" for="add-duty-select">
                                 Action
                                 <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </span>
+                            </label>
                         </div>
-                        <select class="form-control action-select duty">
+                        <select id="add-duty-select" class="form-control action-select duty">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
@@ -171,12 +171,12 @@
                 <div class="modal-body">
                     <div class="input-group mb-4">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">
+                            <label class="input-group-text" for="add-prohibition-select">
                                 Action
                                 <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </span>
+                            </label>
                         </div>
-                        <select class="form-control action-select prohibition">
+                        <select id="add-prohibition-select" class="form-control action-select prohibition">
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
