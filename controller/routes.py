@@ -152,7 +152,7 @@ def get_policy_list_rdf(policies):
     graph.bind('adms', ADMS)
     graph.bind('reg', REG)
     register_node = URIRef(url_for('controller.licence_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
+    graph.add((register_node, RDF.type, URIRef(REG + 'register')))
     graph.add((register_node, RDFS.label, Literal('Licence Register')))
     graph.add((register_node, RDFS.comment, Literal('This is a register (controlled list) of machine-readable Licenses '
                                                     'which are a particular type of Policy.')))
@@ -368,7 +368,7 @@ def get_action_list_rdf(actions):
     graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
     graph.bind('skos', SKOS)
     register_node = URIRef(url_for('controller.action_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
+    graph.add((register_node, RDF.type, URIRef(REG + 'register')))
     graph.add((register_node, RDFS.label, Literal('Action Register')))
     graph.add((
         register_node,

@@ -21,7 +21,12 @@
             {% block right_column %}{% endblock %}
         </div>
     </div>
-    {% block bottom %}{% endblock %}
+    <div class="mt-2">
+        {% block info %}{% endblock %}
+    </div>
+    <div class="mt-2">
+        {% block bottom %}{% endblock %}
+    </div>
 {% endblock %}
 {% block bottom_script %}
 <script>
