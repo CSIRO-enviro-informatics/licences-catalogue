@@ -453,5 +453,8 @@ def create_licence():
     rules = json.loads(attributes.pop('rules'))
     for rule in rules:
         rule['ACTIONS'] = [action['URI'] for action in rule['ACTIONS']]
-    functions.create_policy(uri, attributes, rules)
+    try:
+        functions.create_policy(uri, attributes, rules)
+    except ValueError as error:
+        return Response(error.args, status=500, mimetype='text/plain')
     return redirect(url_for('controller.licence_routes', uri=uri))

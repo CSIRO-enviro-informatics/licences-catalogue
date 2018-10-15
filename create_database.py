@@ -90,19 +90,29 @@ def rebuild():
         );
     ''')
     conn.execute('''
+        CREATE TABLE IF NOT EXISTS PARTY (
+            URI     TEXT    NOT NULL,
+            LABEL   TEXT,
+            COMMENT TEXT,
+            PRIMARY KEY (URI)
+        );
+    ''')
+    conn.execute('''
         CREATE TABLE IF NOT EXISTS ASSIGNOR (
-            ASSIGNOR_URI    TEXT    NOT NULL,
-            RULE_URI        TEXT    NOT NULL,
+            PARTY_URI   TEXT    NOT NULL,
+            RULE_URI    TEXT    NOT NULL,
             FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
-            PRIMARY KEY (ASSIGNOR_URI, RULE_URI)
+            FOREIGN KEY (PARTY_URI) REFERENCES PARTY (URI),
+            PRIMARY KEY (PARTY_URI, RULE_URI)
         );
     ''')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS ASSIGNEE (
-            ASSIGNEE_URI    TEXT    NOT NULL,
-            RULE_URI        TEXT    NOT NULL,
+            PARTY_URI   TEXT    NOT NULL,
+            RULE_URI    TEXT    NOT NULL,
             FOREIGN KEY (RULE_URI) REFERENCES RULE (URI) ON DELETE CASCADE,
-            PRIMARY KEY (ASSIGNEE_URI, RULE_URI)
+            FOREIGN KEY (PARTY_URI) REFERENCES PARTY (URI),
+            PRIMARY KEY (PARTY_URI, RULE_URI)
         );
     ''')
     conn.execute('''

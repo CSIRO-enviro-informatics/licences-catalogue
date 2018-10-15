@@ -2,6 +2,7 @@ import pytest
 import _conf
 import create_database
 import sqlite3
+from seed_database import get_db
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -14,11 +15,12 @@ def setup_database():
 
 @pytest.fixture(autouse=True)
 def wipe_database():
-    conn = sqlite3.connect(_conf.DATABASE_PATH)
+    conn = get_db()
     conn.execute('DELETE FROM ASSIGNEE')
     conn.execute('DELETE FROM ASSIGNOR')
     conn.execute('DELETE FROM RULE_HAS_ACTION')
     conn.execute('DELETE FROM POLICY_HAS_RULE')
+    conn.execute('DELETE FROM PARTY')
     conn.execute('DELETE FROM RULE')
     conn.execute('DELETE FROM ASSET')
     conn.execute('DELETE FROM POLICY')

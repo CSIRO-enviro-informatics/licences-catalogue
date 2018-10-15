@@ -197,8 +197,10 @@ def test_delete_rule(mock):
     rule_label = 'Rule'
     db_access.create_rule(rule_uri, rule_type, rule_label)
     assignor_uri = 'http://example.com#assignor'
+    db_access.create_party(assignor_uri)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     assignee_uri = 'http://example.com#assignee'
+    db_access.create_party(assignee_uri)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     action_uri = 'http://www.w3.org/ns/odrl/2/distribute'
     db_access.add_action_to_rule(action_uri, rule_uri)
@@ -236,6 +238,8 @@ def test_get_rule(mock):
     db_access.add_action_to_rule(action_uri, rule_uri)
     assignor_uri = 'https://example.com#assignor'
     assignee_uri = 'https://example.com#assignee'
+    db_access.create_party(assignor_uri)
+    db_access.create_party(assignee_uri)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     rule = db_access.get_rule(rule_uri)
@@ -330,12 +334,7 @@ def test_get_all_rules(mock):
     db_access.create_rule(rule1, rule_type, rule1_label)
     db_access.create_rule(rule2, rule_type, rule2_label)
     rules = db_access.get_all_rules()
-    assert len(rules) == 2
-    assert rules[0]['URI'] == rule1
-    assert rules[0]['LABEL'] == rule1_label
-    assert rules[0]['TYPE_URI'] == rule_type
-    assert rules[0]['TYPE_LABEL'] == 'Permission'
-    assert all(attr in rules[0] for attr in ['ACTIONS', 'ASSIGNORS', 'ASSIGNEES'])
+    assert rules == [rule1, rule2]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -529,17 +528,86 @@ def test_rule_has_action(mock):
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_create_party(mock):
+    # Should create a party with the URI, label and comment given
+    party_uri = 'https://example.com#party'
+    label = 'Party'
+    comment = 'This is a test party.'
+    db_access.create_party(party_uri, label, comment)
+    assert db_access.party_exists(party_uri)
+
+    # Should raise an exception of the party already exists
+    with pytest.raises(ValueError):
+        db_access.create_party(party_uri)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_delete_party(mock):
+    # Should raise an exception if the Party is currently assigned to a Rule
+    party_uri = 'https://example.com#party'
+    rule_uri = 'https://example.com#rule'
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_party(party_uri)
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.add_assignor_to_rule(party_uri, rule_uri)
+    with pytest.raises(ValueError):
+        db_access.delete_party(party_uri)
+
+    # Should delete the Party if not currently assigned to a Rule (deleting the rule drops the assignment)
+    db_access.delete_rule(rule_uri)
+    db_access.delete_party(party_uri)
+    assert not db_access.party_exists(party_uri)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_party_exists(mock):
+    # Should return false if the party does not exist
+    party_uri = 'https://example.com#party'
+    assert not db_access.party_exists(party_uri)
+
+    # Should return true of the party exists
+    db_access.create_party(party_uri)
+    assert db_access.party_exists(party_uri)
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_rules_for_party(mock):
+    party_uris = ['https://example.com/party/1', 'https://example.com/party/2']
+    for party_uri in party_uris:
+        db_access.create_party(party_uri)
+    rule_uris = ['http://example.com/rule/1', 'http://example.com/rule/2', 'http://example.com/rule/3',
+                 'http://example.com/rule/4']
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    for rule_uri in rule_uris:
+        db_access.create_rule(rule_uri, rule_type)
+    db_access.add_assignor_to_rule(party_uris[0], rule_uris[0])
+    db_access.add_assignor_to_rule(party_uris[0], rule_uris[1])
+    db_access.add_assignee_to_rule(party_uris[0], rule_uris[2])
+    db_access.add_assignor_to_rule(party_uris[1], rule_uris[3])
+
+    # Should list the parties assigned to a rule and only those parties
+    assert {rule_uris[0], rule_uris[1], rule_uris[2]} == set(db_access.get_rules_for_party(party_uris[0]))
+    assert [rule_uris[3]] == db_access.get_rules_for_party(party_uris[1])
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_add_assignor_to_rule(mock):
     # Should raise an exception if the rule doesn't exist
     assignor_uri = 'http://example.com#assignor'
     rule_uri = 'https://example.com#rule'
+    db_access.create_party(assignor_uri)
+    with pytest.raises(ValueError):
+        db_access.add_assignor_to_rule(assignor_uri, rule_uri)
+
+    # Should raise an exception if the assignor doesn't exist
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.delete_party(assignor_uri)
     with pytest.raises(ValueError):
         db_access.add_assignor_to_rule(assignor_uri, rule_uri)
 
     # Should add an assignor to a rule
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_party(assignor_uri)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     assert db_access.rule_has_assignor(rule_uri, assignor_uri)
 
@@ -556,6 +624,7 @@ def test_remove_assignor_from_rule(mock):
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
     rule_label = 'Rule'
     db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_party(assignor_uri)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     db_access.remove_assignor_from_rule(assignor_uri, rule_uri)
     assert not db_access.rule_has_assignor(rule_uri, assignor_uri)
@@ -567,11 +636,11 @@ def test_rule_has_assignor(mock):
     assignor_uri = 'http://example.com#assignor'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_rule(rule_uri, rule_type)
     assert not db_access.rule_has_assignor(rule_uri, assignor_uri)
 
     # Should return true if the rule does have that assignor
+    db_access.create_party(assignor_uri)
     db_access.add_assignor_to_rule(assignor_uri, rule_uri)
     assert db_access.rule_has_assignor(rule_uri, assignor_uri)
 
@@ -580,10 +649,11 @@ def test_rule_has_assignor(mock):
 def test_get_assignors_for_rule(mock):
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_rule(rule_uri, rule_type)
     assignor1 = 'https://example.com#assignor1'
     assignor2 = 'https://example.com#assignor2'
+    db_access.create_party(assignor1)
+    db_access.create_party(assignor2)
     db_access.add_assignor_to_rule(assignor1, rule_uri)
     db_access.add_assignor_to_rule(assignor2, rule_uri)
     assignors = db_access.get_assignors_for_rule(rule_uri)
@@ -593,15 +663,21 @@ def test_get_assignors_for_rule(mock):
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_add_assignee_to_rule(mock):
     # Should raise an exception if the rule doesn't exist
-    assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
+    assignee_uri = 'http://example.com#assignee'
+    db_access.create_party(assignee_uri)
+    with pytest.raises(ValueError):
+        db_access.add_assignee_to_rule(assignee_uri, rule_uri)
+
+    # Should raise an exception if the assignee doesn't exist
+    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
+    db_access.delete_party(assignee_uri)
+    db_access.create_rule(rule_uri, rule_type)
     with pytest.raises(ValueError):
         db_access.add_assignee_to_rule(assignee_uri, rule_uri)
 
     # Should add an assignee to a rule
-    rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_party(assignee_uri)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     assert db_access.rule_has_assignee(rule_uri, assignee_uri)
 
@@ -616,8 +692,8 @@ def test_remove_assignee_from_rule(mock):
     assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_rule(rule_uri, rule_type)
+    db_access.create_party(assignee_uri)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     db_access.remove_assignee_from_rule(assignee_uri, rule_uri)
     assert not db_access.rule_has_assignee(rule_uri, assignee_uri)
@@ -629,11 +705,11 @@ def test_rule_has_assignee(mock):
     assignee_uri = 'http://example.com#assignee'
     rule_uri = 'https://example.com#rule'
     rule_type = 'http://www.w3.org/ns/odrl/2/permission'
-    rule_label = 'Rule'
-    db_access.create_rule(rule_uri, rule_type, rule_label)
+    db_access.create_rule(rule_uri, rule_type)
     assert not db_access.rule_has_assignee(rule_uri, assignee_uri)
 
     # Should return true if the rule does have that assignee
+    db_access.create_party(assignee_uri)
     db_access.add_assignee_to_rule(assignee_uri, rule_uri)
     assert db_access.rule_has_assignee(rule_uri, assignee_uri)
 
@@ -646,6 +722,8 @@ def test_get_assignees_for_rule(mock):
     db_access.create_rule(rule_uri, rule_type, rule_label)
     assignee1 = 'https://example.com#assignee1'
     assignee2 = 'https://example.com#assignee2'
+    db_access.create_party(assignee1)
+    db_access.create_party(assignee2)
     db_access.add_assignee_to_rule(assignee1, rule_uri)
     db_access.add_assignee_to_rule(assignee2, rule_uri)
     assignees = db_access.get_assignees_for_rule(rule_uri)

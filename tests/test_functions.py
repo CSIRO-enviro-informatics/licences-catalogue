@@ -1,5 +1,6 @@
 from controller import functions
 from unittest import mock
+from seed_database import get_db as mock_get_db
 
 
 @mock.patch('controller.db_access.set_policy_attribute')
@@ -9,7 +10,8 @@ from unittest import mock
 @mock.patch('controller.db_access.add_assignor_to_rule')
 @mock.patch('controller.db_access.add_assignee_to_rule')
 @mock.patch('controller.db_access.add_action_to_rule')
-def test_create_policy(add_action_to_rule_mock, add_assignee_to_rule_mock, add_assignor_to_rule_mock, add_rule_to_policy_mock, create_rule_mock, create_policy_mock, set_policy_attribute_mock):
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_create_policy(db_mock, add_action_to_rule_mock, add_assignee_to_rule_mock, add_assignor_to_rule_mock, add_rule_to_policy_mock, create_rule_mock, create_policy_mock, set_policy_attribute_mock):
     # With no attributes
     policy_uri = 'http://example.com#policy'
     functions.create_policy(policy_uri)
@@ -20,14 +22,14 @@ def test_create_policy(add_action_to_rule_mock, add_assignee_to_rule_mock, add_a
     attributes = {'type': 'http://creativecommons.org/ns#License', 'label': 'Some policy'}
     rules = [
         {
-            'URI': 'http://www.w3.org/ns/odrl/2/acceptTracking',
-            'RULE_TYPE': 'http://www.w3.org/ns/odrl/2/permission',
+            'TYPE_URI': 'http://www.w3.org/ns/odrl/2/permission',
             'ASSIGNORS': ['http://example.com/assignor/1', 'http://example.com/assignor/2'],
-            'ASSIGNEES': ['http://example.com/assignee/1', 'http://example.com/assignee/2']
+            'ASSIGNEES': ['http://example.com/assignee/1', 'http://example.com/assignee/2'],
+            'ACTIONS': ['http://www.w3.org/ns/odrl/2/acceptTracking']
         },
         {
-            'URI': 'http://www.w3.org/ns/odrl/2/aggregate',
-            'RULE_TYPE': 'http://www.w3.org/ns/odrl/2/duty',
+            'TYPE_URI': 'http://www.w3.org/ns/odrl/2/duty',
+            'ACTIONS': ['http://www.w3.org/ns/odrl/2/aggregate']
         }
     ]
     functions.create_policy(policy_uri, attributes, rules)

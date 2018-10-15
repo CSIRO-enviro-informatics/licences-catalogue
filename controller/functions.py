@@ -14,7 +14,6 @@ def create_policy(policy_uri, attributes=None, rules=None):
         Permitted attributes:   type, label, jurisdiction, legal_code, has_version, language, see_also
                                 same_as, comment, logo, status
     :param rules: List of Rules. Each Rule should be a Dictionary containing the following elements:
-        URI: string
         TYPE_URI: string    * At least one of TYPE_URI or TYPE_LABEL should be provided.
         TYPE_LABEL: string
         ASSIGNORS: List of strings
@@ -27,44 +26,47 @@ def create_policy(policy_uri, attributes=None, rules=None):
 
     permitted_rule_types = []
 
-    db_access.create_policy(policy_uri)
-    if attributes:
-        for attr_name, attr_value in attributes.items():
-            db_access.set_policy_attribute(policy_uri, attr_name, attr_value)
-    if rules:
-        for rule in rules:
-            rule_uri = _conf.BASE_URI + '/rules/' + str(uuid4())
-            if 'TYPE_URI' in rule:
-                rule_type = rule['TYPE_URI']
-            elif 'TYPE_LABEL' in rule:
-                if not permitted_rule_types:
-                    permitted_rule_types = db_access.get_permitted_rule_types()
-                rule_type = get_rule_type_uri(rule['TYPE_LABEL'], permitted_rule_types)
-                if not rule_type:
-                    db_access.delete_policy(policy_uri)
-                    raise ValueError('Cannot create policy - bad rule type provided')
-            else:
-                db_access.delete_policy(policy_uri)
-                raise ValueError('Cannot create policy - no rule type provided.')
-            db_access.create_rule(rule_uri, rule_type)
-            for action in rule['ACTIONS']:
-                if is_valid_uri(action):
-                    action_uri = action
+    try:
+        db_access.create_policy(policy_uri)
+        if attributes:
+            for attr_name, attr_value in attributes.items():
+                db_access.set_policy_attribute(policy_uri, attr_name, attr_value)
+        if rules:
+            for rule in rules:
+                rule_uri = _conf.BASE_URI + '/rules/' + str(uuid4())
+                if 'TYPE_URI' in rule:
+                    rule_type = rule['TYPE_URI']
+                elif 'TYPE_LABEL' in rule:
+                    if not permitted_rule_types:
+                        permitted_rule_types = db_access.get_permitted_rule_types()
+                    rule_type = get_rule_type_uri(rule['TYPE_LABEL'], permitted_rule_types)
+                    if not rule_type:
+                        raise ValueError('Cannot create policy - bad rule type provided')
                 else:
-                    permitted_actions = db_access.get_all_actions()
-                    action_uri = get_action_uri(action, permitted_actions)
-                    if not action_uri:
-                        db_access.delete_rule(rule_uri)
-                        db_access.delete_policy(policy_uri)
-                        raise ValueError('Cannot create policy - bad action provided.')
-                db_access.add_action_to_rule(action_uri, rule_uri)
-            if 'ASSIGNORS' in rule:
-                for assignor in rule['ASSIGNORS']:
-                    db_access.add_assignor_to_rule(assignor, rule_uri)
-            if 'ASSIGNEES' in rule:
-                for assignee in rule['ASSIGNEES']:
-                    db_access.add_assignee_to_rule(assignee, rule_uri)
-            db_access.add_rule_to_policy(rule_uri, policy_uri)
+                    raise ValueError('Cannot create policy - no rule type provided.')
+                db_access.create_rule(rule_uri, rule_type)
+                for action in rule['ACTIONS']:
+                    if is_valid_uri(action):
+                        action_uri = action
+                    else:
+                        permitted_actions = db_access.get_all_actions()
+                        action_uri = get_action_uri(action, permitted_actions)
+                        if not action_uri:
+                            raise ValueError('Cannot create policy - bad action provided.')
+                    db_access.add_action_to_rule(action_uri, rule_uri)
+                if 'ASSIGNORS' in rule:
+                    for assignor in rule['ASSIGNORS']:
+                        db_access.create_party(assignor)
+                        db_access.add_assignor_to_rule(assignor, rule_uri)
+                if 'ASSIGNEES' in rule:
+                    for assignee in rule['ASSIGNEES']:
+                        db_access.create_party(assignee)
+                        db_access.add_assignee_to_rule(assignee, rule_uri)
+                db_access.add_rule_to_policy(rule_uri, policy_uri)
+    except ValueError as error:
+        db_access.rollback_db()
+        raise error
+    db_access.commit_db()
 
 
 def is_valid_uri(uri):

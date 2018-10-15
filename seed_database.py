@@ -4,6 +4,7 @@ from unittest import mock
 from controller import functions
 import os
 from uuid import uuid4
+from controller import db_access
 
 db = None
 
@@ -46,6 +47,7 @@ def seed(mock):
     cc_by_3_unported()
     cc_by_sa_3_unported()
     cc_by_nc_nd_3_unported()
+    db_access.commit_db()
 
 
 def readonly_licence():
