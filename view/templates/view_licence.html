@@ -1,3 +1,31 @@
+{% macro display_rule(rule) %}
+    {% for action in rule['ACTIONS'] %}
+        <tr>
+            <td>
+                <a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">
+                    {{ action['LABEL'] }}
+                </a>
+            </td>
+            <td>{{ display_parties(rule['ASSIGNORS']) }}</td>
+            <td>{{ display_parties(rule['ASSIGNEES']) }}</td>
+        </tr>
+        {% endfor %}
+        {% if rule['ACTIONS']|length == 0 and (rule['ASSIGNORS']|length > 0 or rule['ASSIGNEES']|length > 0) %}
+        <tr>
+            <td></td>
+            <td>{{ display_parties(rule['ASSIGNORS']) }}</td>
+            <td>{{ display_parties(rule['ASSIGNEES']) }}</td>
+        </tr>
+        {% endif %}
+{% endmacro %}
+{% macro display_parties(parties) %}
+    {% set comma = joiner(', ') %}
+    {% for party in parties %}
+        {{ comma() }}
+        <a href="{{ url_for('controller.party_routes', uri=party['URI']) }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</a>
+    {% endfor %}
+{% endmacro %}
+
 {% extends 'browse.html' %}
 {% block title %}
 <h1>Viewing Licence:</h1>
@@ -78,24 +106,7 @@
             </thead>
             <tbody>
                 {% for permission in permissions %}
-                    {% for action in permission['ACTIONS'] %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">
-                                {{ action['LABEL'] }}
-                            </a>
-                        </td>
-                        <td>{{ permission['ASSIGNORS']|join(', ') }}</td>
-                        <td>{{ permission['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% if permission['ACTIONS']|length == 0 and (permission['ASSIGNORS']|length > 0 or permission['ASSIGNEES']|length > 0) %}
-                    <tr>
-                        <td></td>
-                        <td>{{ permission['ASSIGNORS']|join(', ') }}</td>
-                        <td>{{ permission['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    {% endif %}
+                    {{ display_rule(permission) }}
                 {% endfor %}
             </tbody>
         </table>
@@ -114,24 +125,7 @@
             </thead>
             <tbody>
                 {% for duty in duties %}
-                    {% for action in duty['ACTIONS'] %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">
-                                {{ action['LABEL'] }}
-                            </a>
-                        </td>
-                        <td>{{ duty['ASSIGNORS']|join(', ') }}</td>
-                        <td>{{ duty['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% if duty['ACTIONS']|length == 0 and (duty['ASSIGNORS']|length > 0 or duty['ASSIGNEES']|length > 0) %}
-                    <tr>
-                        <td></td>
-                        <td>{{ duty['ASSIGNORS']|join(', ') }}</td>
-                        <td>{{ duty['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    {% endif %}
+                    {{ display_rule(duty) }}
                 {% endfor %}
             </tbody>
         </table>
@@ -150,24 +144,7 @@
             </thead>
             <tbody>
                 {% for prohibition in prohibitions %}
-                    {% for action in prohibition['ACTIONS'] %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">
-                                {{ action['LABEL'] }}
-                            </a>
-                        </td>
-                        <td>{{ prohibition['ASSIGNORS']|join(', ') }}</td>
-                        <td>{{ prohibition['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% if prohibitions['ACTIONS']|length == 0 and (prohibition['ASSIGNORS']|length > 0 or prohibition['ASSIGNEES']|length > 0) %}
-                    <tr>
-                        <td></td>
-                        <td>{{ prohibition['ASSIGNORS']|join(', ') }}</td>
-                        <td>{{ prohibition['ASSIGNEES']|join(', ') }}</td>
-                    </tr>
-                    {% endif %}
+                    {{ display_rule(prohibition) }}
                 {% endfor %}
             </tbody>
         </table>

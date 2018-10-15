@@ -16,7 +16,7 @@ JSON_CONTEXT_ACTIONS = {
     'definition': 'http://www.w3.org/2004/02/skos/core#definition',
     'containedItemClass': 'http://purl.org/linked-data/registry#containedItemClass',
     'comment': 'http://www.w3.org/2000/01/rdf-schema#comment',
-    'register': 'http://purl.org/linked-data/registry#Register'
+    'register': 'http://purl.org/linked-data/registry#register'
 }
 JSON_CONTEXT_POLICIES = {
     '@vocab': 'http://www.w3.org/ns/odrl/2/',
@@ -24,7 +24,7 @@ JSON_CONTEXT_POLICIES = {
     'created': 'http://purl.org/dc/terms/created',
     'comment': 'http://www.w3.org/2000/01/rdf-schema#comment',
     'sameAs': 'http://www.w3.org/2002/07/owl#sameAs',
-    'register': 'http://purl.org/linked-data/registry#Register',
+    'register': 'http://purl.org/linked-data/registry#register',
     'containedItemClass': 'http://purl.org/linked-data/registry#containedItemClass',
     'hasVersion': 'http://purl.org/dc/terms/hasVersion',
     'language': 'http://purl.org/dc/terms/language',
@@ -35,6 +35,16 @@ JSON_CONTEXT_POLICIES = {
     'logo': 'http://xmlns.com/foaf/0.1/logo',
     'status': 'http://www.w3.org/ns/adms#status'
 }
+JSON_CONTEXT_PARTIES = {
+    '@vocab': 'http://www.w3.org/ns/odrl/2/',
+    'label': 'http://www.w3.org/2000/01/rdf-schema#label',
+    'comment': 'http://www.w3.org/2000/01/rdf-schema#comment',
+    'register': 'http://purl.org/linked-data/registry#register',
+    'containedItemClass': 'http://purl.org/linked-data/registry#containedItemClass',
+}
+party_register_comment = 'This is a register (controlled list) of machine-readable Parties. The Party entity could be' \
+                         ' a person, group of people, organisation, or agent. An agent is a person or thing that take' \
+                         's an active role or produces a specified effect.'
 
 routes = Blueprint('controller', __name__)
 
@@ -152,7 +162,7 @@ def get_policy_list_rdf(policies):
     graph.bind('adms', ADMS)
     graph.bind('reg', REG)
     register_node = URIRef(url_for('controller.licence_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'register')))
+    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
     graph.add((register_node, RDFS.label, Literal('Licence Register')))
     graph.add((register_node, RDFS.comment, Literal('This is a register (controlled list) of machine-readable Licenses '
                                                     'which are a particular type of Policy.')))
@@ -166,7 +176,7 @@ def get_policy_list_rdf(policies):
             graph.add((policy_node, RDFS.label, Literal(policy['LABEL'], lang='en')))
         if policy['COMMENT']:
             graph.add((policy_node, RDFS.comment, Literal(policy['COMMENT'], lang='en')))
-        graph.add((policy_node, URIRef(REG + 'Register'), URIRef(register_node)))
+        graph.add((policy_node, URIRef(REG + 'register'), URIRef(register_node)))
     return graph
 
 
@@ -221,6 +231,8 @@ def view_licence(policy_uri):
         duties = []
         prohibitions = []
         for rule in rules:
+            rule['ASSIGNORS'] = [db_access.get_party(assignor) for assignor in rule['ASSIGNORS']]
+            rule['ASSIGNEES'] = [db_access.get_party(assignee) for assignee in rule['ASSIGNEES']]
             if rule['LABEL'] is None:
                 rule['LABEL'] = rule['URI']
             if rule['TYPE_LABEL'] == 'Permission':
@@ -368,7 +380,7 @@ def get_action_list_rdf(actions):
     graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
     graph.bind('skos', SKOS)
     register_node = URIRef(url_for('controller.action_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'register')))
+    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
     graph.add((register_node, RDFS.label, Literal('Action Register')))
     graph.add((
         register_node,
@@ -381,7 +393,7 @@ def get_action_list_rdf(actions):
         graph.add((action_node, RDF.type, URIRef(ODRL + 'Action')))
         graph.add((action_node, RDFS.label, Literal(action['LABEL'], lang='en')))
         graph.add((action_node, SKOS.definition, Literal(action['DEFINITION'], lang='en')))
-        graph.add((action_node, URIRef(REG + 'Register'), URIRef(register_node)))
+        graph.add((action_node, URIRef(REG + 'register'), URIRef(register_node)))
     return graph
 
 
@@ -458,3 +470,140 @@ def create_licence():
     except ValueError as error:
         return Response(error.args, status=500, mimetype='text/plain')
     return redirect(url_for('controller.licence_routes', uri=uri))
+
+
+@routes.route('/party/')
+def party_routes():
+    party_uri = request.values.get('uri')
+    if party_uri is None:
+        return view_party_list()
+    else:
+        return view_party(party_uri)
+
+
+def view_party_list():
+    title = 'Party Register'
+    parties = db_access.get_all_parties()
+    preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
+        # Display as JSON
+        register_uri = url_for('controller.party_routes', _external=True)
+        parties_json = {
+            register_uri: {
+                'type': REG + 'Register',
+                'label': title,
+                'comment': party_register_comment,
+                'containedItemClass': ODRL + 'Party'
+            }
+        }
+        for party in parties:
+            parties_json[party['URI']] = {
+                'type': ODRL + 'Party',
+                'label': party['LABEL'],
+                'comment': party['COMMENT'],
+                'register': register_uri
+            }
+        return jsonify(parties_json)
+    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
+        # Display as RDF
+        return Response(get_party_list_rdf(parties).serialize(format='turtle'), status=200, mimetype='text/turtle')
+    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
+        # Display as JSON-LD
+        json_ld = get_party_list_rdf(parties).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
+        return Response(json_ld, status=200, mimetype='application/json')
+    else:
+        # Display as HTML
+        items = []
+        for party in parties:
+            items.append({
+                'label': party['LABEL'] if party['LABEL'] else party['URI'],
+                'uri': party['URI'],
+                'comment': party['COMMENT'],
+                'link': url_for('controller.party_routes', uri=party['URI'])
+            })
+        items = sorted(items, key=lambda item: item['label'].lower())
+        return render_template(
+            'browse_list.html',
+            title=title,
+            items=items,
+            permalink=url_for('controller.party_routes', _external=True),
+            rdf_link=url_for('controller.party_routes', _format='text/turtle'),
+            json_link=url_for('controller.party_routes', _format='application/json'),
+            json_ld_link=url_for('controller.party_routes', _format='application/ld+json')
+        )
+
+
+def get_party_list_rdf(parties):
+    graph = Graph()
+    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
+    graph.bind('skos', SKOS)
+    register_node = URIRef(url_for('controller.party_routes', _external=True))
+    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
+    graph.add((register_node, RDFS.label, Literal('Party Register')))
+    graph.add((
+        register_node,
+        RDFS.comment,
+        Literal(party_register_comment)
+    ))
+    graph.add((register_node, URIRef(REG + 'containedItemClass'), URIRef(ODRL + 'Party')))
+    for party in parties:
+        party_node = URIRef(party['URI'])
+        graph.add((party_node, RDF.type, URIRef(ODRL + 'Party')))
+        if party['LABEL']:
+            graph.add((party_node, RDFS.label, Literal(party['LABEL'], lang='en')))
+        if party['COMMENT']:
+            graph.add((party_node, RDFS.comment, Literal(party['COMMENT'], lang='en')))
+        graph.add((party_node, URIRef(REG + 'register'), URIRef(register_node)))
+    return graph
+
+
+def view_party(party_uri):
+    try:
+        party = db_access.get_party(party_uri)
+    except ValueError:
+        abort(404)
+        return
+    preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
+        # Display as JSON
+        return jsonify({party['URI']: {'label': party['LABEL'], 'comment': party['COMMENT']}})
+    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
+        # Display as RDF
+        return Response(get_party_rdf(party).serialize(format='turtle'), status=200, mimetype='text/turtle')
+    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
+        # Display as JSON-LD
+        json_ld = get_party_rdf(party).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
+        return Response(json_ld, status=200, mimetype='application/json')
+    else:
+        # Display as HTML
+        rules = db_access.get_rules_for_party(party_uri)
+        policies = []
+        for rule in rules:
+            policies.extend(db_access.get_policies_for_rule(rule))
+        if party['LABEL'] is None:
+            party['LABEL'] = party['URI']
+        for policy in policies:
+            if policy['LABEL'] is None:
+                policy['LABEL'] = policy['URI']
+        policies = sorted(policies, key=lambda rule: rule['LABEL'].lower())
+        return render_template(
+            'view_party.html',
+            permalink=conf.BASE_URI + url_for('controller.action_routes', uri=party['URI']),
+            rdf_link=url_for('controller.party_routes', _format='text/turtle', uri=party_uri),
+            json_link=url_for('controller.party_routes', _format='application/json', uri=party_uri),
+            json_ld_link=url_for('controller.party_routes', _format='application/ld+json', uri=party_uri),
+            party=party,
+            licences=policies
+        )
+
+
+def get_party_rdf(party):
+    graph = Graph()
+    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
+    party_node = URIRef(party['URI'])
+    graph.add((party_node, RDF.type, URIRef(ODRL + 'Party')))
+    if party['LABEL']:
+        graph.add((party_node, RDFS.label, Literal(party['LABEL'], lang='en')))
+    if party['COMMENT']:
+        graph.add((party_node, RDFS.comment, Literal(party['COMMENT'], lang='en')))
+    return graph

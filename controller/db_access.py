@@ -353,9 +353,7 @@ def add_action_to_rule(action_uri, rule_uri):
 
 
 def remove_action_from_rule(action_uri, rule_uri):
-    """
-    Removes an Action from a Rule.
-    """
+    # Removes an Action from a Rule.
     query_db('DELETE FROM RULE_HAS_ACTION WHERE RULE_URI = ? AND ACTION_URI = ?', (rule_uri, action_uri))
 
 
@@ -392,7 +390,7 @@ def get_rules_using_action(action_uri):
 def get_policies_using_action(action_uri):
     """
     Returns a list of all the Policies which are currently using a given Action.
-    Each Licence is a Dictionary containing the following elements: URI, LABEL
+    Each Policy is a Dictionary containing the following elements: URI, LABEL
     """
     policies = list()
     query_str = '''
@@ -406,17 +404,13 @@ def get_policies_using_action(action_uri):
 
 
 def rule_has_action(rule_uri, action_uri):
-    """
-    Checks if a Rule has an Action
-    """
+    # Checks if a Rule has an Action
     query_str = 'SELECT COUNT(1) FROM RULE_HAS_ACTION WHERE RULE_URI = ? AND ACTION_URI = ?'
     return query_db(query_str, (rule_uri, action_uri), one=True)[0]
 
 
 def get_action(action_uri):
-    """
-    Returns the URI, Label and Definition of an Action
-    """
+    # Returns the URI, Label and Definition of an Action
     result = query_db('SELECT URI, LABEL, DEFINITION FROM ACTION WHERE URI = ?', (action_uri,), one=True)
     if result is None:
         raise ValueError('Action with ID ' + action_uri + ' not found.')
@@ -424,9 +418,7 @@ def get_action(action_uri):
 
 
 def get_all_actions():
-    """
-    Returns a List of all Actions as URIs
-    """
+    # Returns a List of all Actions as URIs
     actions = list()
     for result in query_db('SELECT URI, LABEL, DEFINITION FROM ACTION'):
         actions.append(dict(result))
@@ -434,9 +426,7 @@ def get_all_actions():
 
 
 def get_action_label(action_uri):
-    """
-    Accepts an Action's URI and returns its Label
-    """
+    # Accepts an Action's URI and returns its Label
     return query_db('SELECT LABEL FROM ACTION WHERE URI = ?', (action_uri,), one=True)['LABEL']
 
 
@@ -472,9 +462,7 @@ def party_exists(party_uri):
 
 
 def get_rules_for_party(party_uri):
-    """
-    Returns a list of all the Rules to which the Party is assigned.
-    """
+    # Returns a list of all the Rules to which the Party is assigned.
     query_str = '''
         SELECT DISTINCT R.URI FROM RULE R, ASSIGNOR A1, ASSIGNEE A2 
         WHERE (R.URI = A1.RULE_URI AND A1.PARTY_URI = ?) OR (R.URI = A2.RULE_URI AND A2.PARTY_URI = ?)
@@ -546,3 +534,35 @@ def get_assignees_for_rule(rule_uri):
     # Returns a list of URIs for all Assignees associated with a given Rule
     query_str = 'SELECT PARTY_URI FROM ASSIGNEE WHERE RULE_URI = ?'
     return [result['PARTY_URI'] for result in query_db(query_str, (rule_uri,))]
+
+
+def get_all_parties():
+    # Returns a List of Parties. Each Party is a Dictionary containing the URI, Label and Comment
+    return [dict(result) for result in query_db('SELECT * FROM PARTY')]
+
+
+def get_party(party_uri):
+    """
+    Returns information about the Party with the given URI
+    Returns a Dictionary with the following elements: URI, LABEL, COMMENT
+    """
+    result = query_db('SELECT * FROM PARTY WHERE URI = ?', (party_uri,), one=True)
+    if result is None:
+        raise ValueError('Party with URI ' + party_uri + ' not found.')
+    return dict(result)
+
+
+def get_policies_using_party(party_uri):
+    """
+    Returns a list of all the Policies which are currently using a given Party.
+    Each Policy is a Dictionary containing the following elements: URI, LABEL
+    """
+    policies = list()
+    query_str = '''
+        SELECT DISTINCT P.URI, P.LABEL 
+        FROM POLICY P, PARTY A, POLICY_HAS_RULE P_R, RULE_HAS_ACTION R_A
+        WHERE P.URI = P_R.POLICY_URI AND P_R.RULE_URI = R_A.RULE_URI AND R_A.ACTION_URI = ?
+    '''
+    for result in query_db(query_str, (action_uri,)):
+        policies.append(dict(result))
+    return policies

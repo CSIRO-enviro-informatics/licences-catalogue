@@ -728,3 +728,31 @@ def test_get_assignees_for_rule(mock):
     db_access.add_assignee_to_rule(assignee2, rule_uri)
     assignees = db_access.get_assignees_for_rule(rule_uri)
     assert assignees == [assignee1, assignee2]
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_all_parties(mock):
+    uri1 = 'https://example.com/party/1'
+    label1 = 'Party1'
+    comment1 = 'This is the first party'
+    uri2 = 'https://example.com/party/2'
+    db_access.create_party(uri1, label1, comment1)
+    db_access.create_party(uri2)
+    assert db_access.get_all_parties() == [
+        {'URI': uri1, 'LABEL': label1, 'COMMENT': comment1},
+        {'URI': uri2, 'LABEL': None, 'COMMENT': None}
+    ]
+
+
+@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
+def test_get_party(mock):
+    # Should raise exception if the Party does not exist
+    uri = 'https://example.com/party/1'
+    with pytest.raises(ValueError):
+        db_access.get_party(uri)
+
+    # Should retrieve info about a Party if it exists
+    label = 'Party'
+    comment = 'This is a party.'
+    db_access.create_party(uri, label, comment)
+    assert db_access.get_party(uri) == {'URI': uri, 'LABEL': label, 'COMMENT': comment}
