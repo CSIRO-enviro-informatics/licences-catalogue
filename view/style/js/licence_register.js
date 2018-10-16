@@ -153,10 +153,10 @@ var displayRulesForResult = function(header, table, rules){
                 case PERMISSION_URI:
                     permissions.push(action['LABEL'])
                     break
-                case PROHIBITION_URI:
+                case DUTY_URI:
                     duties.push(action['LABEL'])
                     break
-                case DUTY_URI:
+                case PROHIBITION_URI:
                     prohibitions.push(action['LABEL'])
                     break
             }
