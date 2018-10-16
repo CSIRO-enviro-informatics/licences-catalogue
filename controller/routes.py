@@ -49,9 +49,6 @@ party_register_comment = 'This is a register (controlled list) of machine-readab
 routes = Blueprint('controller', __name__)
 
 
-#
-#   pages
-#
 @routes.route('/')
 def home():
     return render_template('page_home.html')
@@ -79,7 +76,7 @@ def search_results():
 
 @routes.route('/licence/index.json')
 def view_licence_list_json():
-    redirect_url = '/licence/?_format=application/json'
+    redirect_url = url_for('controller.licence_routes', _format='application/json')
     uri = request.values.get('uri')
     if uri is not None:
         redirect_url += '&uri=' + uri
@@ -448,10 +445,15 @@ def get_action_rdf(action):
 @routes.route('/licence/create')
 def create_licence_form():
     actions = db_access.get_all_actions()
+    parties = db_access.get_all_parties()
     actions.sort(key=lambda x: x['LABEL'])
+    parties.sort(key=lambda x: x['LABEL'])
     for action in actions:
         action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
-    return render_template('create_licence.html', actions=actions, search_url=url_for('controller.search_results'))
+    for party in parties:
+        party.update({'LINK': url_for('controller.party_routes', uri=party['URI'])})
+    return render_template('create_licence.html', actions=actions, parties=parties,
+                           search_url=url_for('controller.search_results'))
 
 
 @routes.route('/licence/create', methods=['POST'])

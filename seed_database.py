@@ -24,6 +24,7 @@ def get_db():
 @mock.patch('controller.db_access.get_db', side_effect=get_db)
 def seed(mock):
     # Mocks out get_db() so this can be run independently of the Flask application
+    add_parties()
     readonly_licence()
     cc_by_4()
     cc_by_nd_4()
@@ -48,6 +49,24 @@ def seed(mock):
     cc_by_sa_3_unported()
     cc_by_nc_nd_3_unported()
     db_access.commit_db()
+
+
+def add_parties():
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000928', 'Australian Bureau of Statistics')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/agldwg', 'Australian Government Linked Data Working Group')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000827', 'Australian National University')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/ardc', 'Australian Research Data Commons')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000934', 'Australian Taxation Office')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000843', 'Bureau of Meteorology')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000886', 'CSIRO')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000769', 'Department of Agriculture and Water Resources')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000850', 'Department of Finance')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000880', 'Department of Human Services')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/O-000887', 'Geoscience Australia')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/nsw', 'NSW Health')
+    db_access.create_party('http://catalogue.linked.data.gov.au/org/psma', 'PSMA Australia')
+    db_access.create_party('http://test.linked.data.gov.au/board/B-0068')
+    db_access.create_party('http://example.com/group/power-companies', 'Example Power Company', 'This is a Party representing some hypothetical power companies.')
 
 
 def readonly_licence():
