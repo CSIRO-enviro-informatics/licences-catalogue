@@ -1,3 +1,64 @@
+{% macro rule_modal(type, uri) %}
+    <div id="add{{ type|capitalize }}Modal" class="modal add-rule-modal fade" data-rule-type="{{ uri }}" tabindex="-1" role="dialog" aria-labelledby="{{ type }}ModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="{{ type }}ModalTitle">Add Rule: {{ type|capitalize }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="add-{{ type }}-select">
+                                Action
+                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
+                            </label>
+                        </div>
+                        <select id="add-{{ type }}-select" class="form-control action-select {{ type }}">
+                            {% for action in actions %}
+                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <form class="validate-party-form">
+                        <ul class="list-group mb-2 assignor-list">
+                            <li class="list-group-item font-weight-bold active">
+                                <label for="{{ type }}-assignor-input">Assignors</label>
+                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
+                            </li>
+                        </ul>
+                        <div class="input-group mb-4">
+                            <input id="{{ type }}-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
+                            </div>
+                        </div>
+                    </form>
+                    <form class="validate-party-form">
+                        <ul class="list-group mb-2 assignee-list">
+                            <li class="list-group-item font-weight-bold active">
+                                <label for="{{ type }}-assignee-input">Assignees</label>
+                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
+                            </li>
+                        </ul>
+                        <div class="input-group mb-4">
+                            <input id="{{ type }}-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
 {% extends 'layout.html' %}
 {% block content %}
     <h1 class="text-center">Create a Licence</h1>
@@ -269,182 +330,8 @@
             <span class="fas fa-times text-danger delete-party-item floatright p-1"></span>
         </li>
     </div>
-    <div id="addPermissionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/permission" tabindex="-1" role="dialog" aria-labelledby="permissionModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content text-center">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="permissionModalTitle">Add Rule: Permission</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="input-group mb-4">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="add-permission-select">
-                                Action
-                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </label>
-                        </div>
-                        <select id="add-permission-select" class="form-control action-select permission">
-                            {% for action in actions %}
-                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignor-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="permission-assignor-input">Assignors</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="permission-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignee-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="permission-assignee-input">Assignees</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="permission-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="addDutyModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/duty" tabindex="-1" role="dialog" aria-labelledby="dutyModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content text-center">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="dutyModalTitle">Add Rule: Duty</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="input-group mb-4">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="add-duty-select">
-                                Action
-                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </label>
-                        </div>
-                        <select id="add-duty-select" class="form-control action-select duty">
-                            {% for action in actions %}
-                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignor-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="duty-assignor-input"></label>Assignors
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="duty-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignee-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="duty-assignee-input">Assignees</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="duty-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="addProhibitionModal" class="modal add-rule-modal fade" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition" tabindex="-1" role="dialog" aria-labelledby="prohibitionModalTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content text-center">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="prohibitionModalTitle">Add Rule: Prohibition</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="input-group mb-4">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="add-prohibition-select">
-                                Action
-                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </label>
-                        </div>
-                        <select id="add-prohibition-select" class="form-control action-select prohibition">
-                            {% for action in actions %}
-                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignor-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="prohibition-assignor-input">Assignors</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="prohibition-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignee-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="prohibition-assignee-input">Assignees</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="prohibition-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{ rule_modal('permission', 'http://www.w3.org/ns/odrl/2/permission') }}
+    {{ rule_modal('duty', 'http://www.w3.org/ns/odrl/2/duty') }}
+    {{ rule_modal('prohibition', 'http://www.w3.org/ns/odrl/2/prohibition') }}
     <div id="search-url" data-url="{{ search_url }}" hidden></div>
 {% endblock %}
