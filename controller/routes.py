@@ -446,8 +446,8 @@ def get_action_rdf(action):
 def create_licence_form():
     actions = db_access.get_all_actions()
     parties = db_access.get_all_parties()
-    actions.sort(key=lambda x: x['LABEL'])
-    parties.sort(key=lambda x: x['LABEL'])
+    actions.sort(key=lambda x: (x['LABEL'] is None, x['LABEL']))
+    parties.sort(key=lambda x: (x['LABEL'] is None, x['LABEL']))
     for action in actions:
         action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
     for party in parties:

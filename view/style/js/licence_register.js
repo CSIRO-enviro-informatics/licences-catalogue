@@ -13,9 +13,9 @@ var updateRuleDisplay = function() {
             template.attr('data-rule-type', rules[i]['TYPE_URI'])
             template.attr('data-action-uri', action['URI'])
             if (rules[i]['ASSIGNORS'].length > 0)
-                template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rules[i]['ASSIGNORS'].join(', '))
+                template.find('.assignors').removeAttr('hidden').text('Assignors: ' + rules[i]['ASSIGNORS'].map(function(assignor){return assignor['LABEL']}).join(', '))
             if (rules[i]['ASSIGNEES'].length > 0)
-                template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rules[i]['ASSIGNEES'].join(', '))
+                template.find('.assignees').removeAttr('hidden').text('Assignees: ' + rules[i]['ASSIGNEES'].map(function(assignee){return assignee['LABEL']}).join(', '))
             template.insertBefore(ruleDisplay.find('.list-end-section[data-rule-type="' + rules[i]['TYPE_URI'] + '"]'))
         }
     }
@@ -62,10 +62,10 @@ $('body').on('click', '.add-rule', function() {
     var assignors = []
     var assignees = []
     modal.find('.assignor-list').find('.list-group-item-label').each(function() {
-        assignors.push($(this).text())
+        assignors.push({'URI': $(this).attr('data-uri'), 'LABEL': $(this).text()})
     })
     modal.find('.assignee-list').find('.list-group-item-label').each(function() {
-        assignees.push($(this).text())
+        assignees.push({'URI': $(this).attr('data-uri'), 'LABEL': $(this).text()})
     })
     rules.push({
         'ACTIONS': [action],
@@ -77,6 +77,7 @@ $('body').on('click', '.add-rule', function() {
     updateActionDisplay()
     modal.find('.assignor-list').children(':not(".active")').remove()
     modal.find('.assignee-list').children(':not(".active")').remove()
+    modal.find('.party-select').children().show()
 })
 
 // Removes items from rule list when X clicked
@@ -198,27 +199,18 @@ $(window).on('unload', function() {
 })
 
 // Adding assignors/assignees to a permission
-$('body').on('click', '.add-party', function() {
-    addParty($(this).parent().siblings('input').first())
-})
-$('body').on('focusout', '.party-input', function() {
-    addParty($(this))
-})
-$('body').on('keyup', '.party-input', function(event) {
-    if (event.keyCode === 13)
-        addParty($(this))
-})
-var addParty = function(input_field) {
-    if (input_field.val().length <= 0)
+$('body').on('change', '.party-select', function() {
+    var option = $(this).find('option:selected').first()
+    if (option.val().length == 0)
         return
-    var isValid = input_field.closest('form').get(0).checkValidity()
-    if (!isValid)
-        return
-    var party = input_field.val()
-    input_field.val('')
+    $(this).children().first().prop('selected', true)
     var new_list_item = $('#party-item-template').clone().children()
-    new_list_item.find('div').text(party)
-    input_field.closest('.input-group').prev().append(new_list_item)
+    new_list_item.find('.list-group-item-label').text(option.text()).attr('data-uri', option.val())
+    option.hide()
+    $(this).prev().append(new_list_item)
+})
+
+var addParty = function(input_field) {
 }
 
 $('.validate-party-form').submit(function(e){
@@ -227,6 +219,7 @@ $('.validate-party-form').submit(function(e){
 
 // Removes assignor/assignee from a permission
 $('body').on('click', '.delete-party-item', function() {
+    $(this).closest('.list-group').next().children('[value="' + $(this).prev().attr('data-uri') + '"]').show()
     $(this).parent().remove()
 })
 

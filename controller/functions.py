@@ -52,14 +52,14 @@ def create_policy(policy_uri, attributes=None, rules=None):
                         permitted_actions = db_access.get_all_actions()
                         action_uri = get_action_uri(action, permitted_actions)
                         if not action_uri:
-                            raise ValueError('Cannot create policy - bad action provided.')
+                            raise ValueError('Cannot create policy - bad action provided')
                     db_access.add_action_to_rule(action_uri, rule_uri)
                 if 'ASSIGNORS' in rule:
                     for assignor in rule['ASSIGNORS']:
-                        db_access.add_assignor_to_rule(assignor, rule_uri)
+                        db_access.add_assignor_to_rule(assignor['URI'], rule_uri)
                 if 'ASSIGNEES' in rule:
                     for assignee in rule['ASSIGNEES']:
-                        db_access.add_assignee_to_rule(assignee, rule_uri)
+                        db_access.add_assignee_to_rule(assignee['URI'], rule_uri)
                 db_access.add_rule_to_policy(rule_uri, policy_uri)
     except ValueError as error:
         db_access.rollback_db()

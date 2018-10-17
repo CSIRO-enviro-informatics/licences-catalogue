@@ -7,7 +7,7 @@ import os
 DB_ACCESS
 
 A layer providing functions for interacting with the database.
-commit_db() or rollback_db() MUST be called when all changes are done.
+commit_db() or rollback_db() MUST be called when all changes are done or database will be locked.
 """
 
 
@@ -62,6 +62,7 @@ def commit_db():
 def rollback_db():
     conn = get_db()
     conn.rollback()
+    conn.commit()
 
 
 def create_policy(policy_uri):

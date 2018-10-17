@@ -120,3 +120,7 @@ form#licence-create-form select {
 .text-warning {
     color: #E67623 !important;
 }
+
+label {
+    margin-bottom: auto
+}

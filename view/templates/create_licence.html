@@ -22,34 +22,30 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignor-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="{{ type }}-assignor-input">Assignors</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="{{ type }}-assignor-input" class="form-control party-input" placeholder="Enter a new assignor ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
-                    <form class="validate-party-form">
-                        <ul class="list-group mb-2 assignee-list">
-                            <li class="list-group-item font-weight-bold active">
-                                <label for="{{ type }}-assignee-input">Assignees</label>
-                                <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
-                            </li>
-                        </ul>
-                        <div class="input-group mb-4">
-                            <input id="{{ type }}-assignee-input" class="form-control party-input" placeholder="Enter a new assignee ..." pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-success fa fa-plus add-party"></button>
-                            </div>
-                        </div>
-                    </form>
+                    <ul class="list-group assignor-list">
+                        <li class="list-group-item font-weight-bold active">
+                            <label for="{{ type }}-assignor-input">Assignors</label>
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
+                        </li>
+                    </ul>
+                    <select class="form-control party-select mb-2" id="{{ type }}-assignor-input">
+                        <option selected></option>
+                        {% for party in parties %}
+                        <option value="{{ party['URI'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
+                        {% endfor %}
+                    </select>
+                    <ul class="list-group assignee-list">
+                        <li class="list-group-item font-weight-bold active">
+                            <label for="{{ type }}-assignee-input">Assignees</label>
+                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
+                        </li>
+                    </ul>
+                    <select class="form-control party-select mt-0 mb-1" id="{{ type }}-assignee-input">
+                        <option selected></option>
+                        {% for party in parties %}
+                        <option value="{{ party['URI'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cancel" data-dismiss="modal">Close</button>
@@ -326,7 +322,7 @@
     </div>
     <div id="party-item-template" hidden>
         <li class="list-group-item p-1">
-            <div class="list-group-item-label pl-1"></div>
+            <div class="list-group-item-label pl-1" data-uri=""></div>
             <span class="fas fa-times text-danger delete-party-item floatright p-1"></span>
         </li>
     </div>
