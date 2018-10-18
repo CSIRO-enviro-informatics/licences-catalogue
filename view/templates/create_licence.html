@@ -31,7 +31,7 @@
                     <select class="form-control party-select mb-2" id="{{ type }}-assignor-input">
                         <option selected></option>
                         {% for party in parties %}
-                        <option value="{{ party['URI'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
+                        <option value="{{ party['URI'] }}" data-comment="{{ party['COMMENT'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
                         {% endfor %}
                     </select>
                     <ul class="list-group assignee-list">
@@ -43,7 +43,7 @@
                     <select class="form-control party-select mt-0 mb-1" id="{{ type }}-assignee-input">
                         <option selected></option>
                         {% for party in parties %}
-                        <option value="{{ party['URI'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
+                        <option value="{{ party['URI'] }}" data-comment="{{ party['COMMENT'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
                         {% endfor %}
                     </select>
                 </div>

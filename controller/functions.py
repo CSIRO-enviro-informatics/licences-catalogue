@@ -56,9 +56,13 @@ def create_policy(policy_uri, attributes=None, rules=None):
                     db_access.add_action_to_rule(action_uri, rule_uri)
                 if 'ASSIGNORS' in rule:
                     for assignor in rule['ASSIGNORS']:
+                        if not db_access.party_exists(assignor['URI']):
+                            db_access.create_party(assignor['URI'], assignor['LABEL'], assignor['COMMENT'])
                         db_access.add_assignor_to_rule(assignor['URI'], rule_uri)
                 if 'ASSIGNEES' in rule:
                     for assignee in rule['ASSIGNEES']:
+                        if not db_access.party_exists(assignee['URI']):
+                            db_access.create_party(assignee['URI'], assignee['LABEL'], assignee['COMMENT'])
                         db_access.add_assignee_to_rule(assignee['URI'], rule_uri)
                 db_access.add_rule_to_policy(rule_uri, policy_uri)
     except ValueError as error:

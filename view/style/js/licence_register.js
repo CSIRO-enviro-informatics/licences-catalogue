@@ -62,10 +62,10 @@ $('body').on('click', '.add-rule', function() {
     var assignors = []
     var assignees = []
     modal.find('.assignor-list').find('.list-group-item-label').each(function() {
-        assignors.push({'URI': $(this).attr('data-uri'), 'LABEL': $(this).text()})
+        assignors.push({'URI': $(this).attr('data-uri'), 'LABEL': $(this).text(), 'COMMENT': $(this).attr('data-comment')})
     })
     modal.find('.assignee-list').find('.list-group-item-label').each(function() {
-        assignees.push({'URI': $(this).attr('data-uri'), 'LABEL': $(this).text()})
+        assignees.push({'URI': $(this).attr('data-uri'), 'LABEL': $(this).text(), 'COMMENT': $(this).attr('data-comment')})
     })
     rules.push({
         'ACTIONS': [action],
@@ -198,26 +198,25 @@ $(window).on('unload', function() {
     $('.hidden-rule-input').remove()
 })
 
-// Adding assignors/assignees to a permission
+// Adding assignors/assignees to a rule
 $('body').on('change', '.party-select', function() {
     var option = $(this).find('option:selected').first()
     if (option.val().length == 0)
         return
     $(this).children().first().prop('selected', true)
     var new_list_item = $('#party-item-template').clone().children()
-    new_list_item.find('.list-group-item-label').text(option.text()).attr('data-uri', option.val())
+    new_list_item.find('.list-group-item-label').text(option.text())
+    new_list_item.find('.list-group-item-label').attr('data-comment', option.attr('data-comment'))
+    new_list_item.find('.list-group-item-label').attr('data-uri', option.val())
     option.hide()
     $(this).prev().append(new_list_item)
 })
-
-var addParty = function(input_field) {
-}
 
 $('.validate-party-form').submit(function(e){
     e.preventDefault()
 })
 
-// Removes assignor/assignee from a permission
+// Removes assignor/assignee from a rule
 $('body').on('click', '.delete-party-item', function() {
     $(this).closest('.list-group').next().children('[value="' + $(this).prev().attr('data-uri') + '"]').show()
     $(this).parent().remove()

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, Response
+import requests
 from controller import db_access, functions
 import _conf as conf
 import json
@@ -446,6 +447,17 @@ def get_action_rdf(action):
 def create_licence_form():
     actions = db_access.get_all_actions()
     parties = db_access.get_all_parties()
+    try:
+        external_parties = json.loads(requests.get('http://catalogue.linked.data.gov.au/org/json').text)
+        for external_party in external_parties:
+            if not any(external_party['view_taxonomy_term'] == party['URI'] for party in parties):
+                parties.append({
+                    'URI': external_party['view_taxonomy_term'],
+                    'LABEL': external_party['name'],
+                    'COMMENT': external_party['description__value']
+                })
+    except requests.ConnectionError:
+        pass
     actions.sort(key=lambda x: (x['LABEL'] is None, x['LABEL']))
     parties.sort(key=lambda x: (x['LABEL'] is None, x['LABEL']))
     for action in actions:
