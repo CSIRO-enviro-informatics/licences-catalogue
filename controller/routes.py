@@ -188,6 +188,17 @@ def view_licence(policy_uri):
     rules = [db_access.get_rule(rule_uri) for rule_uri in policy['RULES']]
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
         # Display as JSON
+        rules_json = []
+        for rule in rules:
+            rules_json.append({
+                rule['URI']: {
+                    'label': rule['LABEL'],
+                    'type': [rule['TYPE_URI'], ODRL + 'Rule'],
+                    'assignors': rule['ASSIGNORS'],
+                    'assignees': rule['ASSIGNEES'],
+                    'actions': [action['URI'] for action in rule['ACTIONS']]
+                }
+            })
         licence_json = {
             policy['URI']: {
                 'comment': policy['COMMENT'],
@@ -203,18 +214,9 @@ def view_licence(policy_uri):
                 'seeAlso': policy['SEE_ALSO'],
                 'status': policy['STATUS'],
                 'type': policy['TYPE'],
-                'containedItemClass': ODRL + 'Rule'
+                'rules': rules_json
             }
         }
-        for rule in rules:
-            licence_json[rule['URI']] = {
-                'label': rule['LABEL'],
-                'type': [rule['TYPE_URI'], ODRL + 'Rule'],
-                'assignors': rule['ASSIGNORS'],
-                'assignees': rule['ASSIGNEES'],
-                'actions': [action['URI'] for action in rule['ACTIONS']],
-                'licence': policy['URI']
-            }
         return jsonify(licence_json)
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         # Display as RDF
