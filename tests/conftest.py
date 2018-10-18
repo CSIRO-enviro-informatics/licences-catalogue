@@ -1,8 +1,7 @@
 import pytest
 import _conf
 import create_database
-import sqlite3
-from seed_database import get_db
+from controller.offline_db_access import get_db
 
 
 @pytest.fixture(scope='session', autouse=True)

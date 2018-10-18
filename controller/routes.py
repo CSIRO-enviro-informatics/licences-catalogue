@@ -4,13 +4,9 @@ from controller import db_access, functions
 import _conf as conf
 import json
 from uuid import uuid4
-from rdflib import Graph, RDF, RDFS, Literal, URIRef, XSD, OWL, BNode
-from rdflib.namespace import SKOS, DCTERMS, FOAF
 
-ADMS = 'http://www.w3.org/ns/adms#'
-CREATIVE_COMMONS = 'http://creativecommons.org/ns#'
-ODRL = 'http://www.w3.org/ns/odrl/2/'
-REG = 'http://purl.org/linked-data/registry#'
+from controller.functions import get_policy_json
+
 JSON_CONTEXT_ACTIONS = {
     '@vocab': 'http://www.w3.org/ns/odrl/2/',
     'label': 'http://www.w3.org/2000/01/rdf-schema#label',
@@ -43,9 +39,6 @@ JSON_CONTEXT_PARTIES = {
     'register': 'http://purl.org/linked-data/registry#register',
     'containedItemClass': 'http://purl.org/linked-data/registry#containedItemClass',
 }
-party_register_comment = 'This is a register (controlled list) of machine-readable Parties. The Party entity could be' \
-                         ' a person, group of people, organisation, or agent. An agent is a person or thing that take' \
-                         's an active role or produces a specified effect.'
 
 routes = Blueprint('controller', __name__)
 
@@ -100,34 +93,15 @@ def view_licence_list():
     for policy_uri in db_access.get_all_policies():
         policies.append(db_access.get_policy(policy_uri))
 
-    # Test for preferred Media Type
+    # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        # Display as JSON
-        register_uri = url_for('controller.licence_routes', _external=True)
-        register_json = {
-            register_uri: {
-                'type': REG + 'Register',
-                'label': title,
-                'comment': 'This is a register (controlled list) of machine-readable Licenses which are a particular '
-                           'type of Policy.',
-                'containedItemClass': CREATIVE_COMMONS + 'License'
-            }
-        }
-        for policy in policies:
-            register_json[policy['URI']] = {
-                'type': CREATIVE_COMMONS + 'License',
-                'label': policy['LABEL'],
-                'comment': policy['COMMENT'],
-                'register': register_uri
-            }
-        return jsonify(register_json)
+        return jsonify(functions.get_policies_json(policies, title))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        # Display as RDF
-        return Response(get_policy_list_rdf(policies).serialize(format='turtle'), status=200, mimetype='text/turtle')
+        policies_rdf = functions.get_policies_rdf(policies).serialize(format='turtle')
+        return Response(policies_rdf, status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        # Display as JSON-LD
-        json_ld = get_policy_list_rdf(policies).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
+        json_ld = functions.get_policies_rdf(policies).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
@@ -150,80 +124,22 @@ def view_licence_list():
         )
 
 
-def get_policy_list_rdf(policies):
-    graph = Graph()
-    graph.bind('odrl', ODRL)
-    graph.bind('cc', CREATIVE_COMMONS)
-    graph.bind('owl', OWL)
-    graph.bind('dct', DCTERMS)
-    graph.bind('foaf', FOAF)
-    graph.bind('adms', ADMS)
-    graph.bind('reg', REG)
-    register_node = URIRef(url_for('controller.licence_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
-    graph.add((register_node, RDFS.label, Literal('Licence Register')))
-    graph.add((register_node, RDFS.comment, Literal('This is a register (controlled list) of machine-readable Licenses '
-                                                    'which are a particular type of Policy.')))
-    graph.add((register_node, URIRef(REG + 'containedItemClass'), URIRef(ODRL + 'Policy')))
-    for policy in policies:
-        policy_node = URIRef(policy['URI'])
-        graph.add((policy_node, RDF.type, URIRef(ODRL + 'Policy')))
-        if policy['TYPE']:
-            graph.add((policy_node, RDF.type, URIRef(policy['TYPE'])))
-        if policy['LABEL']:
-            graph.add((policy_node, RDFS.label, Literal(policy['LABEL'], lang='en')))
-        if policy['COMMENT']:
-            graph.add((policy_node, RDFS.comment, Literal(policy['COMMENT'], lang='en')))
-        graph.add((policy_node, URIRef(REG + 'register'), URIRef(register_node)))
-    return graph
-
-
 def view_licence(policy_uri):
     try:
         policy = db_access.get_policy(policy_uri)
     except ValueError:
         abort(404)
         return
+    # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     rules = [db_access.get_rule(rule_uri) for rule_uri in policy['RULES']]
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        # Display as JSON
-        rules_json = []
-        for rule in rules:
-            rules_json.append({
-                rule['URI']: {
-                    'label': rule['LABEL'],
-                    'type': [rule['TYPE_URI'], ODRL + 'Rule'],
-                    'assignors': rule['ASSIGNORS'],
-                    'assignees': rule['ASSIGNEES'],
-                    'actions': [action['URI'] for action in rule['ACTIONS']]
-                }
-            })
-        licence_json = {
-            policy['URI']: {
-                'comment': policy['COMMENT'],
-                'created': policy['CREATED'],
-                'creator': policy['CREATOR'],
-                'hasVersion': policy['HAS_VERSION'],
-                'jurisdiction': policy['JURISDICTION'],
-                'label': policy['LABEL'],
-                'language': policy['LANGUAGE'],
-                'legalCode': policy['LEGAL_CODE'],
-                'logo': policy['LOGO'],
-                'sameAs': policy['SAME_AS'],
-                'seeAlso': policy['SEE_ALSO'],
-                'status': policy['STATUS'],
-                'type': policy['TYPE'],
-                'rules': rules_json
-            }
-        }
-        return jsonify(licence_json)
+        return jsonify(get_policy_json(policy, rules))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        # Display as RDF
-        return Response(get_policy_rdf(policy, rules).serialize(format='turtle'), status=200, mimetype='text/turtle')
+        policy_rdf = functions.get_policy_rdf(policy, rules).serialize(format='turtle')
+        return Response(policy_rdf, status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        # Display as JSON-LD
-        json_ld = get_policy_rdf(policy, rules).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
+        json_ld = functions.get_policy_rdf(policy, rules).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
@@ -256,55 +172,6 @@ def view_licence(policy_uri):
         )
 
 
-def get_policy_rdf(policy, rules):
-    graph = Graph()
-    graph.bind('odrl', ODRL)
-    graph.bind('cc', CREATIVE_COMMONS)
-    graph.bind('owl', OWL)
-    graph.bind('dct', DCTERMS)
-    graph.bind('foaf', FOAF)
-    graph.bind('adms', ADMS)
-    policy_node = URIRef(policy['URI'])
-    graph.add((policy_node, RDF.type, URIRef(ODRL + 'Policy')))
-    if policy['TYPE']:
-        graph.add((policy_node, RDF.type, URIRef(policy['TYPE'])))
-    if policy['LABEL']:
-        graph.add((policy_node, RDFS.label, Literal(policy['LABEL'], lang='en')))
-    if policy['COMMENT']:
-        graph.add((policy_node, RDFS.comment, Literal(policy['COMMENT'], lang='en')))
-    if policy['CREATED']:
-        graph.add((policy_node, DCTERMS.created, Literal(policy['CREATED'], datatype=XSD.date)))
-    if policy['CREATOR']:
-        graph.add((policy_node, DCTERMS.creator, URIRef(policy['CREATOR'])))
-    if policy['HAS_VERSION']:
-        graph.add((policy_node, DCTERMS.hasVersion, Literal(policy['HAS_VERSION'])))
-    if policy['JURISDICTION']:
-        graph.add((policy_node, URIRef(CREATIVE_COMMONS + 'jurisdiction'), URIRef(policy['JURISDICTION'])))
-    if policy['LANGUAGE']:
-        graph.add((policy_node, DCTERMS.language, URIRef(policy['LANGUAGE'])))
-    if policy['LEGAL_CODE']:
-        graph.add((policy_node, URIRef(CREATIVE_COMMONS + 'legalcode'), URIRef(policy['LEGAL_CODE'])))
-    if policy['LOGO']:
-        graph.add((policy_node, URIRef(FOAF + 'logo'), URIRef(policy['LOGO'])))
-    if policy['SAME_AS']:
-        graph.add((policy_node, OWL.sameAs, URIRef(policy['SAME_AS'])))
-    if policy['SEE_ALSO']:
-        graph.add((policy_node, RDFS.seeAlso, URIRef(policy['SEE_ALSO'])))
-    if policy['STATUS']:
-        graph.add((policy_node, URIRef(ADMS + 'status'), URIRef(policy['STATUS'])))
-    for rule in rules:
-        rule_node = BNode()
-        graph.add((policy_node, URIRef(ODRL + rule['TYPE_LABEL'].lower()), rule_node))
-        graph.add((rule_node, RDF.type, URIRef(ODRL + rule['TYPE_LABEL'])))
-        for action in rule['ACTIONS']:
-            graph.add((rule_node, URIRef(ODRL + 'action'), URIRef(action['URI'])))
-        for assignor in rule['ASSIGNORS']:
-            graph.add((rule_node, URIRef(ODRL + 'assignor'), URIRef(assignor)))
-        for assignee in rule['ASSIGNEES']:
-            graph.add((rule_node, URIRef(ODRL + 'assignee'), URIRef(assignee)))
-    return graph
-
-
 @routes.route('/action/index.json')
 def view_action_list_json():
     redirect_url = '/action/?_format=application/json'
@@ -326,32 +193,15 @@ def action_routes():
 def view_actions_list():
     title = 'Action Register'
     actions = db_access.get_all_actions()
+    # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        # Display as JSON
-        register_uri = url_for('controller.action_routes', _external=True)
-        actions_json = {
-            register_uri: {
-                'type': REG + 'Register',
-                'label': title,
-                'comment': 'This is a register (controlled list) of machine-readable Actions.',
-                'containedItemClass': ODRL + 'Action'
-            }
-        }
-        for action in actions:
-            actions_json[action['URI']] = {
-                'type': ODRL + 'Action',
-                'label': action['LABEL'],
-                'comment': action['DEFINITION'],
-                'register': register_uri
-            }
-        return jsonify(actions_json)
+        return jsonify(functions.get_actions_json(actions, title))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        # Display as RDF
-        return Response(get_action_list_rdf(actions).serialize(format='turtle'), status=200, mimetype='text/turtle')
+        actions_rdf = functions.get_actions_rdf(actions).serialize(format='turtle')
+        return Response(actions_rdf, status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        # Display as JSON-LD
-        json_ld = get_action_list_rdf(actions).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
+        json_ld = functions.get_actions_rdf(actions).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
@@ -375,44 +225,20 @@ def view_actions_list():
         )
 
 
-def get_action_list_rdf(actions):
-    graph = Graph()
-    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
-    graph.bind('skos', SKOS)
-    register_node = URIRef(url_for('controller.action_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
-    graph.add((register_node, RDFS.label, Literal('Action Register')))
-    graph.add((
-        register_node,
-        RDFS.comment,
-        Literal('This is a register (controlled list) of machine-readable Actions.')
-    ))
-    graph.add((register_node, URIRef(REG + 'containedItemClass'), URIRef(ODRL + 'Action')))
-    for action in actions:
-        action_node = URIRef(action['URI'])
-        graph.add((action_node, RDF.type, URIRef(ODRL + 'Action')))
-        graph.add((action_node, RDFS.label, Literal(action['LABEL'], lang='en')))
-        graph.add((action_node, SKOS.definition, Literal(action['DEFINITION'], lang='en')))
-        graph.add((action_node, URIRef(REG + 'register'), URIRef(register_node)))
-    return graph
-
-
 def view_action(action_uri):
     try:
         action = db_access.get_action(action_uri)
     except ValueError:
         abort(404)
         return
+    # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        # Display as JSON
         return jsonify({action['URI']: {'label': action['LABEL'], 'definition': action['DEFINITION']}})
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        # Display as RDF
-        return Response(get_action_rdf(action).serialize(format='turtle'), status=200, mimetype='text/turtle')
+        return Response(functions.get_action_rdf(action).serialize(format='turtle'), status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        # Display as JSON-LD
-        json_ld = get_action_rdf(action).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
+        json_ld = functions.get_action_rdf(action).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
@@ -432,17 +258,6 @@ def view_action(action_uri):
             action=action,
             licences=policies
         )
-
-
-def get_action_rdf(action):
-    graph = Graph()
-    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
-    graph.bind('skos', SKOS)
-    action_node = URIRef(action['URI'])
-    graph.add((action_node, RDF.type, URIRef(ODRL + 'Action')))
-    graph.add((action_node, RDFS.label, Literal(action['LABEL'], lang='en')))
-    graph.add((action_node, SKOS.definition, Literal(action['DEFINITION'], lang='en')))
-    return graph
 
 
 @routes.route('/licence/create')
@@ -500,32 +315,15 @@ def party_routes():
 def view_party_list():
     title = 'Party Register'
     parties = db_access.get_all_parties()
+    # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        # Display as JSON
-        register_uri = url_for('controller.party_routes', _external=True)
-        parties_json = {
-            register_uri: {
-                'type': REG + 'Register',
-                'label': title,
-                'comment': party_register_comment,
-                'containedItemClass': ODRL + 'Party'
-            }
-        }
-        for party in parties:
-            parties_json[party['URI']] = {
-                'type': ODRL + 'Party',
-                'label': party['LABEL'],
-                'comment': party['COMMENT'],
-                'register': register_uri
-            }
-        return jsonify(parties_json)
+        return jsonify(functions.get_party_json(parties, title))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        # Display as RDF
-        return Response(get_party_list_rdf(parties).serialize(format='turtle'), status=200, mimetype='text/turtle')
+        parties_rdf = functions.get_parties_rdf(parties).serialize(format='turtle')
+        return Response(parties_rdf, status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        # Display as JSON-LD
-        json_ld = get_party_list_rdf(parties).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
+        json_ld = functions.get_parties_rdf(parties).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
@@ -549,46 +347,20 @@ def view_party_list():
         )
 
 
-def get_party_list_rdf(parties):
-    graph = Graph()
-    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
-    graph.bind('skos', SKOS)
-    register_node = URIRef(url_for('controller.party_routes', _external=True))
-    graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
-    graph.add((register_node, RDFS.label, Literal('Party Register')))
-    graph.add((
-        register_node,
-        RDFS.comment,
-        Literal(party_register_comment)
-    ))
-    graph.add((register_node, URIRef(REG + 'containedItemClass'), URIRef(ODRL + 'Party')))
-    for party in parties:
-        party_node = URIRef(party['URI'])
-        graph.add((party_node, RDF.type, URIRef(ODRL + 'Party')))
-        if party['LABEL']:
-            graph.add((party_node, RDFS.label, Literal(party['LABEL'], lang='en')))
-        if party['COMMENT']:
-            graph.add((party_node, RDFS.comment, Literal(party['COMMENT'], lang='en')))
-        graph.add((party_node, URIRef(REG + 'register'), URIRef(register_node)))
-    return graph
-
-
 def view_party(party_uri):
     try:
         party = db_access.get_party(party_uri)
     except ValueError:
         abort(404)
         return
+    # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        # Display as JSON
         return jsonify({party['URI']: {'label': party['LABEL'], 'comment': party['COMMENT']}})
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        # Display as RDF
-        return Response(get_party_rdf(party).serialize(format='turtle'), status=200, mimetype='text/turtle')
+        return Response(functions.get_party_rdf(party).serialize(format='turtle'), status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        # Display as JSON-LD
-        json_ld = get_party_rdf(party).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
+        json_ld = functions.get_party_rdf(party).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
@@ -611,15 +383,3 @@ def view_party(party_uri):
             party=party,
             licences=policies
         )
-
-
-def get_party_rdf(party):
-    graph = Graph()
-    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
-    party_node = URIRef(party['URI'])
-    graph.add((party_node, RDF.type, URIRef(ODRL + 'Party')))
-    if party['LABEL']:
-        graph.add((party_node, RDFS.label, Literal(party['LABEL'], lang='en')))
-    if party['COMMENT']:
-        graph.add((party_node, RDFS.comment, Literal(party['COMMENT'], lang='en')))
-    return graph
