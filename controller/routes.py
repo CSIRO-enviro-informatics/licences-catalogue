@@ -89,7 +89,6 @@ def licence_routes():
 def view_licence_list():
     title = 'Licence Register'
     policies = []
-    items = []
     for policy_uri in db_access.get_all_policies():
         policies.append(db_access.get_policy(policy_uri))
 
@@ -105,6 +104,7 @@ def view_licence_list():
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
+        items = []
         for policy in policies:
             items.append({
                 'uri': policy['URI'],

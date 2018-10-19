@@ -2,7 +2,11 @@
 {% block left_column %}
 <ul>
     {% for item in items %}
-    <li><a href="{{ item['link'] }}">{{ item['label'] }}</a></li>
+    <li>
+        <span class="p-1" {% if item['comment'] %}data-toggle="tooltip" data-placement="right" data-container="body" title="{{ item['comment']|truncate(200, end=' ...') }}"{% endif %}>
+            <a href="{{ item['link'] }}">{{ item['label'] }}</a>
+        </span>
+    </li>
     {% endfor %}
 </ul>
 {% endblock %}

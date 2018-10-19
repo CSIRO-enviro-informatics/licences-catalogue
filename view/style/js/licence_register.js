@@ -212,10 +212,6 @@ $('body').on('change', '.party-select', function() {
     $(this).prev().append(new_list_item)
 })
 
-$('.validate-party-form').submit(function(e){
-    e.preventDefault()
-})
-
 // Removes assignor/assignee from a rule
 $('body').on('click', '.delete-party-item', function() {
     $(this).closest('.list-group').next().children('[value="' + $(this).prev().attr('data-uri') + '"]').show()
