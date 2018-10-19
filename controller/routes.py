@@ -53,6 +53,33 @@ def about():
     return render_template('about.html')
 
 
+@routes.route('/contact_submit', methods=['POST'])
+def contact_submit():
+    name = request.form['name']
+    email = request.form['email']
+    message = request.form['message']
+    if conf.MAILJET_SECRETS and conf.MAILJET_EMAIL_RECEIVERS and conf.MAILJET_EMAIL_SENDER:
+        email_body = 'Name: {name}\nEmail: {email}\n\n{message}'.format(name=name, email=email, message=message)
+        data = {
+            'Messages': [{
+                'From': {'Email': conf.MAILJET_EMAIL_SENDER, 'Name': 'Licence Catalogue Contact Form'},
+                'To': [{'Email': email, 'Name': ''} for email in conf.MAILJET_EMAIL_RECEIVERS],
+                'Subject': '[Licence Catalogue Contact Form] Enquiry from ' + email,
+                'TextPart': email_body
+            }]
+        }
+        requests.post(
+            conf.MAILJET_SECRETS['API_ENDPOINT'],
+            data=json.dumps(data),
+            headers={'Content-Type': 'application/json'},
+            auth=(conf.MAILJET_SECRETS['MJ_APIKEY_PUBLIC'], conf.MAILJET_SECRETS['MJ_APIKEY_PRIVATE'])
+        )
+        return redirect(url_for('controller.about'))
+    else:
+        flash('Contact form is currently disabled')
+        return redirect(url_for('controller.about'))
+
+
 @routes.route('/search')
 def search():
     actions = db_access.get_all_actions()

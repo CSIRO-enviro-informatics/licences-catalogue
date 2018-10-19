@@ -10,9 +10,27 @@
         </a>
     </li></ul>
     <h2>License</h2>
-    <p>The content of this API is licensed for use under the GNU v3 License. See the <a href="LICENSE">license deed</a> for details.</p>
-    <h2>Contacts</h2>
-    <p>If stuff breaks or doesn't work the way you expect it should or you want things extended, either add issues to the codebase (see above) or contact:</p>
+    <p>The content of this API is licensed for use under the GNU v3 License. See the <a href="https://github.com/CSIRO-enviro-informatics/policies-catalogue/blob/master/LICENSE">license deed</a> for details.</p>
+    <h2>Contact Form</h2>
+    <p>If stuff breaks or doesn't work the way you expect it should or you want things extended, either add issues to the codebase (see above) or use the form below to get into contact:</p>
+    <form id="contact-form" action="{{ url_for('controller.contact_submit') }}" method="POST">
+        <table class="table">
+            <col width="150">
+            <tbody>
+                <tr>
+                    <th><label for="name">Name:</label></th>
+                    <td><input id="name" name="name" type="text" required/></td>
+                </tr>
+                <tr>
+                    <th><label for="email">Email:</label></th>
+                    <td><input id="email" name="email" type="email" required/></td>
+                </tr>
+            </tbody>
+        </table>
+        <textarea name="message" required></textarea>
+        <div class="text-center"><input class="btn btn-primary w-200 m-4" type="submit" value="Submit"></div>
+    </form>
+    <h2>People</h2>
     <p>
         <strong>Nicholas Car</strong><br />
         <em>Senior Experimental Scientist</em><br />

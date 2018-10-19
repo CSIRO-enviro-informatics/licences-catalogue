@@ -59,6 +59,12 @@ form#licence-create-form select {
     width: 100%;
 }
 
+form#contact-form input[type=text],
+form#contact-form input[type=email],
+ form#contact-form textarea {
+    width: 100%;
+}
+
 .list-group-item.active {
     z-index: auto;
 }
