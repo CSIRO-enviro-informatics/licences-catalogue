@@ -342,6 +342,8 @@ def party_routes():
 
 def view_party_list():
     title = 'Party Register'
+    subtitle = 'This register only contains Parties currently used by Licences in the Licence Register. Other ' \
+               'available Parties are excluded for brevity.'
     parties = db_access.get_all_parties()
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
@@ -367,6 +369,7 @@ def view_party_list():
         return render_template(
             'browse_list.html',
             title=title,
+            subtitle=subtitle,
             items=items,
             permalink=url_for('controller.party_routes', _external=True),
             rdf_link=url_for('controller.party_routes', _format='text/turtle'),
