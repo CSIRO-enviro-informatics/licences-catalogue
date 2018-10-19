@@ -26,8 +26,8 @@ def create_policy(policy_uri, attributes=None, rules=None):
     :param rules: List of Rules. Each Rule should be a Dictionary containing the following elements:
         TYPE_URI: string    * At least one of TYPE_URI or TYPE_LABEL should be provided.
         TYPE_LABEL: string
-        ASSIGNORS: List of strings
-        ASSIGNEES: List of strings
+        ASSIGNORS: List of Assignors. Each Assignor should be a Dictionary containing a URI, LABEL and COMMENT.
+        ASSIGNEES: List of Assignees.  Each Assignee should be a Dictionary containing a URI, LABEL and COMMENT.
         ACTIONS: List of strings (URIs or labels)
     :return:
     """
@@ -56,14 +56,15 @@ def create_policy(policy_uri, attributes=None, rules=None):
                     raise ValueError('Cannot create policy - no rule type provided.')
                 db_access.create_rule(rule_uri, rule_type)
                 for action in rule['ACTIONS']:
-                    if is_valid_uri(action):
-                        action_uri = action
-                    else:
-                        permitted_actions = db_access.get_all_actions()
-                        action_uri = get_action_uri(action, permitted_actions)
-                        if not action_uri:
-                            raise ValueError('Cannot create policy - bad action provided')
-                    db_access.add_action_to_rule(action_uri, rule_uri)
+                    if action:
+                        if is_valid_uri(action):
+                            action_uri = action
+                        else:
+                            permitted_actions = db_access.get_all_actions()
+                            action_uri = get_action_uri(action, permitted_actions)
+                            if not action_uri:
+                                raise ValueError('Cannot create policy - bad action provided')
+                        db_access.add_action_to_rule(action_uri, rule_uri)
                 if 'ASSIGNORS' in rule:
                     for assignor in rule['ASSIGNORS']:
                         if not db_access.party_exists(assignor['URI']):

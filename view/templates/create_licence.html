@@ -17,6 +17,7 @@
                             </label>
                         </div>
                         <select id="add-{{ type }}-select" class="form-control action-select {{ type }}">
+                            <option data-action-uri="" data-action-link=""></option>
                             {% for action in actions %}
                             <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
                             {% endfor %}
