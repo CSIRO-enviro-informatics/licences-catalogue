@@ -27,6 +27,11 @@
     </header>
     <div id="container-content">
         <div id="container-content-2">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>{{ message[0] }}
+            </div>
+            {% endfor %}
             {% block content %}{% endblock %}
         </div><!-- container-content -->
     </div><!-- container-content-2 -->

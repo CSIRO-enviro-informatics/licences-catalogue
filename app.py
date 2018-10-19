@@ -4,6 +4,7 @@ from flask import Flask, g
 from controller import routes
 
 app = Flask(__name__, template_folder=conf.TEMPLATES_DIR, static_folder=conf.STATIC_DIR)
+app.secret_key = conf.SECRET_KEY
 app.register_blueprint(routes.routes)
 
 

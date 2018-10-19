@@ -222,7 +222,6 @@ def rebuild():
                 ('Watermark', 'http://www.w3.org/ns/odrl/2/watermark', 'To apply a watermark to the Asset.')
     ''')
     conn.commit()
-    conn.close()
 
 
 if __name__ == '__main__':

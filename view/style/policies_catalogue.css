@@ -109,6 +109,11 @@ form#licence-create-form select {
     border-color: #565859 !important;
 }
 
+.btn-danger {
+    background: #E40028;
+    color: white;
+}
+
 .danger {
     color: #E40028;
 }

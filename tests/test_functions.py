@@ -23,8 +23,10 @@ def test_create_policy(db_mock, add_action_to_rule_mock, add_assignee_to_rule_mo
     rules = [
         {
             'TYPE_URI': 'http://www.w3.org/ns/odrl/2/permission',
-            'ASSIGNORS': ['http://example.com/assignor/1', 'http://example.com/assignor/2'],
-            'ASSIGNEES': ['http://example.com/assignee/1', 'http://example.com/assignee/2'],
+            'ASSIGNORS': [{'URI': 'http://example.com/assignor/1', 'LABEL': None, 'COMMENT': None},
+                          {'URI': 'http://example.com/assignor/2', 'LABEL': None, 'COMMENT': None}],
+            'ASSIGNEES': [{'URI': 'http://example.com/assignee/1', 'LABEL': None, 'COMMENT': None},
+                          {'URI': 'http://example.com/assignee/2', 'LABEL': None, 'COMMENT': None}],
             'ACTIONS': ['http://www.w3.org/ns/odrl/2/acceptTracking']
         },
         {

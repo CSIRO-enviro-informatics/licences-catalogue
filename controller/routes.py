@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, Response
+from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, Response, flash
 import requests
 from controller import db_access, functions
 import _conf as conf
@@ -299,7 +299,8 @@ def create_licence():
     try:
         functions.create_policy(uri, attributes, rules)
     except ValueError as error:
-        return Response(error.args, status=500, mimetype='text/plain')
+        flash(error.args, category='error')
+        return redirect(url_for('controller.create_licence_form'))
     return redirect(url_for('controller.licence_routes', uri=uri))
 
 

@@ -7,12 +7,13 @@ import os
 DB_ACCESS
 
 A layer providing functions for interacting with the database.
-commit_db() or rollback_db() MUST be called when all changes are done or database will be locked.
+Database connection is stored in a Flask global variable otherwise Flask complains about threads.
+For database access while Flask is not running, use offline_db_access.py
+commit_db() or rollback_db() MUST be called when all changes are done or database will be locked to future changes.
 """
 
 
 def get_db():
-    # Database is stored in a Flask global variable otherwise Flask complains about threads.
     db = getattr(g, '_database', None)
     if db is None:
         os.makedirs(os.path.dirname(conf.DATABASE_PATH), exist_ok=True)
@@ -68,6 +69,8 @@ def rollback_db():
 def create_policy(policy_uri):
     """
     Creates a new Policy with the given URI
+
+    :param policy_uri: The URI of the new Policy
     """
     if policy_exists(policy_uri):
         raise ValueError('A Policy with that URI already exists.')
@@ -75,9 +78,7 @@ def create_policy(policy_uri):
 
 
 def delete_policy(policy_uri):
-    """
-    Deletes the Policy with the given URI
-    """
+    # Deletes the Policy with the given URI
     query_db('DELETE FROM POLICY WHERE URI = ?', (policy_uri,))
 
 
@@ -150,17 +151,13 @@ def get_all_policies():
 
 
 def policy_has_rule(policy_uri, rule_uri):
-    """
-    Checks if the given Policy includes the given Rule
-    """
+    # Checks if the given Policy includes the given Rule
     query_str = 'SELECT COUNT(1) FROM POLICY_HAS_RULE WHERE POLICY_URI = ? AND RULE_URI = ?'
     return query_db(query_str, (policy_uri, rule_uri), one=True)[0]
 
 
 def add_asset(asset_uri, policy_uri):
-    """
-    Assigns an existing Asset to an existing Policy.
-    """
+    # Assigns an existing Asset to an existing Policy.
     if not policy_exists(policy_uri):
         raise ValueError('Policy with URI ' + asset_uri + ' does not exist.')
     if asset_exists(asset_uri):
@@ -169,9 +166,7 @@ def add_asset(asset_uri, policy_uri):
 
 
 def remove_asset(asset_uri):
-    """
-    Removes an Asset from its Policy
-    """
+    # Removes an Asset from its Policy
     query_db('DELETE FROM ASSET WHERE URI = ?', (asset_uri,))
 
 
@@ -186,9 +181,7 @@ def asset_exists(uri):
 
 
 def get_all_assets():
-    """
-    Returns a list of all Asset URIs
-    """
+    # Returns a list of all Asset URIs
     assets = list()
     for asset in query_db('SELECT URI FROM ASSET'):
         assets.append(asset['URI'])
@@ -213,9 +206,7 @@ def create_rule(rule_uri, rule_type, rule_label=None):
 
 
 def delete_rule(rule_uri):
-    """
-    Deletes the Rule with the given URI. A Rule can only be deleted if it is not currently assigned to a policy.
-    """
+    # Deletes the Rule with the given URI. A Rule can only be deleted if it is not currently assigned to a policy.
     if len(get_policies_for_rule(rule_uri)) > 0:
         raise ValueError('Cannot delete a Rule while it is assigned to a Policy.')
     query_db('DELETE FROM RULE WHERE URI = ?', (rule_uri,))
@@ -253,9 +244,7 @@ def get_rule(rule_uri):
 
 
 def add_rule_to_policy(rule_uri, policy_uri):
-    """
-    Assigns a Rule to a policy. Policies are made up of many Rules. Rules can be reused in multiple Policies.
-    """
+    # Assigns a Rule to a policy. Policies are made up of many Rules. Rules can be reused in multiple Policies.
     if not rule_exists(rule_uri):
         raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
     if not policy_exists(policy_uri):
@@ -266,9 +255,7 @@ def add_rule_to_policy(rule_uri, policy_uri):
 
 
 def remove_rule_from_policy(rule_uri, policy_uri):
-    """
-    Removes a Rule from a Policy. The Rule will still exist unless deleted, but is not assigned to that Policy anymore.
-    """
+    # Removes a Rule from a Policy. The Rule will still exist unless deleted, but is not assigned to that Policy anymore
     query_str = 'DELETE FROM POLICY_HAS_RULE WHERE RULE_URI=? AND POLICY_URI IN (SELECT URI FROM POLICY WHERE URI=?)'
     query_db(query_str, (rule_uri, policy_uri))
 
@@ -277,16 +264,15 @@ def get_rules_for_policy(policy_uri):
     """
     Retrieves all the Rules used by a Policy with the given URI.
 
-    :return: A List of URIs
+    :param policy_uri: The URI of the Policy
+    :return: A List of Rule URIs
     """
     query_str = 'SELECT RULE_URI FROM POLICY_HAS_RULE WHERE POLICY_URI = ?'
     return [rule_result['RULE_URI'] for rule_result in query_db(query_str, (policy_uri,))]
 
 
 def get_all_rules():
-    """
-    Retrieves list of all Rules' URIs
-    """
+    # Retrieves list of all Rules' URIs
     return [result['URI'] for result in query_db('SELECT URI FROM RULE')]
 
 
@@ -319,7 +305,10 @@ def get_permitted_rule_types():
 
 def get_policies_for_rule(rule_uri):
     """
-    Returns a list of all the Policies which use the Rule given
+    Returns a List of all the Policies which use the Rule given
+
+    :param rule_uri: The URI of the Rule
+    :return: A List of Policy URIs
     """
     policies = list()
     query_str = 'SELECT P.URI, P.LABEL FROM POLICY_HAS_RULE P_R, POLICY P ' \
@@ -343,6 +332,9 @@ def add_action_to_rule(action_uri, rule_uri):
     """
     Assign an Action to a Rule. Rules can have multiple Actions associated with them, and Actions can be associated with
     multiple Rules
+
+    :param action_uri: The URI of the Action to be assigned to the Rule
+    :param rule_uri: The URI of the Rule to which the Action will be assigned
     """
     if not rule_exists(rule_uri):
         raise ValueError('Rule with URI ' + rule_uri + ' does not exist.')
@@ -354,13 +346,21 @@ def add_action_to_rule(action_uri, rule_uri):
 
 
 def remove_action_from_rule(action_uri, rule_uri):
-    # Removes an Action from a Rule.
+    """
+    Unassign an Action from a Rule
+
+    :param action_uri: The URI of the Action to be unassigned from the Rule
+    :param rule_uri: The URI of the Rule from which the Action will be unassigned
+    :return:
+    """
     query_db('DELETE FROM RULE_HAS_ACTION WHERE RULE_URI = ? AND ACTION_URI = ?', (rule_uri, action_uri))
 
 
 def get_actions_for_rule(rule_uri):
     """
     Returns a list of all the Actions which are assigned to a given Rule
+
+    :return: A List of Actions. Each Action is a Dictionary containing the following elements: URI, LABEL, DEFINITION
     """
     query_str = '''
         SELECT A.URI, A.LABEL, A.DEFINITION FROM ACTION A, RULE_HAS_ACTION R_A 
@@ -551,19 +551,3 @@ def get_party(party_uri):
     if result is None:
         raise ValueError('Party with URI ' + party_uri + ' not found.')
     return dict(result)
-
-
-def get_policies_using_party(party_uri):
-    """
-    Returns a list of all the Policies which are currently using a given Party.
-    Each Policy is a Dictionary containing the following elements: URI, LABEL
-    """
-    policies = list()
-    query_str = '''
-        SELECT DISTINCT P.URI, P.LABEL 
-        FROM POLICY P, PARTY A, POLICY_HAS_RULE P_R, RULE_HAS_ACTION R_A
-        WHERE P.URI = P_R.POLICY_URI AND P_R.RULE_URI = R_A.RULE_URI AND R_A.ACTION_URI = ?
-    '''
-    for result in query_db(query_str, (action_uri,)):
-        policies.append(dict(result))
-    return policies

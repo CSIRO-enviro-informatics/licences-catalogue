@@ -51,9 +51,10 @@ def create_policy(policy_uri, attributes=None, rules=None):
                         permitted_rule_types = db_access.get_permitted_rule_types()
                     rule_type = get_rule_type_uri(rule['TYPE_LABEL'], permitted_rule_types)
                     if not rule_type:
-                        raise ValueError('Cannot create policy - bad rule type provided')
+                        raise ValueError('Cannot create policy - Rule type ' + rule['TYPE_LABEL'] +
+                                         ' is not permitted')
                 else:
-                    raise ValueError('Cannot create policy - no rule type provided.')
+                    raise ValueError('Cannot create policy - no Rule type provided')
                 db_access.create_rule(rule_uri, rule_type)
                 for action in rule['ACTIONS']:
                     if action:
@@ -63,7 +64,7 @@ def create_policy(policy_uri, attributes=None, rules=None):
                             permitted_actions = db_access.get_all_actions()
                             action_uri = get_action_uri(action, permitted_actions)
                             if not action_uri:
-                                raise ValueError('Cannot create policy - bad action provided')
+                                raise ValueError('Cannot create policy - Action ' + action + ' is not permitted')
                         db_access.add_action_to_rule(action_uri, rule_uri)
                 if 'ASSIGNORS' in rule:
                     for assignor in rule['ASSIGNORS']:
