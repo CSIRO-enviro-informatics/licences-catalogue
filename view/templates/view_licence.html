@@ -1,11 +1,7 @@
 {% macro display_rule(rule) %}
     {% for action in rule['ACTIONS'] %}
         <tr>
-            <td>
-                <a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">
-                    {{ action['LABEL'] }}
-                </a>
-            </td>
+            <td><a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">{{ action['LABEL'] }}</a></td>
             <td>{{ display_parties(rule['ASSIGNORS']) }}</td>
             <td>{{ display_parties(rule['ASSIGNEES']) }}</td>
         </tr>
@@ -35,54 +31,18 @@
 <table class="table">
     <col width="150">
     <tbody>
-        <tr>
-            <th>Type:</th>
-            <td>{% if licence['TYPE'] is not none %}{{ licence['TYPE'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Description:</th>
-            <td>{% if licence['COMMENT'] is not none %}{{ licence['COMMENT'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Status:</th>
-            <td>{% if licence['STATUS'] is not none %}{{ licence['STATUS'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Version:</th>
-            <td>{% if licence['HAS_VERSION'] is not none %}{{ licence['HAS_VERSION'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Created:</th>
-            <td>{% if licence['CREATED'] is not none %}{{ licence['CREATED'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Creator:</th>
-            <td>{% if licence['CREATOR'] is not none %}{{ licence['CREATOR'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Jurisdiction:</th>
-            <td>{% if licence['JURISDICTION'] is not none %}{{ licence['JURISDICTION'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Legal Code:</th>
-            <td>{% if licence['LEGAL_CODE'] is not none %}{{ licence['LEGAL_CODE'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Language:</th>
-            <td>{% if licence['LANGUAGE'] is not none %}{{ licence['LANGUAGE'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>Same As:</th>
-            <td>{% if licence['SAME_AS'] is not none %}{{ licence['SAME_AS'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>See Also:</th>
-            <td>{% if licence['SEE_ALSO'] is not none %}{{ licence['SEE_ALSO'] }}{% endif %}</td>
-        </tr>
-        <tr>
-            <th>URI:</th>
-            <td>{% if licence['URI'] is not none %}{{ licence['URI'] }}{% endif %}</td>
-        </tr>
+        {{ display_linking_attribute('URI', licence['URI']) }}
+        {{ display_linking_attribute('Type', licence['TYPE']) }}
+        {{ display_attribute('Description', licence['COMMENT']) }}
+        {{ display_linking_attribute('Status', licence['STATUS']) }}
+        {{ display_attribute('Version', licence['HAS_VERSION']) }}
+        {{ display_attribute('Created', licence['CREATED']) }}
+        {{ display_linking_attribute('Creator', licence['CREATOR']) }}
+        {{ display_linking_attribute('Jurisdiction', licence['JURISDICTION']) }}
+        {{ display_linking_attribute('Legal Code', licence['LEGAL_CODE']) }}
+        {{ display_linking_attribute('Language', licence['LANGUAGE']) }}
+        {{ display_linking_attribute('Same As', licence['SAME_AS']) }}
+        {{ display_linking_attribute('See Also', licence['SEE_ALSO']) }}
     </tbody>
 </table>
 {% endblock %}

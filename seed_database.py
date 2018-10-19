@@ -429,7 +429,7 @@ def cc_public_domain():
         'type': 'http://creativecommons.org/ns#License',
         'label': 'CC Public Domain',
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted',
-        'comment': 'A work with this licence is free of known restrictions under copyright law, including all related'
+        'comment': 'A work with this licence is free of known restrictions under copyright law, including all related '
                    'and neighbouring rights. You can copy, modify, distribute and perform the work, even for commercial'
                    ' purposes, all without asking permission.',
         'see_also': 'https://creativecommons.org/publicdomain/mark/1.0/',

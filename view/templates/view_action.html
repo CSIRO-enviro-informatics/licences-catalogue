@@ -7,14 +7,8 @@
 <table class="table">
     <col width="150">
     <tbody>
-        <tr>
-            <th>URL:</th>
-            <td>{{ action['URI'] }}</td>
-        </tr>
-        <tr>
-            <th>Definition:</th>
-            <td>{{ action['DEFINITION'] }}</td>
-        </tr>
+        {{ display_linking_attribute('URI', action['URI']) }}
+        {{ display_attribute('Definition', action['DEFINITION']) }}
     </tbody>
 </table>
 {% endblock %}

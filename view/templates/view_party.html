@@ -8,13 +8,8 @@
     <col width="150">
     <tbody>
         <tr>
-            <th>URL:</th>
-            <td>{{ party['URI'] }}</td>
-        </tr>
-        <tr>
-            <th>Comment:</th>
-            <td>{{ party['COMMENT'] }}</td>
-        </tr>
+        {{ display_linking_attribute('URI', party['URI']) }}
+        {{ display_attribute('Description', party['COMMENT']) }}
     </tbody>
 </table>
 {% endblock %}

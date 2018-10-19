@@ -1,3 +1,15 @@
+{% macro display_attribute(label, value) %}
+    <tr>
+        <th>{{ label }}:</th>
+        <td>{% if value is not none %}{{ value }}{% endif %}</td>
+    </tr>
+{% endmacro %}
+{% macro display_linking_attribute(label, value) %}
+    <tr>
+        <th>{{ label }}:</th>
+        <td>{% if value is not none %}<a href="{{ value }}" target="_blank">{{ value }}</a>{% endif %}</td>
+    </tr>
+{% endmacro %}
 {% extends "layout.html" %}
 {% block content %}
     <div class="row">
