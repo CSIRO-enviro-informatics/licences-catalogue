@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Licence Register</h1>
+    <h1>Licence Catalogue</h1>
     <p>This catalogue is a website tool to allow people to find licences according to certain criteria. It is also a licence writing tool; with it you can author both new abstract licences and also specific implementations of licences for particular purposes.</p>
+    <p>See the <a href="{{ url_for('controller.about') }}">About page</a> for more details.</p>
     <h2>Actions</h2>
     <ul class="list--med">
         <li><a href="{{ url_for('controller.search') }}">Find a Licence</a></li>
