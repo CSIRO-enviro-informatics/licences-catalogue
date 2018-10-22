@@ -1,6 +1,6 @@
 {% extends 'browse.html' %}
 {% block left_column %}
-<ul>
+<ul class="list--med">
     {% for item in items %}
     <li>
         <span class="p-1" {% if item['comment'] %}data-toggle="tooltip" data-placement="right" data-container="body" title="{{ item['comment']|truncate(200, end=' ...') }}"{% endif %}>

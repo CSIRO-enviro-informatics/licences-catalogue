@@ -4,13 +4,16 @@
   font-weight: normal;
   /*src: url("http://www.csiro.au/themes/default/font/UnitRoundedWeb-Black.woff") format("woff");*/
   src: url("UnitRoundedWeb-Black.woff") format("woff");
-
 }
 
 body {
 	margin: 0 auto;
 	text-align: center;
-	background-color: #E0E0E0;
+	background-color: #e8e9e9;
+	font-size: 15px;
+	line-height: 1.6;
+    font-family: 'Open Sans', Arial, helvetica, sans-serif;
+    font-weight:normal;
 }
 
 header {
@@ -39,31 +42,26 @@ header {
 	padding: 20px;
 }
 
-h1 {
-  padding:0em 0px 0px 0px;
-  margin:0px 0px 0.2em 0px;
-  color:#01313c;
-  font-family:UnitRoundedBlack, 'Open Sans', Geneva, sans-serif;
-  font-size:3.2em;
-  font-weight:normal;
-  line-height:1.1;
+p {
+    margin: 0 0 15px;
 }
 
-h2, h3 {
+h1, h2, h3, h4 {
+  padding: 0;
+  color: #01313c;
   font-family: UnitRoundedBlack, 'Open Sans', Geneva, sans-serif;
-  font-weight:normal;
 }
 
-h4, p, li {
-  font-family: 'Open Sans', Arial, helvetica, sans-serif;
-  font-weight:normal;
+h1 {
+  margin: 0 0 15px;
+  font-size: 3.4rem;
+  line-height: 3.6rem;
 }
 
-p, li {
-  color: #000000;
-  font-size: 0.8em;
-  line-height: 1.5em;
-  padding: 0.2em 0 0.9em
+h2 {
+  margin: 2.53333rem 0 0.8rem;
+  font-size: 1.6rem;
+  line-height: 2rem;
 }
 
 p a,
@@ -75,7 +73,7 @@ ul li a {
 
 nav {
     font-family: 'Open Sans', helvetica, sans-serif;
-    font-size: 20px;
+    font-size: 18px;
     color: white;
     font-weight:bold;
     margin-top:-35px;
@@ -159,8 +157,6 @@ nav ul li a:hover {
 }
 #footer-external-links li a {color: #0f4a84;}
 
-
-
 .figure {
 	text-align: center;
 }
@@ -173,3 +169,6 @@ nav ul li a:hover {
 	text-decoration: none;
 	border-bottom: 1px dashed;
 }
+
+.list--med > li {
+  margin: 0 0 10px 0; }
