@@ -45,8 +45,7 @@ def query_db(query_str, args=(), one=False):
     :param one: True if the first result should be returned, False if all results should be returned
     :return: The results of the query
     """
-    conn = get_db()
-    cursor = conn.cursor()
+    cursor = get_db().cursor()
     cursor.execute(query_str, args)
     results = cursor.fetchall()
     if one:
