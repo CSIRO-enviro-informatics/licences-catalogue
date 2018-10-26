@@ -414,3 +414,20 @@ def view_party(party_uri):
             party=party,
             licences=policies
         )
+
+
+@routes.route('/object')
+def view_object():
+    # Route for viewing something by URI, regardless of whether it is a licence, action, party, etc.
+    object_uri = request.values.get('uri')
+    if object_uri is None:
+        flash('Please supply a URI to view an object.', category='error')
+        return redirect(url_for('controller.home'))
+    else:
+        if db_access.policy_exists(object_uri):
+            return redirect(url_for('controller.licence_routes', uri=object_uri))
+        if db_access.action_exists(object_uri):
+            return redirect(url_for('controller.action_routes', uri=object_uri))
+        if db_access.party_exists(object_uri):
+            return redirect(url_for('controller.party_routes', uri=object_uri))
+        abort(404)
