@@ -144,7 +144,7 @@ def view_licence_list():
             'browse_list.html',
             title=title,
             items=items,
-            permalink=url_for('controller.licence_routes', _external=True),
+            permalink=conf.PERMALINK_BASE + 'licence/',
             rdf_link=url_for('controller.licence_routes', _format='text/turtle'),
             json_link=url_for('controller.licence_routes', _format='application/json'),
             json_ld_link=url_for('controller.licence_routes', _format='application/ld+json')
@@ -187,7 +187,7 @@ def view_licence(policy_uri):
         return render_template(
             'view_licence.html',
             title=policy['LABEL'],
-            permalink=url_for('controller.licence_routes', uri=policy_uri, _external=True),
+            permalink=conf.PERMALINK_BASE + 'licence/?uri=' + policy_uri,
             rdf_link=url_for('controller.licence_routes', _format='text/turtle', uri=policy_uri),
             json_link=url_for('controller.licence_routes', _format='application/json', uri=policy_uri),
             json_ld_link=url_for('controller.licence_routes', _format='application/ld+json', uri=policy_uri),
@@ -245,7 +245,7 @@ def view_actions_list():
             'browse_list.html',
             title=title,
             items=items,
-            permalink=url_for('controller.action_routes', _external=True),
+            permalink=conf.PERMALINK_BASE + 'action/',
             rdf_link=url_for('controller.action_routes', _format='text/turtle'),
             json_link=url_for('controller.action_routes', _format='application/json'),
             json_ld_link=url_for('controller.action_routes', _format='application/ld+json')
@@ -278,7 +278,7 @@ def view_action(action_uri):
         policies = sorted(policies, key=lambda rule: rule['LABEL'].lower())
         return render_template(
             'view_action.html',
-            permalink=conf.BASE_URI + url_for('controller.action_routes', uri=action['URI']),
+            permalink=conf.PERMALINK_BASE + 'action/?uri=' + action_uri,
             rdf_link=url_for('controller.action_routes', _format='text/turtle', uri=action_uri),
             json_link=url_for('controller.action_routes', _format='application/json', uri=action_uri),
             json_ld_link=url_for('controller.action_routes', _format='application/ld+json', uri=action_uri),
@@ -371,7 +371,7 @@ def view_party_list():
             title=title,
             subtitle=subtitle,
             items=items,
-            permalink=url_for('controller.party_routes', _external=True),
+            permalink=conf.PERMALINK_BASE + 'party/',
             rdf_link=url_for('controller.party_routes', _format='text/turtle'),
             json_link=url_for('controller.party_routes', _format='application/json'),
             json_ld_link=url_for('controller.party_routes', _format='application/ld+json')
@@ -407,7 +407,7 @@ def view_party(party_uri):
         policies = sorted(policies, key=lambda rule: rule['LABEL'].lower())
         return render_template(
             'view_party.html',
-            permalink=conf.BASE_URI + url_for('controller.action_routes', uri=party['URI']),
+            permalink=conf.PERMALINK_BASE + 'party/?uri=' + party_uri,
             rdf_link=url_for('controller.party_routes', _format='text/turtle', uri=party_uri),
             json_link=url_for('controller.party_routes', _format='application/json', uri=party_uri),
             json_ld_link=url_for('controller.party_routes', _format='application/ld+json', uri=party_uri),
