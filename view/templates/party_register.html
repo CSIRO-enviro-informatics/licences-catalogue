@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% include 'alt_views_bar.html' %}
+<div class="container--sm">
+    <h1>Party Register</h1>
+    <p class="lead">This register only contains parties currently used by Licences in the Licence Register. Other available Parties are excluded for brevity.</p>
+    {% for char, parties in party_groups.items() %}
+        <h1>{{ char }}</h1>
+        {% for party in parties %}
+            <div id="{{ party['URI'] }}" class="card card__block card--white card--padding-large card--remove-box-shadow">
+                <div class="section--small">
+                    <h2>{{ party['LABEL'] }}</h2>
+                    <p>{{ party['COMMENT'] if party['COMMENT'] }}</p>
+                    <ul class="list--inline">
+                        <li>
+                            <button class="btn btn--primary btn--flat" data-toggle="collapse" href="#card-{{ char }}-{{ loop.index }}">
+                                More Information
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div id="card-{{ char }}-{{ loop.index }}" class="collapse">
+                    <div class="hd--grey"></div>
+                    <div class="section--small">
+                        <h4>Licences that involve '{{ party['LABEL'] }}'</h4>
+                        {% if party['LICENCES'] %}
+                            <ul>
+                                {% for licence in party['LICENCES'] %}
+                                    <li>
+                                        <a class="reversed" target="_blank" href="{{ url_for('controller.licence_routes', uri=licence['URI']) }}">
+                                            {{ licence['LABEL'] }} >
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}

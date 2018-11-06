@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% include 'alt_views_bar.html' %}
+<div class="container--sm">
+    <h1>Action Register</h1>
+    <p class="lead">Definable actions available for use with a licence.</p>
+    {% for char, actions in action_groups.items() %}
+        <h1>{{ char }}</h1>
+        {% for action in actions %}
+            <div id="{{ action['URI'] }}" class="card card__block card--white card--padding-large card--remove-box-shadow">
+                <div class="section--small">
+                    <h2>{{ action['LABEL'] }}</h2>
+                    <p>{{ action['DEFINITION'] if action['DEFINITION'] }}</p>
+                    <ul class="list--inline">
+                        <li>
+                            <button class="btn btn--primary btn--flat" data-toggle="collapse" href="#card-{{ char }}-{{ loop.index }}">
+                                More Information
+                            </button>
+                        </li>
+                        <li>
+                            <a class="btn btn--primary--outline btn--flat" target="_blank" href="{{ action['URI'] }}">
+                                Official Definition
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div id="card-{{ char }}-{{ loop.index }}" class="collapse">
+                    <div class="hd--grey"></div>
+                    <div class="section--small">
+                        <h4>Licences that implement '{{ action['LABEL'] }}'</h4>
+                        {% if action['LICENCES'] %}
+                            <ul>
+                                {% for licence in action['LICENCES'] %}
+                                    <li>
+                                        <a class="reversed" target="_blank" href="{{ url_for('controller.licence_routes', uri=licence['URI']) }}">
+                                            {{ licence['LABEL'] }} >
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>None</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}

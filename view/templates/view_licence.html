@@ -1,36 +1,48 @@
 {% macro display_rule(rule) %}
     {% for action in rule['ACTIONS'] %}
-        <tr>
-            <td><a href="{{ url_for('controller.action_routes', uri=action['URI']) }}">{{ action['LABEL'] }}</a></td>
-            <td>{{ display_parties(rule['ASSIGNORS']) }}</td>
-            <td>{{ display_parties(rule['ASSIGNEES']) }}</td>
-        </tr>
-        {% endfor %}
-        {% if rule['ACTIONS']|length == 0 and (rule['ASSIGNORS']|length > 0 or rule['ASSIGNEES']|length > 0) %}
-        <tr>
-            <td></td>
-            <td>{{ display_parties(rule['ASSIGNORS']) }}</td>
-            <td>{{ display_parties(rule['ASSIGNEES']) }}</td>
-        </tr>
-        {% endif %}
-{% endmacro %}
-{% macro display_parties(parties) %}
-    {% set comma = joiner(', ') %}
-    {% for party in parties %}
-        {{ comma() }}
-        <a href="{{ url_for('controller.party_routes', uri=party['URI']) }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</a>
+        <li>
+            <a class="reversed" href="{{ url_for('controller.action_register', uri=action['URI']) }}" target="_blank">{{ action['LABEL'] }}</a>
+            {% if rule['ASSIGNORS'] %}
+                <h2 class='h4 meta-heading'>Assignors</h2>
+                {{ display_parties(rule['ASSIGNORS']) }}
+            {% endif %}
+            {% if rule['ASSIGNEES'] %}
+                <h2 class='h4 meta-heading'>Assignees</h2>
+                {{ display_parties(rule['ASSIGNEES']) }}
+            {% endif %}
+        </li>
     {% endfor %}
+    {% if not rule['ACTIONS'] %}
+        <li>
+            {% if rule['ASSIGNORS'] %}
+                <h2 class='h4 meta-heading'>Assignors</h2>
+                {{ display_parties(rule['ASSIGNORS']) }}
+            {% endif %}
+            {% if rule['ASSIGNEES'] %}
+                <h2 class='h4 meta-heading'>Assignees</h2>
+                {{ display_parties(rule['ASSIGNEES']) }}
+            {% endif %}
+        </li>
+    {% endif %}
 {% endmacro %}
 
-{% extends 'browse.html' %}
-{% block title %}
-<h1>Viewing Licence:</h1>
-<h2>{% if title is defined %}{{ title }}{% endif %}</h2>
-{% endblock %}
-{% block info %}
-<table class="table">
-    <col width="150">
-    <tbody>
+{% macro display_parties(parties) %}
+    <ul class="list--style-disc">
+        {% for party in parties %}
+        <li class="small">
+            <a href="{{ url_for('controller.party_register', uri=party['URI']) }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% extends 'layout.html' %}
+{% block content %}
+{% include 'alt_views_bar.html' %}
+<div class="container--sm">
+    <h1>{{ licence['LABEL'] if licence['LABEL'] }}</h1>
+    <h2>Licence Details</h2>
+    <table class="info-table">
         {{ display_linking_attribute('URI', licence['URI']) }}
         {{ display_linking_attribute('Type', licence['TYPE']) }}
         {{ display_attribute('Description', licence['COMMENT']) }}
@@ -43,72 +55,27 @@
         {{ display_linking_attribute('Language', licence['LANGUAGE']) }}
         {{ display_linking_attribute('Same As', licence['SAME_AS']) }}
         {{ display_linking_attribute('See Also', licence['SEE_ALSO']) }}
-    </tbody>
-</table>
-{% endblock %}
-{% block right_column %}
-{% if logo is not none %}<img src="{{ licence['LOGO'] }}" alt="Licence Logo">{% endif %}
-{% endblock %}
-{% block bottom %}
-<h2>Rules</h2>
-{% if not permissions and not duties and not prohibitions %}None{% endif %}
-<ul id="rule-list-template" class="pl-0">
-    {% if permissions %}
-    <li class="list-group-item font-weight-bold active">Permissions</li>
-    <li class="list-group-item">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Action</th>
-                    <th>Assignors</th>
-                    <th>Assignees</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for permission in permissions %}
-                    {{ display_rule(permission) }}
-                {% endfor %}
-            </tbody>
-        </table>
-    </li>
-    {% endif %}
-    {% if duties %}
-    <li class="list-group-item font-weight-bold active">Duties</li>
-    <li class="list-group-item">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Action</th>
-                    <th>Assignors</th>
-                    <th>Assignees</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for duty in duties %}
-                    {{ display_rule(duty) }}
-                {% endfor %}
-            </tbody>
-        </table>
-    </li>
-    {% endif %}
-    {% if prohibitions %}
-    <li class="list-group-item font-weight-bold active">Prohibitions</li>
-    <li class="list-group-item">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Action</th>
-                    <th>Assignors</th>
-                    <th>Assignees</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for prohibition in prohibitions %}
-                    {{ display_rule(prohibition) }}
-                {% endfor %}
-            </tbody>
-        </table>
-    </li>
-    {% endif %}
-</ul>
+        {{ display_linking_attribute('Logo', licence['LOGO']) }}
+    </table>
+    <h2>Licence Rules</h2>
+    {% if not permissions and not duties and not prohibitions %}<h3>None</h3>{% endif %}
+    {% if permissions %}<h3>Permissions</h3>{% endif %}
+    <ul class="list--remove-type list--remove-padding info-list">
+        {% for permission in permissions %}
+            {{ display_rule(permission) }}
+        {% endfor %}
+    </ul>
+    {% if duties %}<h3>Duties</h3>{% endif %}
+    <ul class="list--remove-type list--remove-padding info-list">
+        {% for duty in duties %}
+            {{ display_rule(duty) }}
+        {% endfor %}
+    </ul>
+    {% if prohibitions %}<h3>Prohibitions</h3>{% endif %}
+    <ul class="list--remove-type list--remove-padding info-list">
+        {% for prohibition in prohibitions %}
+            {{ display_rule(prohibition) }}
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

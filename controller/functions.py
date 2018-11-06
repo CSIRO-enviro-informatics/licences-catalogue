@@ -101,7 +101,7 @@ def get_action_uri(label, permitted_actions):
     return None
 
 
-def search_policies(desired_rules):
+def filter_policies(desired_rules, num_results=10):
     policy_uris = db_access.get_all_policies()
     policies = []
     for policy_uri in policy_uris:
@@ -115,17 +115,17 @@ def search_policies(desired_rules):
         # If any policy rule isn't present in the desired rules, add it to the list of extra rules.
         extra_rules = []
         for rule in policy['RULES']:
-            policy_rule_matches_a_desired_rule = False
-            for desired_rule in desired_rules:
-                if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
-                    for action in rule['ACTIONS']:
+            for action in rule['ACTIONS']:
+                policy_rule_matches_a_desired_rule = False
+                for desired_rule in desired_rules:
+                    if rule['TYPE_URI'] == desired_rule['TYPE_URI']:
                         for desired_action in desired_rule['ACTIONS']:
                             if action['URI'] == desired_action['URI']:
                                 policy_rule_matches_a_desired_rule = True
-            if not policy_rule_matches_a_desired_rule:
-                extra_rules.append(rule)
-        # If any desired rule isn't present in the policy's rules, add it to the list of missing rules.
-        missing_rules = []
+                if not policy_rule_matches_a_desired_rule:
+                    extra_rules.append(rule)
+        # If any desired rule isn't present in the policy's rules, skip to next policy
+        policy_has_missing_rules = False
         for desired_rule in desired_rules:
             desired_rule_matches_a_policy_rule = False
             for rule in policy['RULES']:
@@ -135,23 +135,18 @@ def search_policies(desired_rules):
                             if action['URI'] == desired_action['URI']:
                                 desired_rule_matches_a_policy_rule = True
             if not desired_rule_matches_a_policy_rule:
-                missing_rules.append(desired_rule)
+                policy_has_missing_rules = True
+        if policy_has_missing_rules:
+            continue
 
-        # Give the policy a rank based on how many differences it has from the desired rules
-        # Missing requirements count more than extra ones
-        differences_rank = len(extra_rules) + len(missing_rules) * 2
-
-        if differences_rank < 5:  # Don't add policies that are too off-mark
-            results.append({
-                'LABEL': policy['LABEL'],
-                'LINK': url_for('controller.licence_routes', uri=policy['URI']),
-                'MISSING_RULES': missing_rules,
-                'EXTRA_RULES': extra_rules,
-                'DIFFERENCES': differences_rank
-            })
-
+        results.append({
+            'LABEL': policy['LABEL'],
+            'LINK': url_for('controller.licence_routes', uri=policy['URI']),
+            'RULES': policy['RULES'],
+            'DIFFERENCES': len(extra_rules)
+        })
     results.sort(key=lambda x: x['DIFFERENCES'])
-    return results[:10]
+    return results[:num_results]
 
 
 def get_policy_rdf(policy, rules):
@@ -264,12 +259,12 @@ def get_policies_rdf(policies):
     return graph
 
 
-def get_policies_json(policies, title):
+def get_policies_json(policies):
     register_uri = url_for('controller.licence_routes', _external=True)
     policy_json = {
         register_uri: {
             'type': REG + 'Register',
-            'label': title,
+            'label': 'Licence Register',
             'comment': 'This is a register (controlled list) of machine-readable Licenses which are a particular '
                        'type of Policy.',
             'containedItemClass': CREATIVE_COMMONS + 'License'
@@ -300,7 +295,7 @@ def get_actions_rdf(actions):
     graph = Graph()
     graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
     graph.bind('skos', SKOS)
-    register_node = URIRef(url_for('controller.action_routes', _external=True))
+    register_node = URIRef(url_for('controller.action_register', _external=True))
     graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
     graph.add((register_node, RDFS.label, Literal('Action Register')))
     graph.add((
@@ -318,12 +313,12 @@ def get_actions_rdf(actions):
     return graph
 
 
-def get_actions_json(actions, title):
-    register_uri = url_for('controller.action_routes', _external=True)
+def get_actions_json(actions):
+    register_uri = url_for('controller.action_register', _external=True)
     actions_json = {
         register_uri: {
             'type': REG + 'Register',
-            'label': title,
+            'label': 'Action Register',
             'comment': 'This is a register (controlled list) of machine-readable Actions.',
             'containedItemClass': ODRL + 'Action'
         }
@@ -354,7 +349,7 @@ def get_parties_rdf(parties):
     graph = Graph()
     graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
     graph.bind('skos', SKOS)
-    register_node = URIRef(url_for('controller.party_routes', _external=True))
+    register_node = URIRef(url_for('controller.party_register', _external=True))
     graph.add((register_node, RDF.type, URIRef(REG + 'Register')))
     graph.add((register_node, RDFS.label, Literal('Party Register')))
     graph.add((
@@ -374,12 +369,12 @@ def get_parties_rdf(parties):
     return graph
 
 
-def get_party_json(parties, title):
-    register_uri = url_for('controller.party_routes', _external=True)
+def get_party_json(parties):
+    register_uri = url_for('controller.party_register', _external=True)
     parties_json = {
         register_uri: {
             'type': REG + 'Register',
-            'label': title,
+            'label': 'Party Register',
             'comment': party_register_comment,
             'containedItemClass': ODRL + 'Party'
         }

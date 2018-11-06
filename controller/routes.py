@@ -80,18 +80,10 @@ def contact_submit():
         return redirect(url_for('controller.about'))
 
 
-@routes.route('/search')
-def search():
-    actions = db_access.get_all_actions()
-    for action in actions:
-        action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
-    return render_template('search.html', actions=actions, search_url=url_for('controller.search_results'))
-
-
 @routes.route('/_search_results')
 def search_results():
     rules = json.loads(request.args.get('rules'))
-    results = functions.search_policies(rules)
+    results = functions.filter_policies(rules)
     return jsonify(results=results)
 
 
@@ -114,40 +106,33 @@ def licence_routes():
 
 
 def view_licence_list():
-    title = 'Licence Register'
-    policies = []
-    for policy_uri in db_access.get_all_policies():
-        policies.append(db_access.get_policy(policy_uri))
+    licences = [db_access.get_policy(policy_uri) for policy_uri in db_access.get_all_policies()]
+    actions = db_access.get_all_actions()
+    for action in actions:
+        action.update({'LINK': url_for('controller.action_register', uri=action['URI'])})
 
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(functions.get_policies_json(policies, title))
+        return jsonify(functions.get_policies_json(licences))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        policies_rdf = functions.get_policies_rdf(policies).serialize(format='turtle')
+        policies_rdf = functions.get_policies_rdf(licences).serialize(format='turtle')
         return Response(policies_rdf, status=200, mimetype='text/turtle')
     elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        json_ld = functions.get_policies_rdf(policies).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
+        json_ld = functions.get_policies_rdf(licences).serialize(format='json-ld', context=JSON_CONTEXT_POLICIES)
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
-        items = []
-        for policy in policies:
-            items.append({
-                'uri': policy['URI'],
-                'label': policy['LABEL'] if policy['LABEL'] else policy['URI'],
-                'comment': policy['COMMENT'],
-                'link': url_for('controller.licence_routes', uri=policy['URI'])
-            })
-        items = sorted(items, key=lambda item: item['label'].lower())
+        licences = functions.filter_policies([])
         return render_template(
-            'browse_list.html',
-            title=title,
-            items=items,
+            'licence_search.html',
+            licences=licences,
+            actions=actions,
             permalink=conf.PERMALINK_BASE + 'licence/',
             rdf_link=url_for('controller.licence_routes', _format='text/turtle'),
             json_link=url_for('controller.licence_routes', _format='application/json'),
-            json_ld_link=url_for('controller.licence_routes', _format='application/ld+json')
+            json_ld_link=url_for('controller.licence_routes', _format='application/ld+json'),
+            search_url=url_for('controller.search_results')
         )
 
 
@@ -186,12 +171,10 @@ def view_licence(policy_uri):
                 prohibitions.append(rule)
         return render_template(
             'view_licence.html',
-            title=policy['LABEL'],
             permalink=conf.PERMALINK_BASE + 'licence/?uri=' + policy_uri,
             rdf_link=url_for('controller.licence_routes', _format='text/turtle', uri=policy_uri),
             json_link=url_for('controller.licence_routes', _format='application/json', uri=policy_uri),
             json_ld_link=url_for('controller.licence_routes', _format='application/ld+json', uri=policy_uri),
-            logo=policy['LOGO'],
             licence=policy,
             permissions=permissions,
             duties=duties,
@@ -201,29 +184,19 @@ def view_licence(policy_uri):
 
 @routes.route('/action/index.json')
 def view_action_list_json():
-    redirect_url = '/action/?_format=application/json'
-    uri = request.values.get('uri')
-    if uri is not None:
-        redirect_url += '&uri=' + uri
-    return redirect(redirect_url)
+    return redirect('/action/?_format=application/json')
 
 
 @routes.route('/action/')
-def action_routes():
+def action_register():
     action_uri = request.values.get('uri')
-    if action_uri is None:
-        return view_actions_list()
-    else:
-        return view_action(action_uri)
-
-
-def view_actions_list():
-    title = 'Action Register'
+    if action_uri:
+        return redirect(url_for('controller.action_register') + '#' + action_uri)
     actions = db_access.get_all_actions()
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(functions.get_actions_json(actions, title))
+        return jsonify(functions.get_actions_json(actions))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         actions_rdf = functions.get_actions_rdf(actions).serialize(format='turtle')
         return Response(actions_rdf, status=200, mimetype='text/turtle')
@@ -232,58 +205,26 @@ def view_actions_list():
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
-        items = []
+        action_groups = {}
         for action in actions:
-            items.append({
-                'label': action['LABEL'] if action['LABEL'] else action['URI'],
-                'uri': action['URI'],
-                'comment': action['DEFINITION'],
-                'link': url_for('controller.action_routes', uri=action['URI'])
-            })
-        items = sorted(items, key=lambda item: item['label'].lower())
+            if not action['LABEL']:
+                action['LABEL'] = action['URI']
+            first_char = action['LABEL'][0].upper()
+            licences_using_action = db_access.get_policies_using_action(action['URI'])
+            action['LICENCES'] = sorted(licences_using_action, key=lambda x: x['LABEL'].lower())
+            if first_char in action_groups:
+                action_groups[first_char].append(action)
+            else:
+                action_groups[first_char] = [action]
+        for group in action_groups:
+            action_groups[group].sort(key=lambda x: x['LABEL'].lower())
         return render_template(
-            'browse_list.html',
-            title=title,
-            items=items,
+            'action_register.html',
+            action_groups=action_groups,
             permalink=conf.PERMALINK_BASE + 'action/',
-            rdf_link=url_for('controller.action_routes', _format='text/turtle'),
-            json_link=url_for('controller.action_routes', _format='application/json'),
-            json_ld_link=url_for('controller.action_routes', _format='application/ld+json')
-        )
-
-
-def view_action(action_uri):
-    try:
-        action = db_access.get_action(action_uri)
-    except ValueError:
-        abort(404)
-        return
-    # Respond according to preferred media type
-    preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
-    if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify({action['URI']: {'label': action['LABEL'], 'definition': action['DEFINITION']}})
-    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        return Response(functions.get_action_rdf(action).serialize(format='turtle'), status=200, mimetype='text/turtle')
-    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        json_ld = functions.get_action_rdf(action).serialize(format='json-ld', context=JSON_CONTEXT_ACTIONS)
-        return Response(json_ld, status=200, mimetype='application/json')
-    else:
-        # Display as HTML
-        policies = db_access.get_policies_using_action(action_uri)
-        if action['LABEL'] is None:
-            action['LABEL'] = action['URI']
-        for policy in policies:
-            if policy['LABEL'] is None:
-                policy['LABEL'] = policy['URI']
-        policies = sorted(policies, key=lambda rule: rule['LABEL'].lower())
-        return render_template(
-            'view_action.html',
-            permalink=conf.PERMALINK_BASE + 'action/?uri=' + action_uri,
-            rdf_link=url_for('controller.action_routes', _format='text/turtle', uri=action_uri),
-            json_link=url_for('controller.action_routes', _format='application/json', uri=action_uri),
-            json_ld_link=url_for('controller.action_routes', _format='application/ld+json', uri=action_uri),
-            action=action,
-            licences=policies
+            rdf_link=url_for('controller.action_register', _format='text/turtle'),
+            json_link=url_for('controller.action_register', _format='application/json'),
+            json_ld_link=url_for('controller.action_register', _format='application/ld+json')
         )
 
 
@@ -305,9 +246,11 @@ def create_licence_form():
     actions.sort(key=lambda x: (x['LABEL'] is None, x['LABEL']))
     parties.sort(key=lambda x: (x['LABEL'] is None, x['LABEL']))
     for action in actions:
-        action.update({'LINK': url_for('controller.action_routes', uri=action['URI'])})
+        action['LINK'] = url_for('controller.action_register', uri=action['URI'])
     for party in parties:
-        party.update({'LINK': url_for('controller.party_routes', uri=party['URI'])})
+        party['LINK'] = url_for('controller.party_register', uri=party['URI'])
+        if not party['LABEL']:
+            party['LABEL'] = party['URI']
     return render_template('create_licence.html', actions=actions, parties=parties,
                            search_url=url_for('controller.search_results'))
 
@@ -331,24 +274,21 @@ def create_licence():
     return redirect(url_for('controller.licence_routes', uri=uri))
 
 
+@routes.route('/party/index.json')
+def view_party_list_json():
+    return redirect('/party/?_format=application/json')
+
+
 @routes.route('/party/')
-def party_routes():
+def party_register():
     party_uri = request.values.get('uri')
-    if party_uri is None:
-        return view_party_list()
-    else:
-        return view_party(party_uri)
-
-
-def view_party_list():
-    title = 'Party Register'
-    subtitle = 'This register only contains Parties currently used by Licences in the Licence Register. Other ' \
-               'available Parties are excluded for brevity.'
+    if party_uri:
+        return redirect(url_for('controller.party_register') + '#' + party_uri)
     parties = db_access.get_all_parties()
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(functions.get_party_json(parties, title))
+        return jsonify(functions.get_party_json(parties))
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         parties_rdf = functions.get_parties_rdf(parties).serialize(format='turtle')
         return Response(parties_rdf, status=200, mimetype='text/turtle')
@@ -357,62 +297,29 @@ def view_party_list():
         return Response(json_ld, status=200, mimetype='application/json')
     else:
         # Display as HTML
-        items = []
+        party_groups = {}
         for party in parties:
-            items.append({
-                'label': party['LABEL'] if party['LABEL'] else party['URI'],
-                'uri': party['URI'],
-                'comment': party['COMMENT'],
-                'link': url_for('controller.party_routes', uri=party['URI'])
-            })
-        items = sorted(items, key=lambda item: item['label'].lower())
+            if not party['LABEL']:
+                party['LABEL'] = party['URI']
+            rules_involving_party = db_access.get_rules_for_party(party['URI'])
+            licences_involving_party = []
+            for rule_involving_party in rules_involving_party:
+                licences_involving_party.extend(db_access.get_policies_for_rule(rule_involving_party))
+            party['LICENCES'] = sorted(licences_involving_party, key=lambda x: x['LABEL'].lower())
+            first_char = party['LABEL'][0].upper()
+            if first_char in party_groups:
+                party_groups[first_char].append(party)
+            else:
+                party_groups[first_char] = [party]
+        for group in party_groups:
+            party_groups[group].sort(key=lambda x: x['LABEL'].lower())
         return render_template(
-            'browse_list.html',
-            title=title,
-            subtitle=subtitle,
-            items=items,
+            'party_register.html',
+            party_groups=party_groups,
             permalink=conf.PERMALINK_BASE + 'party/',
-            rdf_link=url_for('controller.party_routes', _format='text/turtle'),
-            json_link=url_for('controller.party_routes', _format='application/json'),
-            json_ld_link=url_for('controller.party_routes', _format='application/ld+json')
-        )
-
-
-def view_party(party_uri):
-    try:
-        party = db_access.get_party(party_uri)
-    except ValueError:
-        abort(404)
-        return
-    # Respond according to preferred media type
-    preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
-    if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify({party['URI']: {'label': party['LABEL'], 'comment': party['COMMENT']}})
-    elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
-        return Response(functions.get_party_rdf(party).serialize(format='turtle'), status=200, mimetype='text/turtle')
-    elif preferred_media_type == 'application/ld+json' or request.values.get('_format') == 'application/ld+json':
-        json_ld = functions.get_party_rdf(party).serialize(format='json-ld', context=JSON_CONTEXT_PARTIES)
-        return Response(json_ld, status=200, mimetype='application/json')
-    else:
-        # Display as HTML
-        rules = db_access.get_rules_for_party(party_uri)
-        policies = []
-        for rule in rules:
-            policies.extend(db_access.get_policies_for_rule(rule))
-        if party['LABEL'] is None:
-            party['LABEL'] = party['URI']
-        for policy in policies:
-            if policy['LABEL'] is None:
-                policy['LABEL'] = policy['URI']
-        policies = sorted(policies, key=lambda rule: rule['LABEL'].lower())
-        return render_template(
-            'view_party.html',
-            permalink=conf.PERMALINK_BASE + 'party/?uri=' + party_uri,
-            rdf_link=url_for('controller.party_routes', _format='text/turtle', uri=party_uri),
-            json_link=url_for('controller.party_routes', _format='application/json', uri=party_uri),
-            json_ld_link=url_for('controller.party_routes', _format='application/ld+json', uri=party_uri),
-            party=party,
-            licences=policies
+            rdf_link=url_for('controller.party_register', _format='text/turtle'),
+            json_link=url_for('controller.party_register', _format='application/json'),
+            json_ld_link=url_for('controller.party_register', _format='application/ld+json')
         )
 
 
@@ -421,13 +328,13 @@ def view_object():
     # Route for viewing something by URI, regardless of whether it is a licence, action, party, etc.
     object_uri = request.values.get('uri')
     if object_uri is None:
-        flash('Please supply a URI to view an object.', category='error')
+        flash(('Object not found', 'Please supply a URI to view an object.'), category='error')
         return redirect(url_for('controller.home'))
     else:
         if db_access.policy_exists(object_uri):
             return redirect(url_for('controller.licence_routes', uri=object_uri))
         if db_access.action_exists(object_uri):
-            return redirect(url_for('controller.action_routes', uri=object_uri))
+            return redirect(url_for('controller.action_register', uri=object_uri))
         if db_access.party_exists(object_uri):
-            return redirect(url_for('controller.party_routes', uri=object_uri))
+            return redirect(url_for('controller.party_register', uri=object_uri))
         abort(404)

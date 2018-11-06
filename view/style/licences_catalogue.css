@@ -1,0 +1,327 @@
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100%;
+    position: relative;
+}
+
+.header-nav__primary {
+    background: url(https://style.csiro.au/assets/img/header--dark-blue-band.svg) no-repeat 0 0;
+    background-position-x: 50px;
+}
+
+.header__bg__s4 {
+    height: 47px;
+    background-color: #007B97;
+}
+
+.logo__container {
+    background: url(http://author-uat.csiro.au/sg/assets/media/style_guide/styleguide_Curve.svg) no-repeat 0 0;
+    background-size: 800px 390px;
+    background-position: -395px -149px;
+    left: -50px;
+}
+
+.logo__image {
+    height: 60px;
+    width: 60px;
+}
+
+.nav-logos {
+    position: absolute;
+    top: 15%;
+    left: 80px;
+    width: 100%;
+}
+
+.nav-title {
+    width: 100px;
+    padding-left: 10px;
+}
+
+.alt-heading-format {
+    color: #565859;
+}
+
+.list--inline li {
+    vertical-align: middle;
+    padding-bottom: 2px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer__primary {
+    padding: 1rem 15px 1rem;
+    text-align: center;
+}
+
+footer .footer__links {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.lead {
+    color: #666;
+    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 1.86667rem;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.icon-grid__item {
+    width: 25%;
+}
+
+.noflex {
+    display: block;
+}
+
+h3.alt-heading-format {
+    font-weight: 500;
+}
+
+.btn--flat {
+    padding: 3px 20px 3px 20px;
+}
+
+.btn--tab {
+    height: 33px;
+    border-right: none;
+}
+
+.btn-group .btn {
+    padding: 3px 10px 3px 10px;
+}
+
+.btn--primary {
+    background: #007B97;
+    border-color: #007B97;
+}
+
+.rule-box {
+    border: 1px solid #8e9090;
+    padding: 10px;
+}
+
+.tooltip {
+    opacity: 1 !important;
+}
+
+.tooltip .arrow::before{
+    border-bottom-color: #0093B5;
+}
+
+.tooltip-inner{
+    background-color: #edf7fa;
+    color: black;
+    border-color: #0093B5 !important;
+    border: solid 1px;
+}
+
+.card.card__block {
+    margin: 1.5em 0 1.5em 0;
+}
+
+.modal-dialog {
+    max-width: 650px;
+}
+
+.modal-content {
+    border-style: none;
+}
+
+.modal-header {
+    background-color: #007B97;
+}
+
+.modal-title {
+    color: white;
+}
+
+.modal-header .close {
+    opacity: 1;
+    height: 2.5rem;
+    width: 2.5rem;
+    right: -5px;
+    top: 0;
+    color: #007B97;
+    background-color: white;
+    padding: 0;
+}
+
+.modal-footer {
+    justify-content: flex-start;
+}
+
+.danger {
+    color: #E40028;
+}
+
+.form--remove-bottom {
+    margin-bottom: 0;
+}
+
+.card__summary p {
+    margin-bottom: 0;
+}
+
+.alt-views-bar {
+    position: relative;
+    top: -53px;
+    justify-content: flex-end;
+    display: flex;
+}
+.alt-views-bar ul {
+    background-color: #FAFAFA;
+    border-color: #e8e9e9;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 3px;
+    padding: 10px;
+}
+
+li.permalink-box {
+    border: 1px;
+    border-style: solid;
+    border-color: #8e9090;
+    border-radius: 3px;
+    padding: 2px;
+}
+.permalink-box input {
+    border-style: none;
+    margin-right: 5px;
+    color: #007B97;
+    background-color: inherit;
+}
+.permalink-box .btn {
+    border-radius: 3px;
+    float: right;
+    padding: 3px 6px;
+    margin: 1px;
+}
+.permalink-box svg {
+    color: #2d3031;
+}
+
+.info-table {
+    border-style: none;
+    background-color: #FAFAFA;
+}
+
+.info-table th {
+    font-weight: bold;
+}
+
+.info-table tr {
+    border-color: white;
+    border-width: 5px;
+}
+
+.list--style-disc li {
+    list-style-type: disc;
+}
+
+.meta-heading {
+    margin-top: 0.4rem;
+}
+
+.info-list li {
+    background-color: #FAFAFA;
+    padding: 10px;
+}
+
+.card--padding-large {
+    padding: 20px;
+}
+
+.accordion .card {
+    margin-bottom: 15px;
+}
+
+.accordion .card-header {
+    background-color: #007B97;
+    padding: 8px;
+    padding-top: 23px;
+}
+
+.accordion .card-header h2 {
+    color: white;
+}
+
+.with-grey-border {
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.accordion .card-header li {
+    padding: 0px 8px 0px 8px;
+    margin: 0;
+}
+
+.accordion .card-header[aria-expanded=true] {
+    background-color: #335a63;
+}
+
+select {
+    background-image: linear-gradient(45deg,transparent 50%,gray 50%),linear-gradient(135deg,gray 50%,transparent 50%),linear-gradient(to right,transparent,transparent);
+    background-size: 5px 5px,5px 5px,1px 1.5em;
+    background-repeat: no-repeat;
+    background-position: calc(100% - 20px) calc(1em + 2px),calc(100% - 15px) calc(1em + 2px),calc(100% - 2.5em) .5em;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.form-control:focus {
+    box-shadow: none;
+}
+.party-select-group {
+    border: 1px solid black;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.party-select-group .list-group-item {
+    border: none;
+    padding: 0 .8rem;
+    line-height: 2.4rem;
+}
+
+.party-select-group .list-group-item:last-child {
+    border: none;
+    border-bottom: 1px solid #565859;
+    border-radius: 0;
+}
+
+.form-group .party-select-group select {
+    border: none;
+    padding: 0 .5rem;
+}
+
+.floatright {
+    float: right;
+}
+
+.licence-grid {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.licence-grid .card {
+    width: 32%;
+}
+
+.extendfull {
+    padding-right: 3000px;
+    margin-right: -3000px;
+    padding-left: 3000px;
+    margin-left: -3000px;
+    background-color: #FAFAFA;
+}

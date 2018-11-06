@@ -1,0 +1,47 @@
+.ci {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+    fill: currentColor
+}
+
+.ci--inline {
+    display: inline-block;
+    font-size: inherit;
+    height: 13px;
+    width: 13px;
+    overflow: visible;
+    vertical-align: middle;
+    color: #007B97;
+}
+
+.ci--spaced {
+    width: 2em;
+}
+
+.ci--fw {
+    text-align: center;
+    width: 3em
+}
+
+.ci--small {
+    width: 16px;
+    height: 16px;
+}
+
+.ci--med {
+    width: 60px;
+    height: 80px;
+}
+
+.btn .ci {
+    color: inherit;
+}
+
+.svg__solid__times {
+    vertical-align: -10%;
+}

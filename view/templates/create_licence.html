@@ -1,56 +1,64 @@
 {% macro rule_modal(type, uri) %}
     <div id="add{{ type|capitalize }}Modal" class="modal add-rule-modal fade" data-rule-type="{{ uri }}" tabindex="-1" role="dialog" aria-labelledby="{{ type }}ModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content text-center">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="{{ type }}ModalTitle">Add Rule: {{ type|capitalize }}</h5>
+                    <h3 class="modal-title alt-heading-format" id="{{ type }}ModalTitle">Add {{ type|capitalize }} Rule</h3>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="input-group mb-4">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="add-{{ type }}-select">
-                                Action
-                                <i class="fas fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Action</strong></div>An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or made mandatory by Duties."></i>
-                            </label>
-                        </div>
-                        <select id="add-{{ type }}-select" class="form-control action-select {{ type }}">
-                            <option data-action-uri="" data-action-link=""></option>
-                            {% for action in actions %}
-                            <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">{{ action['LABEL'] }}</option>
+                <div class="modal-body form-group form-group--complete field--full-width">
+                    <label for="add-{{ type }}-action-select" class="emphasis--semi">
+                        Action: <span class="danger">*</span>
+                    </label>
+                    <select id="add-{{ type }}-action-select" class="form-control action-select">
+                        {% for action in actions %}
+                        <option data-action-uri="{{ action['URI'] }}" data-action-link="{{ action['LINK'] }}">
+                            {{ action['LABEL'] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <p class="small">
+                        An operation on an Asset. Actions may be allowed by Permissions, disallowed by Prohibitions, or
+                        made mandatory by Duties.
+                    </p>
+                    <label for="add-{{ type }}-assignor-select" class="emphasis--semi">Assignors:</label>
+                    <div class="party-select-group">
+                        <ul class="list-group assignor-list"></ul>
+                        <select id="add-{{ type }}-assignor-select" class="form-control party-select">
+                            <option selected>Select assignor ...</option>
+                            {% for party in parties %}
+                            <option data-uri="{{ party['URI'] }}" data-link="{{ party['LINK'] }}" data-comment="{{ party['COMMENT'] }}">
+                                {{ party['LABEL'] }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
-                    <ul class="list-group assignor-list">
-                        <li class="list-group-item font-weight-bold active">
-                            <label for="{{ type }}-assignor-input">Assignors</label>
-                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignors</strong></div>An Assignor is an issuer of the Rule. An Assignor could be a person, group of people, organisation or agent."></i>
-                        </li>
-                    </ul>
-                    <select class="form-control party-select mb-2" id="{{ type }}-assignor-input">
-                        <option selected></option>
-                        {% for party in parties %}
-                        <option value="{{ party['URI'] }}" data-comment="{{ party['COMMENT'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
-                        {% endfor %}
-                    </select>
-                    <ul class="list-group assignee-list">
-                        <li class="list-group-item font-weight-bold active">
-                            <label for="{{ type }}-assignee-input">Assignees</label>
-                            <i class="fas fa-lg fa-question-circle pl-1 pt-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Assignees</strong></div>An Assignee is a recipient of the Rule. An Assignee could be a person, group of people, organisation or agent."></i>
-                        </li>
-                    </ul>
-                    <select class="form-control party-select mt-0 mb-1" id="{{ type }}-assignee-input">
-                        <option selected></option>
-                        {% for party in parties %}
-                        <option value="{{ party['URI'] }}" data-comment="{{ party['COMMENT'] }}">{{ party['LABEL'] if party['LABEL'] else party['URI'] }}</option>
-                        {% endfor %}
-                    </select>
+                    <p class="small">
+                        An Assignor is an issuer of the Rule. An Assignor could be a person, group of people,
+                        organisation, or agent.
+                    </p>
+                    <label for="add-{{ type }}-assignor-select" class="emphasis--semi">Assignees:</label>
+                    <div class="party-select-group">
+                        <ul class="list-group assignee-list"></ul>
+                        <select id="add-{{ type }}-assignee-select" class="form-control party-select">
+                            <option selected>Select assignee ...</option>
+                            {% for party in parties %}
+                            <option data-uri="{{ party['URI'] }}" data-link="{{ party['LINK'] }}" data-comment="{{ party['COMMENT'] }}">
+                                {{ party['LABEL'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="small">
+                        An Assignee is a recipient of the Rule. An Assignee could be a person, group of people,
+                        organisation or agent.
+                    </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary add-rule" data-dismiss="modal">Add</button>
+                    <button type="button" class="btn btn--primary add-rule" data-dismiss="modal">Add Rule</button>
+                    <button type="button" class="btn btn--primary--outline" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -58,88 +66,136 @@
 {% endmacro %}
 {% extends 'layout.html' %}
 {% block content %}
-    <h1 class="text-center">Create a Licence</h1>
-    <ul class="nav nav-pills justify-content-center nav-justified ml-5 mr-5 mt-3">
-        <li class="nav-item">
-            <a class="nav-link active" data-toggle="pill" href="#step-1">Select Rules</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link search-button" data-toggle="pill" href="#step-2">Suggested Licences</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="pill" href="#step-3">Licence Info</a>
-        </li>
-    </ul>
-    <div class="tab-content mt-3 mb-5">
-        <div class="tab-pane fade show active" id="step-1">
-            <h2 class="text-center">Select your rules</h2>
-            <ul id="rule-list" class="list-group ml-5 mr-5"></ul>
-            <div class="text-center mt-5">
-                <button type="button" class="btn btn-primary w-200 previous-button mr-3" disabled="disabled">
-                    <i class="fa fa-chevron-left"></i> Back
-                </button>
-                <button type="button" class="btn btn-primary w-200 next-button search-button ml-3">
-                    Continue <i class="fa fa-chevron-right"></i>
-                </button>
+<h1>Create a Licence</h1>
+<div class="section--small">
+    <div class="accordion" id="create-licence-accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <ul class="list--inline">
+                    <li><h2>1</h2></li>
+                    <li class="with-grey-border"><h2>Select Rules</h2></li>
+                </ul>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#create-licence-accordion">
+                <div class="card-body">
+                    <div id="filter-rule-list" class="hd--alternate--grey">
+                        <div class="section--small">
+                            <h3 class="alt-heading-format">Permissions</h3>
+                            <p class="small">A Permission Rule grants the ability to perform an Action on an Asset.</p>
+                            <ul class="rule-section list--remove-type list--remove-padding" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></ul>
+                            <button class="btn btn--primary btn--flat" data-toggle="modal" data-target="#addPermissionModal">
+                                <svg class="ci ci--xs ci--inline svg__solid__plus">
+                                    <use href="#svg__solid__plus"></use>
+                                </svg>
+                                Add
+                            </button>
+                        </div>
+                        <div class="section--small">
+                            <h3 class="alt-heading-format">Duties</h3>
+                            <p class="small">A Duty Rule states an obligation to perform an Action on an Asset.</p>
+                            <ul class="rule-section list--remove-type list--remove-padding" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></ul>
+                            <button class="btn btn--primary btn--flat" data-toggle="modal" data-target="#addDutyModal">
+                                <svg class="ci ci--xs ci--inline svg__solid__plus">
+                                    <use href="#svg__solid__plus"></use>
+                                </svg>
+                                Add
+                            </button>
+                        </div>
+                        <div class="section--small">
+                            <h3 class="alt-heading-format">Prohibitions</h3>
+                            <p class="small">A Prohibition Rule states an inability to perform an Action on an Asset.</p>
+                            <ul class="rule-section list--remove-type list--remove-padding" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></ul>
+                            <button class="btn btn--primary btn--flat" data-toggle="modal" data-target="#addProhibitionModal">
+                                <svg class="ci ci--xs ci--inline svg__solid__plus">
+                                    <use href="#svg__solid__plus"></use>
+                                </svg>
+                                Add
+                            </button>
+                        </div>
+                        <div class="section--small">
+                            <button class="btn btn--primary search-button" data-toggle="collapse" data-target="#collapseTwo">Continue to Next Step</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="step-2">
-            <div id="results"></div>
-            <div class="text-center mt-5">
-                <button type="button" class="btn btn-primary w-200 previous-button mr-3">
-                    <i class="fa fa-chevron-left"></i> Back
-                </button>
-                <button type="button" class="btn btn-primary w-200 next-button ml-3">
-                    Create New Licence <i class="fa fa-chevron-right"></i>
-                </button>
+        <div class="card">
+            <div class="card-header search-button" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <ul class="list--inline">
+                    <li><h2>2</h2></li>
+                    <li class="with-grey-border"><h2>Suggested Licences</h2></li>
+                </ul>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#create-licence-accordion">
+                <div class="card-body section--small container">
+                    <div id="licences-found" hidden>
+                        <h3 class="text-center">Please consider reusing a licence.</h3>
+                        <h3 class="text-center">The following licences are similar to your requirements.</h3>
+                    </div>
+                    <div id="licences-not-found" hidden>
+                        <h3 class="text-center">There are no appropriate existing licences to re-use.</h3>
+                        <h3 class="text-center">Please continue with creating a new licence.</h3>
+                    </div>
+                    <div id="licence-list" class="licence-grid"></div>
+                    <div class="section--small">
+                        <ul class="list--inline">
+                            <li><button class="btn btn--primary--outline" data-toggle="collapse" data-target="#collapseOne">< Back</button></li>
+                            <li><button class="btn btn--primary" data-toggle="collapse" data-target="#collapseThree">Create a New Licence</button></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="step-3">
-            <form id="licence-create-form" method="post">
-                <table class="table">
-                    <col width="150">
-                    <tbody>
-                        <tr>
-                            <th><label for="label">Licence Name:</label></th>
-                            <td><input id="label" name="label" type="text" required/></td>
-                        </tr>
-                        <tr>
-                            <th><label for="comment">Description:</label></th>
-                            <td><textarea id="comment" name="comment"></textarea></td>
-                        </tr>
-                        <tr>
-                            <th><label for="creator">Creator:</label></th>
-                            <td><input id="creator" name="creator" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
-                        </tr>
-                        <tr>
-                            <th><label for="status">Status:</label></th>
-                            <td>
-                                <select id="status" name="status">
-                                    <option value="">None</option>
-                                    <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/accepted">Accepted</option>
-                                    <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/deprecated">Deprecated</option>
-                                    <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/experimental">Experimental</option>
-                                    <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/reserved">Reserved</option>
-                                    <option value="http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted">Submitted</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="version">Version:</label></th>
-                            <td><input id="version" name="has_version" type="text"/></td>
-                        </tr>
-                        <tr>
-                            <th><label for="jurisdiction">Jurisdiction:</label></th>
-                            <td><input id="jurisdiction" name="jurisdiction" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
-                        </tr>
-                        <tr>
-                            <th><label for="legal_code">Legal Code:</label></th>
-                            <td><input id="legal_code" name="legal_code" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
-                        </tr>
-                        <tr>
-                            <th><label for="language">Language:</label></th>
-                            <td>
-                                <select id="language" name="language" required>
+        <div class="card">
+            <div class="card-header" id="headingThree" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                <ul class="list--inline">
+                    <li><h2>3</h2></li>
+                    <li class="with-grey-border"><h2>Licence Info</h2></li>
+                </ul>
+            </div>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#create-licence-accordion">
+                <div class="card-body container">
+                    <form id="licence-create-form" method="post">
+                        <div class="row">
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="label">Licence Name</label>
+                                <input class="form-control" type="text" id="label" name="label" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="comment">Description</label>
+                                <textarea class="form-control" id="comment" name="comment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="creator">Creator</label>
+                                <input class="form-control" id="creator" name="creator" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            </div>
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="logo">Logo</label>
+                                <input class="form-control" id="logo" name="logo" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="version">Version</label>
+                                <input class="form-control" id="version" name="has_version"/>
+                            </div>
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="jurisdiction">Jurisdiction</label>
+                                <input class="form-control" id="jurisdiction" name="jurisdiction" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="legal_code">Legal Code</label>
+                                <input class="form-control" id="legal_code" name="legal_code" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            </div>
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="language">Language</label>
+                                <select class="form-control" id="language" name="language" required>
                                     <option value="http://www.lexvo.org/page/iso639-3/afr">Afrikanns</option>
                                     <option value="http://www.lexvo.org/page/iso639-3/sqi">Albanian</option>
                                     <option value="http://www.lexvo.org/page/iso639-3/ara">Arabic</option>
@@ -211,122 +267,85 @@
                                     <option value="http://www.lexvo.org/page/iso639-3/cym">Welsh</option>
                                     <option value="http://www.lexvo.org/page/iso639-3/xho">Xhosa</option>
                                 </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="same_as">Same As:</label></th>
-                            <td><input id="same_as" name="same_as" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
-                        </tr>
-                        <tr>
-                            <th><label for="see_also">See Also:</label></th>
-                            <td><input id="see_also" name="see_also" type="text" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="text-center mt-5">
-                    <button type="button" class="btn btn-primary w-200 previous-button search-button mr-3">
-                        <i class="fa fa-chevron-left"></i> Back
-                    </button>
-                    <input type="submit" class="btn btn-primary w-200" value="Create Licence"/>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="results-template" hidden>
-        <div id="licences-found" hidden>
-            <h3 class="text-center">Please consider reusing a licence.</h3>
-            <h3 class="text-center">The following licences are similar to your requirements.</h3>
-        </div>
-        <div id="licences-not-found" hidden>
-            <h3 class="text-center">There are no appropriate existing licences to re-use.</h3>
-            <h3 class="text-center">Please continue with creating a new licence.</h3>
-        </div>
-    </div>
-    <div id="licence-template" hidden>
-        <div class="card text-center">
-            <div class="card-header mouseover" data-toggle="collapse" data-target="#licence-1">
-                <strong class="mb-0">Licence #1</strong>
-            </div>
-            <div id="licence-1" class="collapse">
-                <div class="card-body">
-                    <strong hidden>This licence has these <span class="text-info">extra rules</span></strong>
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr hidden>
-                                <th>Permissions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr hidden>
-                                <th>Duties</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr hidden>
-                                <th>Prohibitions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <strong hidden>This licence has these <span class="text-warning">missing rules</span></strong>
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr hidden>
-                                <th>Permissions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr hidden>
-                                <th>Duties</th>
-                                <td class="text-left"></td>
-                            </tr>
-                            <tr hidden>
-                                <th>Prohibitions</th>
-                                <td class="text-left"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a target="_blank" href="#!" type="button" class="btn btn-primary w-200">See Licence</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="same_as">Same As</label>
+                                <input class="form-control" id="same_as" name="same_as" pattern="\w+:(\/?\/?)[^\s]+" title="URI"//>
+                            </div>
+                            <div class="form-group form-group--complete">
+                                <label class="control-label" for="see_also">See Also</label>
+                                <input class="form-control" id="see_also" name="see_also" pattern="\w+:(\/?\/?)[^\s]+" title="URI"/>
+                            </div>
+                        </div>
+                        <div class="hd--grey"></div>
+                        <div class="section--small text-center">
+                            <ul class="list--inline">
+                                <li><button class="btn btn--primary--outline search-button" data-toggle="collapse" data-target="#collapseTwo">< Back</button></li>
+                                <li><button class="btn btn--primary" type="submit"><svg class="ci svg__solid__magic ci--inline ci--small"><use href="#svg__solid__magic"></use></svg> Create Licence</button></li>
+                            </ul>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    <ul id="rule-list-template" hidden>
-        <li class="list-group-item font-weight-bold active">Filter:</li>
-        <li id="permission-header" class="list-group-item font-weight-bold">
-            Permissions
-            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Permission Rule</strong></div>A Permission Rule grants the ability to perform an Action on an Asset."></span>
-            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addPermissionModal"></span>
-        </li>
-        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></div>
-        <li id="duty-header" class="list-group-item font-weight-bold">
-            Duties
-            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Duty Rule</strong></div>A Duty Rule states an obligation to perform an Action on an Asset."></span>
-            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addDutyModal"></span>
-        </li>
-        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/duty"></div>
-        <li id="prohibition-header" class="list-group-item font-weight-bold">
-            Prohibitions
-            <span class="fas fa-question-circle p-1" data-toggle="tooltip" data-placement="right" data-html="true" title="<div><strong>Add a Prohibition Rule</strong></div>A Prohibition Rule states an inability to perform an Action on an Asset."></span>
-            <span class="fas fa-plus fa-lg success floatright" data-toggle="modal" data-target="#addProhibitionModal"></span>
-        </li>
-        <div class="list-end-section" data-rule-type="http://www.w3.org/ns/odrl/2/prohibition"></div>
-    </ul>
-    <div id="rule-item-template" hidden>
-        <li class="list-group-item" data-rule-type="" data-action-uri="">
-            <div class="ml-3">
-                <a target="_blank" href="">Rule Label</a>
-                <span class="fas fa-times fa-lg danger delete-rule-item ml-1"></span>
+</div>
+<div id="rule-item-template" hidden>
+    <li class="rule-item">
+        <div class="btn-group">
+            <button class="btn btn--primary--outline btn--flat delete-rule">
+                <svg class="ci ci--xs ci--inline svg__solid__times">
+                    <use href="#svg__solid__times"></use>
+                </svg>
+            </button>
+            <a class="btn btn--primary--outline btn--flat" target="_blank" href="#!">
+                <span class="action-label">Action</span>
+            </a>
+        </div>
+    </li>
+</div>
+<div id="rule-item-with-parties-template" hidden>
+    <li class="rule-item">
+        <div class="btn-group">
+            <button class="btn btn--primary--outline btn--tab delete-rule">
+                <svg class="ci ci--xs ci--inline svg__solid__times">
+                    <use href="#svg__solid__times"></use>
+                </svg>
+            </button>
+            <div class="rule-box">
+                <a class="reversed action-label" href="#!" target="_blank">Action</a>
+                <h2 class='h4 meta-heading assignors-heading' hidden>Assignors</h2>
+                <ul class="list--style-disc"></ul>
+                <h2 class='h4 meta-heading assignees-heading' hidden>Assignees</h2>
+                <ul class="list--style-disc"></ul>
             </div>
-            <div class="ml-4 assignors" hidden></div>
-            <div class="ml-4 assignees" hidden></div>
-        </li>
-    </div>
-    <div id="party-item-template" hidden>
-        <li class="list-group-item p-1">
-            <div class="list-group-item-label pl-1" data-uri=""></div>
-            <span class="fas fa-times text-danger delete-party-item floatright p-1"></span>
-        </li>
-    </div>
-    {{ rule_modal('permission', 'http://www.w3.org/ns/odrl/2/permission') }}
-    {{ rule_modal('duty', 'http://www.w3.org/ns/odrl/2/duty') }}
-    {{ rule_modal('prohibition', 'http://www.w3.org/ns/odrl/2/prohibition') }}
-    <div id="search-url" data-url="{{ search_url }}" hidden></div>
+        </div>
+    </li>
+</div>
+<div id="party-item-template" hidden>
+    <li class="list-group-item">
+        <span class="list-group-item-label" data-uri=""></span>
+        <span class="floatright">
+            <svg class="ci ci--inline ci--small svg__solid__times delete-party-item">
+                <use href="#svg__solid__times"></use>
+            </svg>
+        </span>
+    </li>
+</div>
+<div id="licence-item-template" hidden>
+    <a href="#" target="_blank" class="card card__block card--white">
+        <h3 class="card__title more-link__last-word">Licence Title</h3>
+        <div class="card__summary">
+            <p hidden><span class="emphasis">Permissions: </span><span></span></p>
+            <p hidden><span class="emphasis">Duties: </span><span></span></p>
+            <p hidden><span class="emphasis">Prohibitions: </span><span></span></p>
+        </div>
+    </a>
+</div>
+<div id="search-url" data-url="{{ search_url }}" hidden></div>
+{{ rule_modal('permission', 'http://www.w3.org/ns/odrl/2/permission') }}
+{{ rule_modal('duty', 'http://www.w3.org/ns/odrl/2/duty') }}
+{{ rule_modal('prohibition', 'http://www.w3.org/ns/odrl/2/prohibition') }}
 {% endblock %}
