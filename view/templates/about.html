@@ -22,6 +22,7 @@
                 <h2>Contact Us</h2>
                 <p>If stuff breaks or you want things extended, use the form below to get in touch:</p>
                 <form id="contact-form" action="{{ url_for('controller.contact_submit') }}" method="POST">
+                    <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}"/>
                     <div class="form-group form-group--complete field--full-width">
                         <label class="control-label" for="name">Name</label>
                         <input class="form-control" id="name" name="name" required/>

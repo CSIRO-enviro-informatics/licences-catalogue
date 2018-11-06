@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, Response, flash
+from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, Response, flash, session
 import requests
 from controller import db_access, functions
 import _conf as conf
@@ -43,6 +43,14 @@ JSON_CONTEXT_PARTIES = {
 routes = Blueprint('controller', __name__)
 
 
+@routes.before_request
+def csrf_protect():
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            abort(403)
+
+
 @routes.route('/')
 def home():
     return render_template('page_home.html')
@@ -76,7 +84,7 @@ def contact_submit():
         )
         return redirect(url_for('controller.about'))
     else:
-        flash('Contact form is currently disabled')
+        flash(('Message not sent', 'Contact form is currently disabled'))
         return redirect(url_for('controller.about'))
 
 

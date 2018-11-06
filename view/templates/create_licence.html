@@ -156,6 +156,7 @@
             <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#create-licence-accordion">
                 <div class="card-body container">
                     <form id="licence-create-form" method="post">
+                        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}"/>
                         <div class="row">
                             <div class="form-group form-group--complete">
                                 <label class="control-label" for="label">Licence Name</label>
