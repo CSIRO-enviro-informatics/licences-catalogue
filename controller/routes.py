@@ -270,6 +270,7 @@ def create_licence():
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted'
     }
     attributes.update(request.form.items())
+    attributes.pop('_csrf_token', None)
     uri = conf.BASE_URI + '/' + str(uuid4())
     rules = json.loads(attributes.pop('rules'))
     for rule in rules:
