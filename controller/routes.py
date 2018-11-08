@@ -105,8 +105,11 @@ def view_licence_list_json():
 
 
 @routes.route('/licence/')
-def licence_routes():
+@routes.route('/licence/<licence_id>')
+def licence_routes(licence_id=None):
     licence_uri = request.values.get('uri')
+    if not licence_uri and licence_id:
+        licence_uri = conf.BASE_URI + 'licence/' + licence_id
     if licence_uri is None:
         return view_licence_list()
     else:
@@ -271,7 +274,7 @@ def create_licence():
     }
     attributes.update(request.form.items())
     attributes.pop('_csrf_token', None)
-    uri = conf.BASE_URI + '/' + str(uuid4())
+    uri = conf.BASE_URI + str(uuid4())
     rules = json.loads(attributes.pop('rules'))
     for rule in rules:
         rule['ACTIONS'] = [action['URI'] for action in rule['ACTIONS']]

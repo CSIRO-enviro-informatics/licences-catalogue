@@ -43,7 +43,7 @@ def create_policy(policy_uri, attributes=None, rules=None):
                 db_access.set_policy_attribute(policy_uri, attr_name, attr_value)
         if rules:
             for rule in rules:
-                rule_uri = _conf.BASE_URI + '/rules/' + str(uuid4())
+                rule_uri = _conf.BASE_URI + 'rules/' + str(uuid4())
                 if 'TYPE_URI' in rule:
                     rule_type = rule['TYPE_URI']
                 elif 'TYPE_LABEL' in rule:
