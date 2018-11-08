@@ -27,7 +27,7 @@
                     <div class="party-select-group">
                         <ul class="list-group assignor-list"></ul>
                         <select id="add-{{ type }}-assignor-select" class="form-control party-select">
-                            <option selected>Select assignor ...</option>
+                            <option selected disabled value="">Select assignor ...</option>
                             {% for party in parties %}
                             <option data-uri="{{ party['URI'] }}" data-link="{{ party['LINK'] }}" data-comment="{{ party['COMMENT'] }}">
                                 {{ party['LABEL'] }}
@@ -43,7 +43,7 @@
                     <div class="party-select-group">
                         <ul class="list-group assignee-list"></ul>
                         <select id="add-{{ type }}-assignee-select" class="form-control party-select">
-                            <option selected>Select assignee ...</option>
+                            <option selected disabled value="">Select assignee ...</option>
                             {% for party in parties %}
                             <option data-uri="{{ party['URI'] }}" data-link="{{ party['LINK'] }}" data-comment="{{ party['COMMENT'] }}">
                                 {{ party['LABEL'] }}
@@ -65,6 +65,7 @@
     </div>
 {% endmacro %}
 {% extends 'layout.html' %}
+{% block title %}Create Licence - Licence Catalogue - CSIRO{% endblock %}
 {% block content %}
 <h1>Create a Licence</h1>
 <div class="section--small">
@@ -328,11 +329,11 @@
 <div id="party-item-template" hidden>
     <li class="list-group-item">
         <span class="list-group-item-label" data-uri=""></span>
-        <span class="floatright">
-            <svg class="ci ci--inline ci--small svg__solid__times delete-party-item">
+        <button class="floatright delete-party-item">
+            <svg class="ci ci--inline ci--small svg__solid__times">
                 <use href="#svg__solid__times"></use>
             </svg>
-        </span>
+        </button>
     </li>
 </div>
 <div id="licence-item-template" hidden>

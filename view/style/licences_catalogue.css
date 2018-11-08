@@ -288,7 +288,7 @@ select {
 
 .party-select-group .list-group-item {
     border: none;
-    padding: 0 .8rem;
+    padding: 0 0 0 .8rem;
     line-height: 2.4rem;
 }
 
@@ -324,4 +324,10 @@ select {
     padding-left: 3000px;
     margin-left: -3000px;
     background-color: #FAFAFA;
+}
+
+.delete-party-item {
+    cursor: pointer;
+    border: 0;
+    background-color: transparent;
 }

@@ -243,19 +243,27 @@ jQuery(document).ready(function($){
     })
 
     // Adding an assignor/assignee selection to the add rule modal
-    $('body').on('change', '.party-select', function() {
-        var option = $(this).find('option:selected').first()
+    $('body').on('click', '.party-select option', function() { // Clicking the option normally
+        addParty($(this))
+    })
+    $('body').on('keypress', '.party-select', function(event){ // Selecting option via enter key press for accessibility
+        var keycode = event.keyCode || event.which
+        if (keycode == 13)
+            addParty($(this).children(':selected').first())
+    })
+    var addParty = function(option){
+        console.log(option.val())
         if (option.val().length == 0)
             return
-        $(this).children().first().prop('selected', true)
         var new_list_item = $('#party-item-template').clone().children()
         new_list_item.find('.list-group-item-label').text(option.text())
         new_list_item.find('.list-group-item-label').attr('data-comment', option.attr('data-comment'))
         new_list_item.find('.list-group-item-label').attr('data-link', option.attr('data-link'))
         new_list_item.find('.list-group-item-label').attr('data-uri', option.attr('data-uri'))
         option.hide()
-        $(this).prev().append(new_list_item)
-    })
+        option.parent().children().first().prop('selected', true)
+        option.closest('.party-select-group').children('.list-group').first().append(new_list_item)
+    }
 
     // Removes assignor/assignee selection from the add rule modal
     $('body').on('click', '.delete-party-item', function() {

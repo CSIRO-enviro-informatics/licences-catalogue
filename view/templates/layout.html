@@ -14,7 +14,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Licence Catalogue</title>
+    <title>{% block title %}Licence Catalogue{% endblock %}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=10.0,minimum-scale=0.25,user-scalable=yes">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,300italic,300,600,600italic,700,700italic,800,800italic" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap.min.css') }}">
@@ -98,7 +98,6 @@
             <div class="header-nav__wrapper">
                 <nav class="header-nav__secondary container--relative">
                     <a href="#maincontent" class="sr-only--focusable">Skip to content</a>
-                    <a href="#searchbutton" class="sr-only--focusable">Skip to search</a>
                     <div>
                         <ul class="list--inline list--remove-margin" role="menubar">
                             <li>
@@ -146,7 +145,7 @@
             </div>
         </div>
     </header>
-    <div class="container">
+    <div id="maincontent" class="container">
         {% set messages = get_flashed_messages() %}
         {% if messages %}
             <div class="container section section--remove-bottom">
@@ -191,7 +190,7 @@
 <script src="{{ url_for('static', filename='js/slide-menu.js') }}"></script>
 <script src="{{ url_for('static', filename='js/header.js') }}"></script>
 <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/licence_register.js') }}"></script>
 {% block bottom_script %}{% endblock %}
 </html>
