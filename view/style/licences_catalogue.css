@@ -18,10 +18,16 @@ body {
 }
 
 .logo__container {
-    background: url(http://author-uat.csiro.au/sg/assets/media/style_guide/styleguide_Curve.svg) no-repeat 0 0;
-    background-size: 800px 390px;
-    background-position: -395px -149px;
+    background: none;
     left: -50px;
+}
+
+.nav-wave {
+    background: url(wave.svg) no-repeat;
+    height: 100%;
+    margin-left: -280px;
+    background-size: 800px 390px;
+    background-position: -110px -150px;
 }
 
 .logo__image {
@@ -323,6 +329,9 @@ select {
     margin-right: -3000px;
     padding-left: 3000px;
     margin-left: -3000px;
+}
+
+light-shadow {
     background-color: #FAFAFA;
 }
 
