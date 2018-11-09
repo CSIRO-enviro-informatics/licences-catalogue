@@ -9,6 +9,7 @@ app.secret_key = conf.SECRET_KEY
 app.register_blueprint(routes.routes)
 
 
+# Closes connection to database when exiting application. See db_access.py for details.
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
@@ -16,6 +17,7 @@ def close_connection(exception):
         db.close()
 
 
+# Generate token for Cross-Site Request Forgery protection
 def generate_csrf_token():
     if '_csrf_token' not in session:
         session['_csrf_token'] = str(uuid4())
@@ -25,7 +27,7 @@ def generate_csrf_token():
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
-# run the Flask app
+# Run the Flask app
 if __name__ == '__main__':
     logging.basicConfig(filename=conf.LOGFILE,
                         level=logging.DEBUG,

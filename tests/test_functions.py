@@ -1,6 +1,14 @@
 from controller import functions
 from unittest import mock
-from seed_database import get_db as mock_get_db
+from controller.offline_db_access import get_db as mock_get_db
+
+
+"""
+All tests use the mock feature to replace get_db with the offline version.
+This is because tests are run outside the Flask application. See db_access.py for more information.
+
+All tests use the fixtures defined in conftest.py for setup and teardown.
+"""
 
 
 @mock.patch('controller.db_access.set_policy_attribute')

@@ -1,7 +1,15 @@
 import pytest
 from controller import db_access
 from unittest import mock
-from seed_database import get_db as mock_get_db
+from controller.offline_db_access import get_db as mock_get_db
+
+
+"""
+All tests use the mock feature to replace get_db with the offline version.
+This is because tests are run outside the Flask application. See db_access.py for more information.
+
+All tests use the fixtures defined in conftest.py for setup and teardown.
+"""
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -19,15 +27,10 @@ def test_create_policy(mock):
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
 def test_delete_policy(mock):
     # Should remove an existing policy
-    asset_uri = 'https://example.com#asset'
     policy_uri = 'https://example.com#policy'
     db_access.create_policy(policy_uri)
-    db_access.add_asset(asset_uri, policy_uri)
     db_access.delete_policy(policy_uri)
     assert not db_access.policy_exists(policy_uri)
-
-    # Should have also removed any assets using that policy
-    assert not db_access.asset_exists(asset_uri)
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -111,62 +114,6 @@ def test_policy_has_rule(mock):
     db_access.create_rule(rule_uri, rule_type, rule_label)
     db_access.add_rule_to_policy(rule_uri, policy_uri)
     assert db_access.policy_has_rule(policy_uri, rule_uri)
-
-
-@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
-def test_add_asset(mock):
-    # Should raise an exception when the policy doesn't exist
-    asset_uri = 'https://example.com#asset'
-    policy_uri = 'https://example.com#policy'
-    with pytest.raises(ValueError):
-        db_access.add_asset(asset_uri, policy_uri)
-
-    # Should store a new asset entry in the database
-    db_access.create_policy(policy_uri)
-    db_access.add_asset(asset_uri, policy_uri)
-    asset_exists = db_access.query_db('SELECT COUNT(1) FROM ASSET WHERE URI = ?', (asset_uri,), one=True)[0]
-    assert asset_exists
-
-    # Should reject duplicate assets
-    with pytest.raises(ValueError):
-        db_access.add_asset(asset_uri, policy_uri)
-
-
-@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
-def test_remove_asset(mock):
-    # Should remove an existing asset
-    asset_uri = 'https://example.com#asset'
-    policy_uri = 'https://example.com#policy'
-    db_access.create_policy(policy_uri)
-    db_access.add_asset(asset_uri, policy_uri)
-    db_access.remove_asset(asset_uri)
-    assert not db_access.asset_exists(asset_uri)
-
-
-@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
-def test_asset_exists(mock):
-    # Should return true if the asset exists
-    asset_uri = 'https://example.com#asset'
-    policy_uri = 'https://example.com#policy'
-    db_access.create_policy(policy_uri)
-    db_access.add_asset(asset_uri, policy_uri)
-    assert db_access.asset_exists(asset_uri)
-
-    # Should return false if the asset doesn't exist
-    nonexistent_uri = 'https://example.com#nonexistent'
-    assert not db_access.asset_exists(nonexistent_uri)
-
-
-@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
-def test_get_all_assets(mock):
-    policy_uri = 'https://example.com#policy'
-    db_access.create_policy(policy_uri)
-    asset1 = 'https://example.com#asset1'
-    asset2 = 'https://example.com#asset2'
-    db_access.add_asset(asset1, policy_uri)
-    db_access.add_asset(asset2, policy_uri)
-    assets = db_access.get_all_assets()
-    assert assets == [asset1, asset2]
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
@@ -409,11 +356,6 @@ def test_get_all_actions(mock):
     assert actions
     for action in actions:
         assert all(x in ['URI', 'LABEL', 'DEFINITION'] for x in action)
-
-
-@mock.patch('controller.db_access.get_db', side_effect=mock_get_db)
-def test_get_action_label(mock):
-    assert db_access.get_action_label('http://www.w3.org/ns/odrl/2/acceptTracking') == 'Accept Tracking'
 
 
 @mock.patch('controller.db_access.get_db', side_effect=mock_get_db)

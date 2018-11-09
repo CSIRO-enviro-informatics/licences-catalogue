@@ -1,6 +1,6 @@
 import re
 from controller import db_access
-from flask import url_for
+from flask import url_for, jsonify
 import _conf
 from uuid import uuid4
 from rdflib import Graph, URIRef, BNode, OWL, RDF, RDFS, Literal
@@ -18,14 +18,18 @@ party_register_comment = 'This is a register (controlled list) of machine-readab
 def create_policy(policy_uri, attributes=None, rules=None):
     """
     Creates an entire policy with the given URI, attributes and Rules.
+    Will attempt to use Rule Type and Actions whether they are given by URI or Label.
+    If there is an error at any point, will rollback all changes to database to avoid leaving partially created
+    policies.
 
     :param policy_uri:
     :param attributes:  Dictionary of optional attributes of the policy.
         Permitted attributes:   type, label, jurisdiction, legal_code, has_version, language, see_also
                                 same_as, comment, logo, status
     :param rules: List of Rules. Each Rule should be a Dictionary containing the following elements:
-        TYPE_URI: string    * At least one of TYPE_URI or TYPE_LABEL should be provided.
-        TYPE_LABEL: string
+        TYPE_URI*: string (i.e. 'http://www.w3.org/ns/odrl/2/duty')
+        TYPE_LABEL*: string (i.e. 'duty')
+        * At least one of TYPE_URI or TYPE_LABEL should be provided, but both are not required
         ASSIGNORS: List of Assignors. Each Assignor should be a Dictionary containing a URI, LABEL and COMMENT.
         ASSIGNEES: List of Assignees.  Each Assignee should be a Dictionary containing a URI, LABEL and COMMENT.
         ACTIONS: List of strings (URIs or labels)
@@ -77,17 +81,19 @@ def create_policy(policy_uri, attributes=None, rules=None):
                             db_access.create_party(assignee['URI'], assignee['LABEL'], assignee['COMMENT'])
                         db_access.add_assignee_to_rule(assignee['URI'], rule_uri)
                 db_access.add_rule_to_policy(rule_uri, policy_uri)
-    except ValueError as error:
+    except Exception as error:
         db_access.rollback_db()
         raise error
     db_access.commit_db()
 
 
 def is_valid_uri(uri):
+    # Checks if the URI is valid
     return True if re.match('\w+:(/?/?)[^\s]+', uri) else False
 
 
 def get_rule_type_uri(label, permitted_rule_types):
+    # Takes a ruletype Label tries to figure out the corresponding URI
     for permitted_rule_type in permitted_rule_types:
         if permitted_rule_type['LABEL'] == label:
             return permitted_rule_type['URI']
@@ -95,6 +101,7 @@ def get_rule_type_uri(label, permitted_rule_types):
 
 
 def get_action_uri(label, permitted_actions):
+    # Takes an Action Label and tries to figure out the corresponding URI
     for permitted_action in permitted_actions:
         if permitted_action['LABEL'] == label:
             return permitted_action['URI']
@@ -102,6 +109,27 @@ def get_action_uri(label, permitted_actions):
 
 
 def filter_policies(desired_rules, num_results=10):
+    """
+    Filters through all available policies according to the rules supplied. Does not take assignors or assignees into
+    account at this time.
+
+    :param desired_rules: A List of Rules. Each Rule is a Dictionary containing the following elements:
+        TYPE_URI: string
+        ACTIONS: A List of Actions. Each Action is a Dictionary containing a URI
+    :param num_results: The maximum number of policies to return
+    :return: A List of Policies. Each Policy is a Dictionary containing the following elements:
+        LABEL: string
+        LINK: string
+        DIFFERENCES: int
+        RULES: A List of Rules. Each Rule is a Dictionary containing the following elements:
+            URI: string
+            LABEL: string
+            TYPE_URI: string
+            TYPE_LABEL: string
+            ASSIGNORS: List of Assignors. Each Assignor is a Dictionary containing a URI, LABEL and COMMENT.
+            ASSIGNEES: List of Assignees.  Each Assignee is a Dictionary containing a URI, LABEL and COMMENT.
+            ACTIONS: List of Actions. Each Action is a Dictionary containing a URI, LABEL and DEFINITION.
+    """
     policy_uris = db_access.get_all_policies()
     policies = []
     for policy_uri in policy_uris:
@@ -150,6 +178,13 @@ def filter_policies(desired_rules, num_results=10):
 
 
 def get_policy_rdf(policy, rules):
+    """
+    Converts a policy into RDF format
+
+    :param policy:
+    :param rules: The rules which are included in the policy
+    :return: an RDFlib graph
+    """
     graph = Graph()
     graph.bind('odrl', ODRL)
     graph.bind('cc', CREATIVE_COMMONS)
@@ -199,6 +234,13 @@ def get_policy_rdf(policy, rules):
 
 
 def get_policy_json(policy, rules):
+    """
+    Converts a policy into JSON format
+
+    :param policy:
+    :param rules: The rules which are included in the policy
+    :return: A Flask Response containing the policy in JSON format
+    """
     rules_json = []
     for rule in rules:
         rules_json.append({
@@ -228,10 +270,16 @@ def get_policy_json(policy, rules):
             'rules': rules_json
         }
     }
-    return policy_json
+    return jsonify(policy_json)
 
 
 def get_policies_rdf(policies):
+    """
+    Converts a policy register into RDF format
+
+    :param policies:
+    :return: an RDFlib graph
+    """
     graph = Graph()
     graph.bind('odrl', ODRL)
     graph.bind('cc', CREATIVE_COMMONS)
@@ -260,6 +308,12 @@ def get_policies_rdf(policies):
 
 
 def get_policies_json(policies):
+    """
+    Converts a policy register into JSON format
+
+    :param policies:
+    :return: A Flask Response containing the policies in JSON format
+    """
     register_uri = url_for('controller.licence_routes', _external=True)
     policy_json = {
         register_uri: {
@@ -277,21 +331,16 @@ def get_policies_json(policies):
             'comment': policy['COMMENT'],
             'register': register_uri
         }
-    return policy_json
-
-
-def get_action_rdf(action):
-    graph = Graph()
-    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
-    graph.bind('skos', SKOS)
-    action_node = URIRef(action['URI'])
-    graph.add((action_node, RDF.type, URIRef(ODRL + 'Action')))
-    graph.add((action_node, RDFS.label, Literal(action['LABEL'], lang='en')))
-    graph.add((action_node, SKOS.definition, Literal(action['DEFINITION'], lang='en')))
-    return graph
+    return jsonify(policy_json)
 
 
 def get_actions_rdf(actions):
+    """
+    Converts an action register into RDF format
+
+    :param actions:
+    :return: an RDFlib graph
+    """
     graph = Graph()
     graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
     graph.bind('skos', SKOS)
@@ -314,6 +363,12 @@ def get_actions_rdf(actions):
 
 
 def get_actions_json(actions):
+    """
+    Converts an action register into JSON format
+
+    :param actions:
+    :return: A Flask Response containing the actions in JSON format
+    """
     register_uri = url_for('controller.action_register', _external=True)
     actions_json = {
         register_uri: {
@@ -330,22 +385,16 @@ def get_actions_json(actions):
             'comment': action['DEFINITION'],
             'register': register_uri
         }
-    return actions_json
-
-
-def get_party_rdf(party):
-    graph = Graph()
-    graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
-    party_node = URIRef(party['URI'])
-    graph.add((party_node, RDF.type, URIRef(ODRL + 'Party')))
-    if party['LABEL']:
-        graph.add((party_node, RDFS.label, Literal(party['LABEL'], lang='en')))
-    if party['COMMENT']:
-        graph.add((party_node, RDFS.comment, Literal(party['COMMENT'], lang='en')))
-    return graph
+    return jsonify(actions_json)
 
 
 def get_parties_rdf(parties):
+    """
+    Converts a party register into RDF format
+
+    :param parties:
+    :return: an RDFlib graph
+    """
     graph = Graph()
     graph.bind('odrl', 'http://www.w3.org/ns/odrl/2/')
     graph.bind('skos', SKOS)
@@ -369,7 +418,13 @@ def get_parties_rdf(parties):
     return graph
 
 
-def get_party_json(parties):
+def get_parties_json(parties):
+    """
+    Converts a party register into JSON format
+
+    :param parties:
+    :return: A Flask Response containing the actions in JSON format
+    """
     register_uri = url_for('controller.party_register', _external=True)
     parties_json = {
         register_uri: {
@@ -386,4 +441,4 @@ def get_party_json(parties):
             'comment': party['COMMENT'],
             'register': register_uri
         }
-    return parties_json
+    return jsonify(parties_json)

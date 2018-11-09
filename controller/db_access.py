@@ -27,7 +27,7 @@ def update_db(query_str, args=()):
     """
     Submits a query to update or insert something in the database.
 
-    :param query_str: The query as a string. Use args for adding variables to prevent SQL Injection
+    :param query_str: The query as a string. Use args for including variables to prevent SQL Injection
     :param args:
     :return: The most recent rowid
     """
@@ -66,11 +66,7 @@ def rollback_db():
 
 
 def create_policy(policy_uri):
-    """
-    Creates a new Policy with the given URI
-
-    :param policy_uri: The URI of the new Policy
-    """
+    # Creates a new Policy with the given URI
     if policy_exists(policy_uri):
         raise ValueError('A Policy with that URI already exists.')
     query_db('INSERT INTO POLICY (URI, CREATED) VALUES (?, CURRENT_TIMESTAMP)', (policy_uri,))
@@ -155,38 +151,6 @@ def policy_has_rule(policy_uri, rule_uri):
     return query_db(query_str, (policy_uri, rule_uri), one=True)[0]
 
 
-def add_asset(asset_uri, policy_uri):
-    # Assigns an existing Asset to an existing Policy.
-    if not policy_exists(policy_uri):
-        raise ValueError('Policy with URI ' + asset_uri + ' does not exist.')
-    if asset_exists(asset_uri):
-        raise ValueError('An Asset with that URI already exists.')
-    query_db('INSERT INTO ASSET (URI, POLICY_URI) VALUES (?, ?)', (asset_uri, policy_uri))
-
-
-def remove_asset(asset_uri):
-    # Removes an Asset from its Policy
-    query_db('DELETE FROM ASSET WHERE URI = ?', (asset_uri,))
-
-
-def asset_exists(uri):
-    """
-    Checks whether an Asset with a given URI has a record in the database
-
-    :return:    True if the asset exists
-                False if the asset does not exist
-    """
-    return query_db('SELECT COUNT(1) FROM ASSET WHERE URI = ?', (uri,), one=True)[0]
-
-
-def get_all_assets():
-    # Returns a list of all Asset URIs
-    assets = list()
-    for asset in query_db('SELECT URI FROM ASSET'):
-        assets.append(asset['URI'])
-    return assets
-
-
 def create_rule(rule_uri, rule_type, rule_label=None):
     """
     Creates a new Rule with the given URI and rule type.
@@ -195,7 +159,7 @@ def create_rule(rule_uri, rule_type, rule_label=None):
     :param rule_type: Permitted rule types: http://www.w3.org/ns/odrl/2/permission
                                             http://www.w3.org/ns/odrl/2/prohibition
                                             http://www.w3.org/ns/odrl/2/duty
-    :param rule_label:
+    :param rule_label: The human-readable label for the new rule
     """
     if rule_exists(rule_uri):
         raise ValueError('A Rule with that URI already exists.')
@@ -423,11 +387,6 @@ def get_all_actions():
     for result in query_db('SELECT URI, LABEL, DEFINITION FROM ACTION'):
         actions.append(dict(result))
     return actions
-
-
-def get_action_label(action_uri):
-    # Accepts an Action's URI and returns its Label
-    return query_db('SELECT LABEL FROM ACTION WHERE URI = ?', (action_uri,), one=True)['LABEL']
 
 
 def create_party(party_uri, label=None, comment=None):

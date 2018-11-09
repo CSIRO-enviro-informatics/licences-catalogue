@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from controller.functions import get_policy_json
 
+# JSON vocabularies that are added to all JSON views served by this application.
 JSON_CONTEXT_ACTIONS = {
     '@vocab': 'http://www.w3.org/ns/odrl/2/',
     'label': 'http://www.w3.org/2000/01/rdf-schema#label',
@@ -45,6 +46,7 @@ routes = Blueprint('controller', __name__)
 
 @routes.before_request
 def csrf_protect():
+    # For all POST methods, verify that the CSRF token is correct
     if request.method == "POST":
         token = session.pop('_csrf_token', None)
         if not token or token != request.form.get('_csrf_token'):
@@ -63,6 +65,7 @@ def about():
 
 @routes.route('/contact_submit', methods=['POST'])
 def contact_submit():
+    # Sends an email via mailjet with the contents of the contact form submission
     name = request.form['name']
     email = request.form['email']
     message = request.form['message']
@@ -90,6 +93,8 @@ def contact_submit():
 
 @routes.route('/_search_results')
 def search_results():
+    # For AJAX requests searching through licences. Filters through licences according to the rules supplied and returns
+    # a maximum of 10 licences.
     rules = json.loads(request.args.get('rules'))
     results = functions.filter_policies(rules)
     return jsonify(results=results)
@@ -97,6 +102,7 @@ def search_results():
 
 @routes.route('/licence/index.json')
 def view_licence_list_json():
+    # Redirect for alternate URL for JSON view
     redirect_url = url_for('controller.licence_routes', _format='application/json')
     uri = request.values.get('uri')
     if uri is not None:
@@ -107,6 +113,11 @@ def view_licence_list_json():
 @routes.route('/licence/')
 @routes.route('/licence/<licence_id>')
 def licence_routes(licence_id=None):
+    """
+    All routes for licences. If a licence URI is specified in a GET variable or if the licence ID is specified in the
+    URL, displays the relevant licence.
+    Otherwise, shows the 'Find A Licence' page.
+    """
     licence_uri = request.values.get('uri')
     if not licence_uri and licence_id:
         licence_uri = conf.BASE_URI + 'licence/' + licence_id
@@ -117,6 +128,11 @@ def licence_routes(licence_id=None):
 
 
 def view_licence_list():
+    """
+    'Find a Licence' page. Displays up to ten licences initially, with no filter applied. User can update the filter
+    and the page updates accordingly via the search_results() route.
+    Also available as JSON, JSON-LD and Turtle/RDF. These views return all licences, no search is applied.
+    """
     licences = [db_access.get_policy(policy_uri) for policy_uri in db_access.get_all_policies()]
     actions = db_access.get_all_actions()
     for action in actions:
@@ -125,7 +141,7 @@ def view_licence_list():
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(functions.get_policies_json(licences))
+        return functions.get_policies_json(licences)
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         policies_rdf = functions.get_policies_rdf(licences).serialize(format='turtle')
         return Response(policies_rdf, status=200, mimetype='text/turtle')
@@ -148,6 +164,11 @@ def view_licence_list():
 
 
 def view_licence(policy_uri):
+    """
+    Displays information about a licence, including its attributes and rules (which are sorted into permissions, duties,
+    and prohibitions before display).
+    Also available as JSON, JSON-LD and Turtle/RDF.
+    """
     try:
         policy = db_access.get_policy(policy_uri)
     except ValueError:
@@ -157,7 +178,7 @@ def view_licence(policy_uri):
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     rules = [db_access.get_rule(rule_uri) for rule_uri in policy['RULES']]
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(get_policy_json(policy, rules))
+        return get_policy_json(policy, rules)
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         policy_rdf = functions.get_policy_rdf(policy, rules).serialize(format='turtle')
         return Response(policy_rdf, status=200, mimetype='text/turtle')
@@ -195,11 +216,18 @@ def view_licence(policy_uri):
 
 @routes.route('/action/index.json')
 def view_action_list_json():
+    # Redirect for alternate URL for JSON view
     return redirect('/action/?_format=application/json')
 
 
 @routes.route('/action/')
 def action_register():
+    """
+    Displays all actions in alphabetical order and grouped into their first letter.
+    Specific actions in this register are usually pointed to via element ID
+    i.e. licences.com/action/#http://www.w3.org/ns/odrl/2/read
+    Also available as JSON, JSON-LD and Turtle/RDF.
+    """
     action_uri = request.values.get('uri')
     if action_uri:
         return redirect(url_for('controller.action_register') + '#' + action_uri)
@@ -207,7 +235,7 @@ def action_register():
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(functions.get_actions_json(actions))
+        return functions.get_actions_json(actions)
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         actions_rdf = functions.get_actions_rdf(actions).serialize(format='turtle')
         return Response(actions_rdf, status=200, mimetype='text/turtle')
@@ -241,6 +269,15 @@ def action_register():
 
 @routes.route('/licence/create')
 def create_licence_form():
+    """
+    'Create a Licence' page. Consists of three steps:
+    1. User builds the rules they want in their licence, which might include actions, assignors and assignees.
+    2. The page suggests some similar licences to the user in case that licence already exists
+    3. The user enters other information about the licence such as its name, description, etc.
+
+    Assignors and assignees are selected from a list of permitted 'parties', which consists of a list pulled from
+    http://catalogue.linked.data.gov.au/org/json combined with the parties that are already in the database.
+    """
     actions = db_access.get_all_actions()
     parties = db_access.get_all_parties()
     try:
@@ -268,6 +305,14 @@ def create_licence_form():
 
 @routes.route('/licence/create', methods=['POST'])
 def create_licence():
+    """
+    Creates a new licence.
+    At this time all new licences have their type automatically set, and their status set to 'submitted'.
+    All things in the form submission except the CSRF token and the Rules (which are popped out) are assumed to be
+    policy attributes.
+    If successful, redirects to the new licence.
+    If not, redirects back to the form and flashes an error message at top of page.
+    """
     attributes = {
         'type': 'http://creativecommons.org/ns#License',
         'status': 'http://dd.eionet.europa.eu/vocabulary/datadictionary/status/submitted'
@@ -288,11 +333,18 @@ def create_licence():
 
 @routes.route('/party/index.json')
 def view_party_list_json():
+    # Redirect for alternate URL for JSON view
     return redirect('/party/?_format=application/json')
 
 
 @routes.route('/party/')
 def party_register():
+    """
+    Displays all parties in alphabetical order and grouped into their first letter.
+    Specific parties in this register are usually pointed to via element ID
+    i.e. licences.com/parties/#http://test.linked.data.gov.au/board/B-0068
+    Also available as JSON, JSON-LD and Turtle/RDF.
+    """
     party_uri = request.values.get('uri')
     if party_uri:
         return redirect(url_for('controller.party_register') + '#' + party_uri)
@@ -300,7 +352,7 @@ def party_register():
     # Respond according to preferred media type
     preferred_media_type = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if preferred_media_type == 'application/json' or request.values.get('_format') == 'application/json':
-        return jsonify(functions.get_party_json(parties))
+        return functions.get_parties_json(parties)
     elif preferred_media_type == 'text/turtle' or request.values.get('_format') == 'text/turtle':
         parties_rdf = functions.get_parties_rdf(parties).serialize(format='turtle')
         return Response(parties_rdf, status=200, mimetype='text/turtle')

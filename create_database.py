@@ -42,13 +42,6 @@ def rebuild():
         );
     ''')
     conn.execute('''
-        CREATE TABLE IF NOT EXISTS ASSET (
-            URI         TEXT    NOT NULL    PRIMARY KEY,
-            POLICY_URI  TEXT    NOT NULL,
-            FOREIGN KEY (POLICY_URI) REFERENCES POLICY (URI) ON DELETE CASCADE
-        );
-    ''')
-    conn.execute('''
         CREATE TABLE IF NOT EXISTS RULE_TYPE (
             URI     TEXT    NOT NULL    PRIMARY KEY,
             LABEL   TEXT    NOT NULL

@@ -2,6 +2,11 @@ import os
 import _conf
 import sqlite3
 
+"""
+Use get_db() from this file when accessing the database when Flask is not running (like in create_database.py and 
+seed_database.py)
+"""
+
 db = None
 
 
