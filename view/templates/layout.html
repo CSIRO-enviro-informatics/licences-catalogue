@@ -12,7 +12,7 @@
 {% endmacro %}
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{% block title %}Licence Catalogue{% endblock %}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=10.0,minimum-scale=0.25,user-scalable=yes">
@@ -122,22 +122,22 @@
                 <nav class="header-nav__primary" aria-label="Main menu">
                     <ul class="header-nav__primary__menu list--remove-padding list--remove-margin" role="menubar">
                         <li>
-                            <a href="{{ url_for('controller.create_licence') }}" class="btn btn--transparent btn--sm">
+                            <a href="{{ url_for('controller.create_licence') }}" class="btn btn--transparent btn--sm" aria-label="Create page">
                                 Create
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url_for('controller.licence_routes') }}" class="btn btn--transparent btn--sm">
+                            <a href="{{ url_for('controller.licence_routes') }}" class="btn btn--transparent btn--sm" aria-label="Licences page">
                                 Licences
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url_for('controller.action_register') }}" class="btn btn--transparent btn--sm">
+                            <a href="{{ url_for('controller.action_register') }}" class="btn btn--transparent btn--sm" aria-label="Actions page">
                                 Actions
                             </a>
                         </li>
                         <li>
-                            <a href="{{ url_for('controller.party_register') }}" class="btn btn--transparent btn--sm">
+                            <a href="{{ url_for('controller.party_register') }}" class="btn btn--transparent btn--sm" aria-label="Parties page">
                                 Parties
                             </a>
                         </li>

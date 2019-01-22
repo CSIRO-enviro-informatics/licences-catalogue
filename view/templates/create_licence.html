@@ -39,10 +39,10 @@
                         An Assignor is an issuer of the Rule. An Assignor could be a person, group of people,
                         organisation, or agent.
                     </p>
-                    <label for="add-{{ type }}-assignor-select" class="emphasis--semi">Assignees:</label>
+                    <label for="add-{{ type }}-assignee-select" class="emphasis--semi">Assignees:</label>
                     <div class="party-select-group">
                         <ul class="list-group assignee-list"></ul>
-                        <select id="add-{{ type }}-assignee-select" class="form-control party-select">
+                        <select id="add-{{ type }}-assignee-select" class="form-control party-select" aria-label="add-{{ type }}-assignee-select">
                             <option selected disabled value="">Select assignee ...</option>
                             {% for party in parties %}
                             <option data-uri="{{ party['URI'] }}" data-link="{{ party['LINK'] }}" data-comment="{{ party['COMMENT'] }}">
@@ -297,7 +297,7 @@
 <div id="rule-item-template" hidden>
     <li class="rule-item">
         <div class="btn-group">
-            <button class="btn btn--primary--outline btn--flat delete-rule">
+            <button class="btn btn--primary--outline btn--flat delete-rule" aria-label="remove rule">
                 <svg class="ci ci--xs ci--inline svg__solid__times">
                     <use href="#svg__solid__times"></use>
                 </svg>
@@ -311,7 +311,7 @@
 <div id="rule-item-with-parties-template" hidden>
     <li class="rule-item">
         <div class="btn-group">
-            <button class="btn btn--primary--outline btn--tab delete-rule">
+            <button class="btn btn--primary--outline btn--tab delete-rule" aria-label="remove rule">
                 <svg class="ci ci--xs ci--inline svg__solid__times">
                     <use href="#svg__solid__times"></use>
                 </svg>
@@ -329,7 +329,7 @@
 <div id="party-item-template" hidden>
     <li class="list-group-item">
         <span class="list-group-item-label" data-uri=""></span>
-        <button class="floatright delete-party-item">
+        <button class="floatright delete-party-item" aria-label="remove item">
             <svg class="ci ci--inline ci--small svg__solid__times">
                 <use href="#svg__solid__times"></use>
             </svg>

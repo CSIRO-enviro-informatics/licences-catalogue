@@ -41,13 +41,14 @@
                 <div class="section--small">
                     <h3 class="alt-heading-format">
                         Permissions
-                        <a href="#!" data-toggle="tooltip" data-placement="bottom" title="A Permission Rule grants the ability to perform an Action on an Asset.">
+                        <a href="#!" data-toggle="tooltip" data-placement="bottom" id="permission-rule-tooltip" title="A Permission Rule grants the ability to perform an Action on an Asset.">
+                            <label for="permission-rule-tooltip" hidden>Permission Rule tooltip</label>
                             <svg class="ci ci--xs ci--inline svg__solid__question-circle">
                                 <use href="#svg__solid__question-circle"></use>
                             </svg>
                         </a>
                     </h3>
-                    <ul class="rule-section list--remove-type list--remove-padding" data-rule-type="http://www.w3.org/ns/odrl/2/permission"></ul>
+                    <ul class="rule-section list--remove-type list--remove-padding"  data-rule-type="http://www.w3.org/ns/odrl/2/permission"></ul>
                     <button class="btn btn--primary btn--flat" data-toggle="modal" data-target="#addPermissionModal">
                         <svg class="ci ci--xs ci--inline svg__solid__plus">
                             <use href="#svg__solid__plus"></use>
@@ -58,7 +59,8 @@
                 <div class="section--small">
                     <h3 class="alt-heading-format">
                         Duties
-                        <a href="#!" data-toggle="tooltip" data-placement="bottom" title="A Duty Rule states an obligation to perform an Action on an Asset.">
+                        <a href="#!" data-toggle="tooltip" data-placement="bottom" id="duty-rule-tooltip" title="A Duty Rule states an obligation to perform an Action on an Asset.">
+                            <label for="duty-rule-tooltip" hidden>Duty Rule tooltip</label>
                             <svg class="ci ci--xs ci--inline svg__solid__question-circle">
                                 <use href="#svg__solid__question-circle"></use>
                             </svg>
@@ -75,7 +77,8 @@
                 <div class="section--small">
                     <h3 class="alt-heading-format">
                         Prohibitions
-                        <a href="#!" data-toggle="tooltip" data-placement="bottom" title="A Prohibition Rule states an inability to perform an Action on an Asset.">
+                        <a href="#!" data-toggle="tooltip" data-placement="bottom" id="prohibition-rule-tooltip" title="A Prohibition Rule states an inability to perform an Action on an Asset.">
+                            <label for="prohibition-rule-tooltip">Prohibition Rule tooltip</label>
                             <svg class="ci ci--xs ci--inline svg__solid__question-circle">
                                 <use href="#svg__solid__question-circle"></use>
                             </svg>
@@ -107,7 +110,7 @@
 <div id="rule-item-template" hidden>
     <li class="rule-item">
         <div class="btn-group">
-            <button class="btn btn--primary--outline btn--flat delete-rule">
+            <button class="btn btn--primary--outline btn--flat delete-rule"aria-label="remove rule">
                 <svg class="ci ci--xs ci--inline svg__solid__times">
                     <use href="#svg__solid__times"></use>
                 </svg>
