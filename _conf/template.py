@@ -32,3 +32,7 @@ MAILJET_SECRETS = {
 }
 MAILJET_EMAIL_SENDER = {{YOUR_SENDER_EMAIL}}  # Who the emails will appear to come from
 MAILJET_EMAIL_RECEIVERS = [{{YOUR_RECEIVE_EMAIL}}]  # Who will receive the emails
+
+# Register username and password to create licences for this system
+USERNAME = {{YOUR_USERNAME}}
+PASSWORD = {{YOUR_PASSWORD}}

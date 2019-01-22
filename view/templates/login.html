@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="container--sm">
+    <div class="section--med offset-md-3 col-1-2 card card--white">
+        <div class="section--md">
+            <h1>Login</h1>
+            <p>Only authorised personnel can create new licences in this catalogue.</p>
+        </div>
+        <form id="login-form" action="{{ url_for('controller.auth_login') }}" method="POST">
+            <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}"/>
+            <div class="form-group form-group--complete field--full-width">
+                <label class="control-label" for="username">Username</label>
+                <input class="form-control" id="username" name="username" required/>
+            </div>
+            <div class="form-group form-group--complete field--full-width">
+                <label class="control-label" for="password">Password</label>
+                <input class="form-control" id="password" name="password" type="password" required/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn--primary" type="submit">
+                    <svg class="ci svg__solid__paper-plane ci--inline ci--small"><use href="#svg__solid__paper-plane"></use></svg>
+                     Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -268,6 +268,22 @@ def action_register():
 
 
 @routes.route('/licence/create')
+def login():
+    return render_template('login.html')
+
+
+@routes.route('/licence/create', methods=['POST'])
+def auth_login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if username == conf.USERNAME and password == conf.PASSWORD:
+        return create_licence_form()
+    else:
+        return render_template('invalid_access.html')
+
+
+# @routes.route('/licence/create')
 def create_licence_form():
     """
     'Create a Licence' page. Consists of three steps:
