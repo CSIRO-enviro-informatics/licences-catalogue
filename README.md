@@ -1,4 +1,4 @@
-# Policies Catalogue
+# Licences Catalogue
 A Linked Data catalogue of policies (licenses, laws etc.) presented as Policies according to the [ODRL Information Model 2.2](https://www.w3.org/TR/odrl-model/).
 
 This catalogue is a website tool to allow people to find policies according to certain criteria and is also a policy writing tool; with it you can author both new abstract policies and also specific implementations of policies for particular purposes.
