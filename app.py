@@ -1,9 +1,9 @@
 import logging
 import _conf as conf
-from flask import Flask, g, session, redirect, url_for
+from flask import Flask, g, session
 from controller import routes
 from uuid import uuid4
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from flask_login import LoginManager
 from model.user import User
 
 app = Flask(__name__, template_folder=conf.TEMPLATES_DIR, static_folder=conf.STATIC_DIR)

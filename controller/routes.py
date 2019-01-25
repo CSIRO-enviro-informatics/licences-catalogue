@@ -4,7 +4,7 @@ from controller import db_access, functions
 import _conf as conf
 import json
 from uuid import uuid4
-from flask_login import login_required, current_user, login_user, logout_user, login_manager
+from flask_login import current_user, login_user, logout_user
 from model.user import User
 
 from controller.functions import get_policy_json
