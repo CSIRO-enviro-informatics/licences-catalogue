@@ -4,3 +4,4 @@ flask-paginate
 rdflib
 pyldapi
 pytest
+flask-login

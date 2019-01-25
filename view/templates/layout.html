@@ -116,13 +116,20 @@
                                     About
                                 </a>
                             </li>
+                            <li>
+                                {% if current_user.is_authenticated %}
+                                    <a href="{{ url_for('controller.logout', next=request.base_url) }}" class="reversed header-nav__secondary_link">Logout</a>
+                                {% else %}
+                                    <a href="{{ url_for('controller.login', next=request.base_url) }}" class="reversed header-nav__secondary_link">Login</a>
+                                {% endif %}
+                            </li>
                         </ul>
                     </div>
                 </nav>
                 <nav class="header-nav__primary" aria-label="Main menu">
                     <ul class="header-nav__primary__menu list--remove-padding list--remove-margin" role="menubar">
                         <li>
-                            <a href="{{ url_for('controller.create_licence') }}" class="btn btn--transparent btn--sm" aria-label="Create page">
+                            <a href="{{ url_for('controller.create_licence_form') }}" class="btn btn--transparent btn--sm" aria-label="Create page">
                                 Create
                             </a>
                         </li>
@@ -147,13 +154,12 @@
         </div>
     </header>
     <div id="maincontent" class="container">
-        {% set messages = get_flashed_messages() %}
+        {% set messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="container section section--remove-bottom">
-                {% for message in get_flashed_messages() %}
-                    <div class="callout callout--danger">
-                        <h2 class="h4 callout__title">{{ message[0] }}</h2>
-                        <p>{{ message[1] }}</p>
+            <div class="section section--remove-bottom">
+                {% for category, message in messages %}
+                    <div class="{{ category }}" role="alert">
+                        <h2 class="h4 callout__title">{{ message }}</h2>
                     </div>
                 {% endfor %}
             </div>

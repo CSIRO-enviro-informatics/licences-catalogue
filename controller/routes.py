@@ -4,6 +4,8 @@ from controller import db_access, functions
 import _conf as conf
 import json
 from uuid import uuid4
+from flask_login import login_required, current_user, login_user, logout_user, login_manager
+from model.user import User
 
 from controller.functions import get_policy_json
 
@@ -267,23 +269,45 @@ def action_register():
         )
 
 
-@routes.route('/licence/create')
+@routes.route('/logout')
+def logout():
+    """
+    Log the user out and redirect them to the page they're currently on.
+    """
+    logout_user()
+    next = request.args.get('next')
+    flash('You have been logged out.', 'alert alert-success')
+    return redirect(next or url_for('controller.home'))
+
+
+@routes.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    """
+    GET request to this endpoint responds with the login page. POST requests verify if the credentials entered
+    are valid. If an authenticated (logged in) user requests this endpoint, they will simply be redirected to
+    the home page.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('controller.home'))
 
-
-@routes.route('/licence/create', methods=['POST'])
-def auth_login():
     username = request.form.get('username')
     password = request.form.get('password')
+    next = request.args.get('next')
 
-    if username == conf.USERNAME and password == conf.PASSWORD:
-        return create_licence_form()
-    else:
-        return render_template('invalid_access.html')
+    if request.method == 'POST':
+        if username == conf.USERNAME and password == conf.PASSWORD:
+            login_user(User(conf.USERNAME))
+            next = next if next else request.url
+            flash('You are logged in', 'alert alert-success')
+            return redirect(next or url_for('controller.home'))
+        else:
+            flash('Invalid username or password', 'alert alert-danger')
+            return redirect(url_for('controller.login', next=next))
+
+    return render_template('login.html', next=next)
 
 
-# @routes.route('/licence/create')
+@routes.route('/licence/create')
 def create_licence_form():
     """
     'Create a Licence' page. Consists of three steps:
@@ -294,6 +318,8 @@ def create_licence_form():
     Assignors and assignees are selected from a list of permitted 'parties', which consists of a list pulled from
     http://catalogue.linked.data.gov.au/org/json combined with the parties that are already in the database.
     """
+    if not current_user.is_authenticated: # Unauthenticated users will be redirected to the login page.
+        return redirect(url_for('controller.login', next=request.url))
     actions = db_access.get_all_actions()
     parties = db_access.get_all_parties()
     try:

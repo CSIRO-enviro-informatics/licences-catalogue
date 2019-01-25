@@ -1,12 +1,27 @@
 import logging
 import _conf as conf
-from flask import Flask, g, session
+from flask import Flask, g, session, redirect, url_for
 from controller import routes
 from uuid import uuid4
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from model.user import User
 
 app = Flask(__name__, template_folder=conf.TEMPLATES_DIR, static_folder=conf.STATIC_DIR)
 app.secret_key = conf.SECRET_KEY
 app.register_blueprint(routes.routes)
+
+
+# flask-login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """
+    Callback function to load a Flask-Login user object
+    """
+    return User(user_id)
 
 
 # Closes connection to database when exiting application. See db_access.py for details.
